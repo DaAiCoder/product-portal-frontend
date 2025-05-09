@@ -5,3 +5,4 @@ const App = () => <h1>Product Portal Frontend</h1>;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
+
