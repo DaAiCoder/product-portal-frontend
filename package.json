@@ -1,5 +1,5 @@
 {
-  "name": "chessfinder- fe",
+  "name": "chessfinder-fe",
   "version": "0.2.0",
   "scripts": {
     "dev": "vite",
