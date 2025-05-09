@@ -1,8 +1,8 @@
+// File: src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-
-const App = () => <h1>Product Portal Frontend</h1>;
+import App from './App';
+import './styles/globals.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
-
