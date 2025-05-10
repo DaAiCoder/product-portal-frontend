@@ -1,6 +1,5 @@
 // File: src/App.js
 import Feeds from './pages/Feeds';
-…
 <Routes>
   <Route path="/login" element={<Login />} />
   <Route
