@@ -14,7 +14,7 @@ export default function Login() {
 
   return (
     <div className="p-6 max-w-md mx-auto space-y-4">
-      <h2 className="text-xl font-semibold">Login (Passwordless)</h2>
+      <h2 className="text-xl font-semibold">Login/Sign up</h2>
       <button
         onClick={() => handleLogin('google')}
         className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -37,8 +37,9 @@ export default function Login() {
         onClick={() => handleLogin('magic-link')}
         className="w-full py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
       >
-        Send Magic Link
+        Send code to email
       </button>
     </div>
   );
 }
+
