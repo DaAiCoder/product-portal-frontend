@@ -17,7 +17,7 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Theme init & apply
+  // Persist and apply theme
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -30,7 +30,7 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate backgrounds
+  // Rotate background images
   useEffect(() => {
     const iv = setInterval(() => {
       setBgIndex((i) => (i + 1) % bgImages.length);
@@ -38,15 +38,15 @@ export default function Layout({ children }) {
     return () => clearInterval(iv);
   }, []);
 
-  // Close menu on outside click
+  // Close profile menu on outside click
   useEffect(() => {
-    const handleClick = (e) => {
+    const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
@@ -79,6 +79,12 @@ export default function Layout({ children }) {
               className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               Home
+            </Link>
+            <Link
+              to="/feeds"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              Feeds
             </Link>
             {!isAuthenticated ? (
               <Link
