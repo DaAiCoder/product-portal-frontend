@@ -1,11 +1,15 @@
 // File: src/components/Layout.js
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Layout({ children }) {
   const [theme, setTheme] = useState('light');
   const [bgIndex, setBgIndex] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
+  const navigate = useNavigate();
+  const menuRef = useRef();
+
   const bgImages = [
     'https://source.unsplash.com/1600x900/?nature,water',
     'https://source.unsplash.com/1600x900/?forest',
@@ -13,6 +17,7 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
+  // Theme init & apply
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -25,7 +30,7 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // rotate background
+  // Rotate backgrounds
   useEffect(() => {
     const iv = setInterval(() => {
       setBgIndex((i) => (i + 1) % bgImages.length);
@@ -33,7 +38,24 @@ export default function Layout({ children }) {
     return () => clearInterval(iv);
   }, []);
 
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  const toggleMenu = () => setMenuOpen((open) => !open);
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    navigate('/login');
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -58,15 +80,45 @@ export default function Layout({ children }) {
             >
               Home
             </Link>
-            <Link
-              to="/login"
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              Login
-            </Link>
+            {!isAuthenticated ? (
+              <Link
+                to="/login"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                Login
+              </Link>
+            ) : (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={toggleMenu}
+                  className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  aria-haspopup="true"
+                  aria-expanded={menuOpen}
+                >
+                  👤
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
             <button
               onClick={toggleTheme}
-              className="ml-4 p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               aria-label="Toggle Theme"
             >
               {theme === 'dark' ? '☀️' : '🌙'}
@@ -76,12 +128,10 @@ export default function Layout({ children }) {
       </header>
 
       <main className="flex-1 relative overflow-hidden">
-        {/* Rotating background */}
         <div
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
           style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
         />
-        {/* Foreground content */}
         <div className="relative z-10 p-6">{children}</div>
       </main>
 
@@ -93,4 +143,3 @@ export default function Layout({ children }) {
     </div>
   );
 }
-
