@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
-import Feeds from './pages/feeds';       // ← updated to lowercase
+import Feeds from './pages/feeds';
 import Onboarding from './pages/Onboarding';
 
 export default function App() {
