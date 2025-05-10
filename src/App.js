@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Feeds from './pages/Feeds';
+import Onboarding from './pages/Onboarding';
 
 export default function App() {
   return (
@@ -14,6 +15,14 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <Onboarding />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/"
             element={
@@ -43,3 +52,4 @@ export default function App() {
     </Router>
   );
 }
+
