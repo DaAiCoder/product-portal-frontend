@@ -5,11 +5,7 @@ import { Link } from 'react-router-dom';
 export default function Layout({ children }) {
   const [theme, setTheme] = useState('light');
   const [bgIndex, setBgIndex] = useState(0);
-
-  // Check for a dummy auth token
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
-
-  // Nature image URLs for rotating backgrounds
   const bgImages = [
     'https://source.unsplash.com/1600x900/?nature,water',
     'https://source.unsplash.com/1600x900/?forest',
@@ -17,31 +13,27 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Theme initialization
   useEffect(() => {
     const stored = localStorage.getItem('theme');
-    if (stored) {
-      setTheme(stored);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (stored) setTheme(stored);
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
       setTheme('dark');
-    }
   }, []);
 
-  // Apply theme to <html> and persist
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background every 10 seconds
+  // rotate background
   useEffect(() => {
-    const interval = setInterval(() => {
-      setBgIndex((prev) => (prev + 1) % bgImages.length);
+    const iv = setInterval(() => {
+      setBgIndex((i) => (i + 1) % bgImages.length);
     }, 10000);
-    return () => clearInterval(interval);
+    return () => clearInterval(iv);
   }, []);
 
-  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -83,16 +75,14 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      <main className="flex-grow relative overflow-hidden">
+      <main className="flex-1 relative overflow-hidden">
         {/* Rotating background */}
         <div
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
           style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
         />
         {/* Foreground content */}
-        <div className="relative z-10 p-6">
-          {children}
-        </div>
+        <div className="relative z-10 p-6">{children}</div>
       </main>
 
       <footer className="bg-white dark:bg-gray-800">
@@ -103,3 +93,4 @@ export default function Layout({ children }) {
     </div>
   );
 }
+
