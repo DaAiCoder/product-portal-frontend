@@ -1,45 +1,66 @@
 // File: src/pages/Login.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://product-portal-backend-vj6p.onrender.com';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  // Stub login: store provider and dummy token, then redirect
-  const handleLogin = (provider) => {
-    localStorage.setItem('authToken', 'dummyToken');
-    localStorage.setItem('authProvider', provider);
-    navigate('/');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    const body = new URLSearchParams({
+      username,
+      password,
+      grant_type: 'password',
+    });
+    try {
+      const res = await fetch(`${API_URL}/auth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Login failed');
+      localStorage.setItem('authToken', data.access_token);
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
     <div className="p-6 max-w-md mx-auto space-y-4">
       <h2 className="text-xl font-semibold">Login/Sign up</h2>
-      <button
-        onClick={() => handleLogin('google')}
-        className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Sign in with Google
-      </button>
-      <button
-        onClick={() => handleLogin('apple')}
-        className="w-full py-2 bg-black text-white rounded hover:bg-gray-800"
-      >
-        Sign in with Apple
-      </button>
-      <button
-        onClick={() => handleLogin('reddit')}
-        className="w-full py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-      >
-        Sign in with Reddit
-      </button>
-      <button
-        onClick={() => handleLogin('magic-link')}
-        className="w-full py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-      >
-        Send code to email
-      </button>
+      {error && <p className="text-red-500">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+        <button
+          type="submit"
+          className="w-full py-2 bg-blue-600 text-white rounded"
+        >
+          Sign in
+        </button>
+      </form>
     </div>
   );
 }
-
