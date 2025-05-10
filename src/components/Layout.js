@@ -4,7 +4,20 @@ import { Link } from 'react-router-dom';
 
 export default function Layout({ children }) {
   const [theme, setTheme] = useState('light');
+  const [bgIndex, setBgIndex] = useState(0);
 
+  // Check for a dummy auth token
+  const isAuthenticated = Boolean(localStorage.getItem('authToken'));
+
+  // Nature image URLs for rotating backgrounds
+  const bgImages = [
+    'https://source.unsplash.com/1600x900/?nature,water',
+    'https://source.unsplash.com/1600x900/?forest',
+    'https://source.unsplash.com/1600x900/?mountain',
+    'https://source.unsplash.com/1600x900/?beach',
+  ];
+
+  // Theme initialization
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) {
@@ -14,18 +27,21 @@ export default function Layout({ children }) {
     }
   }, []);
 
+  // Apply theme to <html> and persist
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  // Rotate background every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % bgImages.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -35,11 +51,13 @@ export default function Layout({ children }) {
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
               Product Portal
             </h1>
-            <input
-              type="text"
-              placeholder="Search..."
-              className="hidden md:block border rounded px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring"
-            />
+            {isAuthenticated && (
+              <input
+                type="text"
+                placeholder="Search..."
+                className="hidden md:block border rounded px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring"
+              />
+            )}
           </div>
           <nav className="flex items-center space-x-6">
             <Link
@@ -64,7 +82,19 @@ export default function Layout({ children }) {
           </nav>
         </div>
       </header>
-      <main className="flex-grow">{children}</main>
+
+      <main className="flex-grow relative overflow-hidden">
+        {/* Rotating background */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+          style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
+        />
+        {/* Foreground content */}
+        <div className="relative z-10 p-6">
+          {children}
+        </div>
+      </main>
+
       <footer className="bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto py-3 px-6 text-center text-sm text-gray-500 dark:text-gray-400">
           © {new Date().getFullYear()} Product Portal
