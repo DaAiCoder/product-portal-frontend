@@ -1,22 +1,22 @@
-// File: src/pages/Dashboard.js
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 
+// same default positions you configured in DashboardLayout
+const DEFAULT_LAYOUT = [
+  { i: 'notes', x: 0, y: 0, w: 6, h: 6 },
+  { i: 'feeds', x: 6, y: 0, w: 6, h: 6 },
+];
+
 export default function Dashboard() {
+  const [layout, setLayout] = useState(DEFAULT_LAYOUT);
+
   return (
-    <DashboardLayout>
-      <div key="widget1" className="bg-white p-4 shadow rounded">
-        <div className="widget-drag-handle cursor-move font-bold">Widget 1</div>
-        <p>Some content...</p>
-      </div>
-      <div key="widget2" className="bg-white p-4 shadow rounded">
-        <div className="widget-drag-handle cursor-move font-bold">Widget 2</div>
-        <p>More content...</p>
-      </div>
-      <div key="widget3" className="bg-white p-4 shadow rounded">
-        <div className="widget-drag-handle cursor-move font-bold">Widget 3</div>
-        <p>Even more content...</p>
-      </div>
-    </DashboardLayout>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">My Dashboard</h2>
+      <DashboardLayout
+        layout={layout}
+        onLayoutChange={(newLayout) => setLayout(newLayout)}
+      />
+    </div>
   );
 }
