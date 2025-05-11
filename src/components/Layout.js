@@ -92,6 +92,12 @@ export default function Layout({ children }) {
             >
               Notes
             </Link>
+           <Link
+              to="/settings/theme"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                 >
+              Theme
+          </Link>
             {!isAuthenticated ? (
               <Link
                 to="/login"
