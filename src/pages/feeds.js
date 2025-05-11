@@ -1,5 +1,3 @@
-// File: src/pages/feeds.js
-
 import React, { useState, useEffect } from 'react';
 import {
   getFollowedTopics,
@@ -25,11 +23,9 @@ export default function NewsFeed() {
   useEffect(() => {
     (async () => {
       try {
-        const [savedTopics, savedFeeds] = await Promise.all([
-          getFollowedTopics(),
-          getRSSFeeds(),
-        ]);
+        const savedTopics = await getFollowedTopics();
         setTopics(savedTopics);
+        const savedFeeds = await getRSSFeeds(savedTopics);
         setFeeds(savedFeeds);
       } catch (err) {
         console.error(err);
@@ -37,7 +33,7 @@ export default function NewsFeed() {
     })();
   }, []);
 
-  // Fetch & slice to 12 articles
+  // Fetch & slice to 12 articles whenever topics change
   useEffect(() => {
     if (!NEWS_API_KEY || topics.length === 0) {
       setArticles([]);
@@ -62,7 +58,9 @@ export default function NewsFeed() {
       ? topics.filter((t) => t !== topic)
       : [...topics, topic];
     setTopics(updated);
-    try { await setFollowedTopics(updated); } catch (_) {}
+    try {
+      await setFollowedTopics(updated);
+    } catch (_) {}
   };
 
   const handleCustomTopic = async (e) => {
