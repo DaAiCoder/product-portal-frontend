@@ -1,5 +1,3 @@
-// File: C:\Users\Rolan\Downloads\Product-portal-frontend\src\App.js
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -7,7 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
-import Feeds from './pages/feeds';
+import Feeds from './pages/Feeds';
+import Notes from './pages/Notes';
 import Onboarding from './pages/Onboarding';
 
 export default function App() {
@@ -16,6 +15,7 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/login" element={<Login />} />
+
           <Route
             path="/onboarding"
             element={
@@ -24,6 +24,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/"
             element={
@@ -32,6 +33,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/feeds"
             element={
@@ -40,6 +42,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/notes"
+            element={
+              <ProtectedRoute>
+                <Notes />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/profile"
             element={
