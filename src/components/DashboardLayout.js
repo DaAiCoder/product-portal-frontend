@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Link } from 'react-router-dom';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -11,7 +12,6 @@ const DEFAULT_LAYOUT = [
 ];
 
 export default function DashboardLayout({ children }) {
-  // load from localStorage or fall back
   const [layout, setLayout] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('dashboardLayout')) || DEFAULT_LAYOUT;
@@ -20,22 +20,23 @@ export default function DashboardLayout({ children }) {
     }
   });
 
-  // whenever layout changes, persist it
   const onLayoutChange = (currentLayout, allLayouts) => {
-    const lgLayout = allLayouts.lg || currentLayout;
-    setLayout(lgLayout);
-    localStorage.setItem('dashboardLayout', JSON.stringify(lgLayout));
+    const lg = allLayouts.lg || currentLayout;
+    setLayout(lg);
+    localStorage.setItem('dashboardLayout', JSON.stringify(lg));
   };
 
   return (
     <ResponsiveGridLayout
       className="layout"
       layouts={{ lg: layout }}
-      breakpoints={{ lg: 1200 }}
-      cols={{ lg: 12 }}
+      breakpoints={{ lg: 1200, md: 996, sm: 768 }}
+      cols={{ lg: 12, md: 10, sm: 6 }}
       rowHeight={30}
       onLayoutChange={onLayoutChange}
       measureBeforeMount
+      // allow east handle so you can drag to resize purely horizontally
+      resizeHandles={['se', 'e']}
       draggableHandle=".widget-handle"
     >
       {React.Children.map(children, (child) => (
@@ -43,9 +44,17 @@ export default function DashboardLayout({ children }) {
           key={child.key}
           className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded overflow-hidden flex flex-col"
         >
-          {/* optional drag handle */}
-          <div className="widget-handle bg-gray-100 dark:bg-gray-700 px-2 py-1 cursor-move">
-            {child.props.title}
+          <div className="widget-handle bg-gray-100 dark:bg-gray-700 px-2 py-1 cursor-move flex justify-between items-center">
+            {child.props.link ? (
+              <Link
+                to={child.props.link}
+                className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {child.props.title}
+              </Link>
+            ) : (
+              <span className="font-medium">{child.props.title}</span>
+            )}
           </div>
           <div className="p-4 flex-1 overflow-auto">{child}</div>
         </div>
@@ -53,4 +62,3 @@ export default function DashboardLayout({ children }) {
     </ResponsiveGridLayout>
   );
 }
-
