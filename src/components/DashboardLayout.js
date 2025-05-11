@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }) {
     <ResponsiveGridLayout
       className="layout"
       layouts={{ lg: layout }}
-      breakpoints={{ lg: 1200, md: 996, sm: 768 }}
+      breakpoints={{ lg: 900, md: 800, sm: 668 }}
       cols={{ lg: 12, md: 10, sm: 6 }}
       rowHeight={30}
       onLayoutChange={onLayoutChange}
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }) {
       {React.Children.map(children, (child) => (
         <div
           key={child.key}
-          className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded overflow-hidden flex flex-col"
+          className="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded overflow-hidden flex flex-col"
         >
           <div className="widget-handle bg-gray-100 dark:bg-gray-700 px-2 py-1 cursor-move flex justify-between items-center">
             {child.props.link ? (
