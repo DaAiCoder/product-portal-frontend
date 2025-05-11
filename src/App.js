@@ -5,7 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
-import Feeds from './pages/Feeds';
+import Feeds from './pages/feeds';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 
