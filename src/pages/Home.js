@@ -1,24 +1,14 @@
 // File: src/pages/Home.js
-import React from 'react';
-import DashboardLayout from '../components/DashboardLayout';
-import WidgetCard from '../components/WidgetCard';
-import Feeds from './feeds';
-import Notes from './notes';
-import Profile from './Profile';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
-  return (
-    <DashboardLayout>
-      <WidgetCard title="News Feed" minHeight={300}>
-        <Feeds />
-      </WidgetCard>
-      <WidgetCard title="Quick Notes" minHeight={300}>
-        <Notes />
-      </WidgetCard>
-      <WidgetCard title="Profile Overview" minHeight={200}>
-        <Profile />
-      </WidgetCard>
-      {/* add more WidgetCard blocks here as you build out more widgets */}
-    </DashboardLayout>
-  );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // if you want non-authenticated users to see a landing page, guard this
+    navigate('/dashboard');
+  }, [navigate]);
+
+  return null; // or a loader/spinner while redirecting
 }
