@@ -1,12 +1,13 @@
+// File: src/services/notesService.js
 const BASE = process.env.REACT_APP_API_URL;
 
-async function getAll() {
+export async function listNotes() {
   const res = await fetch(`${BASE}/notes`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to fetch notes');
   return res.json();
 }
 
-async function create(data) {
+export async function createNote(data) {
   const res = await fetch(`${BASE}/notes`, {
     method: 'POST',
     credentials: 'include',
@@ -17,7 +18,7 @@ async function create(data) {
   return res.json();
 }
 
-async function update(id, data) {
+export async function updateNote(id, data) {
   const res = await fetch(`${BASE}/notes/${id}`, {
     method: 'PUT',
     credentials: 'include',
@@ -28,17 +29,10 @@ async function update(id, data) {
   return res.json();
 }
 
-async function remove(id) {
+export async function deleteNote(id) {
   const res = await fetch(`${BASE}/notes/${id}`, {
     method: 'DELETE',
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to delete note');
 }
-
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-};
