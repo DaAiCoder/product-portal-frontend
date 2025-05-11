@@ -35,8 +35,8 @@ export default function DashboardLayout({ children }) {
       rowHeight={30}
       onLayoutChange={onLayoutChange}
       measureBeforeMount
-      // allow east handle so you can drag to resize purely horizontally
-      resizeHandles={['se', 'e']}
+      // enable all compass-point handles for full-direction resizing
+       resizeHandles={['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']}
       draggableHandle=".widget-handle"
     >
       {React.Children.map(children, (child) => (
