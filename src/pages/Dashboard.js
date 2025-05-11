@@ -1,8 +1,8 @@
 // File: src/pages/Dashboard.js
 import React, { useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
-import NotesWidget from '../components/NotesWidget';
-import FeedsWidget from '../components/FeedsWidget';
+import NotesPage from './notes';
+import FeedsPage from './feeds';
 
 const DEFAULT_LAYOUT = [
   { i: 'notes', x: 0, y: 0, w: 6, h: 6 },
@@ -10,17 +10,26 @@ const DEFAULT_LAYOUT = [
 ];
 
 export default function Dashboard() {
-  const [layout, setLayout] = useState(DEFAULT_LAYOUT);
+  const [layout, setLayout] = useState(
+    () => JSON.parse(localStorage.getItem('dashboardLayout')) || DEFAULT_LAYOUT
+  );
 
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">My Dashboard</h2>
       <DashboardLayout
         layout={layout}
-        onLayoutChange={setLayout}
+        onLayoutChange={(newLayout) => {
+          setLayout(newLayout);
+          localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
+        }}
       >
-        <div key="notes"><NotesWidget /></div>
-        <div key="feeds"><FeedsWidget /></div>
+        <div key="notes">
+          <NotesPage />
+        </div>
+        <div key="feeds">
+          <FeedsPage />
+        </div>
       </DashboardLayout>
     </div>
   );
