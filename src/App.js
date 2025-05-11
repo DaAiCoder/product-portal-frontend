@@ -5,9 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
-import Feeds from './pages/feeds';
+import Feeds from './pages/Feeds';
 import Onboarding from './pages/Onboarding';
-import Notes from './pages/notes';
 import Dashboard from './pages/Dashboard';
 
 export default function App() {
@@ -40,24 +39,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-   <Route
-          path="/dashboard"
-           element={
-             <ProtectedRoute>
-               <Dashboard />
-            </ProtectedRoute>
-           }
-       />
-
-          <Route
-            path="/notes"
-            element={
-              <ProtectedRoute>
-                <Notes />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/profile"
             element={
@@ -66,8 +47,17 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Layout>
     </Router>
   );
 }
+
