@@ -1,4 +1,21 @@
 /* src/styles/globals.css */
+
+/* define your design tokens as CSS custom properties */
+:root {
+  --color-primary: #3b82f6;   /* blue-500 */
+  --color-secondary: #10b981; /* green-500 */
+  --font-base: 1rem;          /* 16px */
+  --spacing: 1rem;            /* 16px */
+}
+
+/* override in dark mode */
+.dark {
+  --color-primary: #2563eb;   /* blue-600 */
+  --color-secondary: #059669; /* green-600 */
+}
+
+/* then pull in Tailwind’s base, components, utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
