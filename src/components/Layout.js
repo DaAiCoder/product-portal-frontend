@@ -17,7 +17,6 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Persist and apply theme
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -30,7 +29,6 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background images
   useEffect(() => {
     const iv = setInterval(() => {
       setBgIndex((i) => (i + 1) % bgImages.length);
@@ -38,7 +36,6 @@ export default function Layout({ children }) {
     return () => clearInterval(iv);
   }, []);
 
-  // Close profile menu on outside click
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -85,6 +82,12 @@ export default function Layout({ children }) {
               className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               Feeds
+            </Link>
+            <Link
+              to="/notes"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              Notes
             </Link>
             {!isAuthenticated ? (
               <Link
