@@ -2,7 +2,7 @@
 import React from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import WidgetCard from '../components/WidgetCard';
-import Feeds from './Feeds';
+import Feeds from './feeds';
 import Notes from './notes';
 import Profile from './Profile';
 
