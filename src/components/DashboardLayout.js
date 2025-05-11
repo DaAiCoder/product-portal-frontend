@@ -27,38 +27,28 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <ResponsiveGridLayout
+  <ResponsiveGridLayout
       className="layout"
       layouts={{ lg: layout }}
-      breakpoints={{ lg: 900, md: 800, sm: 668 }}
-      cols={{ lg: 12, md: 10, sm: 6 }}
+      layout={layout}               // ensure you pass the current layout
+      breakpoints={{ lg: 1200 }}
+      cols={{ lg: 12 }}
       rowHeight={30}
       onLayoutChange={onLayoutChange}
-      measureBeforeMount
-      // enable all compass-point handles for full-direction resizing
-       resizeHandles={['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']}
-      draggableHandle=".widget-handle"
+      // if your version needs `layout={layout}`, add it here:
+      layout={layout}
     >
+      {children}
       {React.Children.map(children, (child) => (
         <div
           key={child.key}
-          className="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded overflow-hidden flex flex-col"
+          className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded p-4 overflow-auto"
         >
-          <div className="widget-handle bg-gray-100 dark:bg-gray-700 px-2 py-1 cursor-move flex justify-between items-center">
-            {child.props.link ? (
-              <Link
-                to={child.props.link}
-                className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                {child.props.title}
-              </Link>
-            ) : (
-              <span className="font-medium">{child.props.title}</span>
-            )}
-          </div>
-          <div className="p-4 flex-1 overflow-auto">{child}</div>
+          {child}
         </div>
       ))}
     </ResponsiveGridLayout>
+  );
+}
   );
 }
