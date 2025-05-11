@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Feeds from './pages/feeds';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
+import ThemeEditor from './components/ThemeEditor';  // ← new import
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Layout>
           <Routes>
             <Route path="/login" element={<Login />} />
+
             <Route
               path="/onboarding"
               element={
@@ -28,6 +30,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/"
               element={
@@ -36,6 +39,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/feeds"
               element={
@@ -44,6 +48,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/profile"
               element={
@@ -52,11 +57,22 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ← New theme-editor route */}
+            <Route
+              path="/theme"
+              element={
+                <ProtectedRoute>
+                  <ThemeEditor />
                 </ProtectedRoute>
               }
             />
