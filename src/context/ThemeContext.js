@@ -1,8 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-export const ThemeContext = createContext();
-
-const DEFAULT_SETTINGS = {
+const defaultTheme = {
   colors: {
     primary: '#1d4ed8',
     secondary: '#9333ea',
@@ -15,36 +13,55 @@ const DEFAULT_SETTINGS = {
   },
 };
 
+export const ThemeContext = createContext({
+  theme: defaultTheme,
+  applyTheme: () => {},
+  resetTheme: () => {},
+});
+
 export function ThemeProvider({ children }) {
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem('themeSettings');
-    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
-  });
+  const [theme, setTheme] = useState(defaultTheme);
 
-  // Apply CSS variables & persist on change
+  // on mount, load from localStorage or defaults
   useEffect(() => {
-    localStorage.setItem('themeSettings', JSON.stringify(settings));
-    const root = document.documentElement;
-    Object.entries(settings.colors).forEach(
-      ([k, v]) => root.style.setProperty(`--color-${k}`, v)
-    );
-    Object.entries(settings.fonts).forEach(
-      ([k, v]) => root.style.setProperty(`--font-${k}`, v)
-    );
-    Object.entries(settings.spacing).forEach(
-      ([k, v]) => root.style.setProperty(`--spacing-${k}`, v)
-    );
-  }, [settings]);
+    try {
+      const stored = JSON.parse(localStorage.getItem('themeSettings'));
+      if (stored) {
+        setTheme(stored);
+        injectCSSVars(stored);
+      } else {
+        injectCSSVars(defaultTheme);
+      }
+    } catch {
+      injectCSSVars(defaultTheme);
+    }
+  }, []);
 
-  const updateSetting = (category, key, value) => {
-    setSettings(s => ({
-      ...s,
-      [category]: { ...s[category], [key]: value },
-    }));
-  };
+  function injectCSSVars(t) {
+    const root = document.documentElement;
+    Object.entries(t.colors).forEach(([key, val]) => {
+      root.style.setProperty(`--color-${key}`, val);
+    });
+    root.style.setProperty(`--font-base`, t.fonts.base);
+    root.style.setProperty(`--spacing-base`, t.spacing.base);
+  }
+
+  // apply & persist
+  function applyTheme(updated) {
+    setTheme(updated);
+    injectCSSVars(updated);
+    localStorage.setItem('themeSettings', JSON.stringify(updated));
+  }
+
+  // reset to defaults
+  function resetTheme() {
+    setTheme(defaultTheme);
+    injectCSSVars(defaultTheme);
+    localStorage.removeItem('themeSettings');
+  }
 
   return (
-    <ThemeContext.Provider value={{ settings, updateSetting }}>
+    <ThemeContext.Provider value={{ theme, applyTheme, resetTheme }}>
       {children}
     </ThemeContext.Provider>
   );
