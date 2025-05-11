@@ -1,6 +1,15 @@
-// File: src/ components/Layout.js
+// File: src/components/Layout.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  FaHome,
+  FaRss,
+  FaTachometerAlt,
+  FaUser,
+  FaSignOutAlt,
+  FaSun,
+  FaMoon
+} from 'react-icons/fa';
 
 export default function Layout({ children }) {
   const [theme, setTheme] = useState('light');
@@ -73,37 +82,19 @@ export default function Layout({ children }) {
               />
             )}
           </div>
-          <nav className="flex items-center space-x-6">
-            <Link
-              to="/"
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              Home
+          <nav className="flex items-center space-x-4">
+            <Link to="/" title="Home" className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              <FaHome size={20} />
             </Link>
-            <Link
-              to="/feeds"
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              Feeds
+            <Link to="/feeds" title="Feeds" className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              <FaRss size={20} />
             </Link>
-            <Link
-              to="/notes"
-              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              Notes
+            <Link to="/dashboard" title="Dashboard" className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              <FaTachometerAlt size={20} />
             </Link>
-           <Link
-              to="theme"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                 >
-              Theme
-          </Link>
             {!isAuthenticated ? (
-              <Link
-                to="/login"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                Login
+              <Link to="/login" title="Login" className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                <FaUser size={20} />
               </Link>
             ) : (
               <div className="relative" ref={menuRef}>
@@ -113,22 +104,22 @@ export default function Layout({ children }) {
                   aria-haspopup="true"
                   aria-expanded={menuOpen}
                 >
-                  👤
+                  <FaUser size={18} />
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="flex items-center px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={() => setMenuOpen(false)}
                     >
-                      Profile
+                      <FaUser className="mr-2" /> Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="flex items-center w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      Logout
+                      <FaSignOutAlt className="mr-2" /> Logout
                     </button>
                   </div>
                 )}
@@ -139,7 +130,7 @@ export default function Layout({ children }) {
               className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
               aria-label="Toggle Theme"
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {theme === 'dark' ? <FaSun /> : <FaMoon />}
             </button>
           </nav>
         </div>
