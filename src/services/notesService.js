@@ -1,8 +1,13 @@
 // File: src/services/notesService.js
 
-const BASE = process.env.REACT_APP_API_URL
-  || process.env.REACT_APP_API_BASE_URL
-  || 'https://product-portal-backend-xo2c.onrender.com';
+
+
+ const BASE =
+ process.env.REACT_APP_API_BASE_URL ||
+ process.env.REACT_APP_API_URL ||
+ 'https://product-portal-backend-xo2c.onrender.com';
+
+
 
 export async function listNotes() {
   const res = await fetch(`${BASE}/notes`, { credentials: 'include' });
