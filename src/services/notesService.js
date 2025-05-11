@@ -1,9 +1,12 @@
 // File: src/services/notesService.js
-const BASE = process.env.REACT_APP_API_URL;
+
+const BASE = process.env.REACT_APP_API_URL
+  || process.env.REACT_APP_API_BASE_URL
+  || 'https://product-portal-backend-xo2c.onrender.com';
 
 export async function listNotes() {
   const res = await fetch(`${BASE}/notes`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch notes');
+  if (!res.ok) throw new Error(`Failed to fetch notes: ${res.statusText}`);
   return res.json();
 }
 
@@ -14,7 +17,7 @@ export async function createNote(data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to create note');
+  if (!res.ok) throw new Error(`Failed to create note: ${res.statusText}`);
   return res.json();
 }
 
@@ -25,7 +28,7 @@ export async function updateNote(id, data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update note');
+  if (!res.ok) throw new Error(`Failed to update note: ${res.statusText}`);
   return res.json();
 }
 
@@ -34,5 +37,5 @@ export async function deleteNote(id) {
     method: 'DELETE',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Failed to delete note');
+  if (!res.ok) throw new Error(`Failed to delete note: ${res.statusText}`);
 }
