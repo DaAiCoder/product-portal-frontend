@@ -26,14 +26,21 @@ export default function DashboardLayout({ children }) {
     <ResponsiveGridLayout
       className="layout"
       layouts={{ lg: layout }}
+      layout={layout}               // ensure you pass the current layout
       breakpoints={{ lg: 1200 }}
       cols={{ lg: 12 }}
       rowHeight={30}
       onLayoutChange={onLayoutChange}
-      // if your version needs `layout={layout}`, add it here:
-      layout={layout}
     >
-      {children}
+      {React.Children.map(children, (child) => (
+        <div
+          key={child.key}
+          className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded p-4 overflow-auto"
+        >
+          {child}
+        </div>
+      ))}
     </ResponsiveGridLayout>
   );
 }
+
