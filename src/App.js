@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import Feeds from './pages/feeds';
 import Onboarding from './pages/Onboarding';
 import Notes from './pages/notes';
+import Dashboard from './pages/Dashboard';
 
 export default function App() {
   return (
@@ -39,6 +40,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+   <Route
+          path="/dashboard"
+           element={
+             <ProtectedRoute>
+               <Dashboard />
+            </ProtectedRoute>
+           }
+       />
+
           <Route
             path="/notes"
             element={
