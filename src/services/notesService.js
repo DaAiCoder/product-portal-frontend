@@ -6,7 +6,10 @@ const BASE = process.env.REACT_APP_API_URL
 
 export async function listNotes() {
   const res = await fetch(`${BASE}/notes`, { credentials: 'include' });
-  if (!res.ok) throw new Error(`Failed to fetch notes: ${res.statusText}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Failed to fetch notes: ${JSON.stringify(err)}`);
+  }
   return res.json();
 }
 
