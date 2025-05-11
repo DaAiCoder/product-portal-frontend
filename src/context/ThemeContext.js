@@ -8,7 +8,8 @@ const defaultVars = {
   spacing: '8px',
 };
 
-const ThemeContext = createContext({
+// Export the raw context for direct import
+export const ThemeContext = createContext({
   themeVars: defaultVars,
   setThemeVars: () => {},
 });
@@ -22,7 +23,6 @@ export function ThemeProvider({ children }) {
     }
   });
 
-  // Whenever themeVars changes, write to localStorage & update :root CSS vars
   useEffect(() => {
     localStorage.setItem('themeVars', JSON.stringify(themeVars));
     const root = document.documentElement.style;
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }) {
   );
 }
 
-// Custom hook for consuming
+// Convenience hook
 export function useTheme() {
   return useContext(ThemeContext);
 }
