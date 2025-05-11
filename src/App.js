@@ -6,8 +6,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Feeds from './pages/feeds';
-import Notes from './pages/notes';
 import Onboarding from './pages/Onboarding';
+import Notes from './pages/notes';
 
 export default function App() {
   return (
@@ -15,7 +15,6 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/login" element={<Login />} />
-
           <Route
             path="/onboarding"
             element={
@@ -24,7 +23,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/"
             element={
@@ -33,7 +31,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/feeds"
             element={
@@ -42,7 +39,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/notes"
             element={
@@ -51,7 +47,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/profile"
             element={
