@@ -1,45 +1,52 @@
 // File: src/context/ThemeContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const defaultVars = {
-  primary: '#3b82f6',
-  secondary: '#f59e0b',
-  fontSize: '16px',
-  spacing: '8px',
-};
+import React, { createContext, useState, useEffect } from 'react';
 
-// Export the raw context for direct import
 export const ThemeContext = createContext({
-  themeVars: defaultVars,
-  setThemeVars: () => {},
+  theme: {
+    primaryColor: '#3B82F6',    // Tailwind blue-500
+    secondaryColor: '#10B981',  // Tailwind green-500
+    baseFontSize: '1rem',
+    baseSpacing: '1rem',
+  },
+  setTheme: () => {},
 });
 
 export function ThemeProvider({ children }) {
-  const [themeVars, setThemeVars] = useState(() => {
+  const [theme, setTheme] = useState(() => {
+    // Load from localStorage or use defaults
     try {
-      return JSON.parse(localStorage.getItem('themeVars')) || defaultVars;
+      const stored = JSON.parse(localStorage.getItem('appTheme'));
+      return stored || {
+        primaryColor: '#3B82F6',
+        secondaryColor: '#10B981',
+        baseFontSize: '1rem',
+        baseSpacing: '1rem',
+      };
     } catch {
-      return defaultVars;
+      return {
+        primaryColor: '#3B82F6',
+        secondaryColor: '#10B981',
+        baseFontSize: '1rem',
+        baseSpacing: '1rem',
+      };
     }
   });
 
+  // Apply CSS variables and persist on theme changes
   useEffect(() => {
-    localStorage.setItem('themeVars', JSON.stringify(themeVars));
-    const root = document.documentElement.style;
-    root.setProperty('--color-primary', themeVars.primary);
-    root.setProperty('--color-secondary', themeVars.secondary);
-    root.setProperty('--font-base', themeVars.fontSize);
-    root.setProperty('--spacing', themeVars.spacing);
-  }, [themeVars]);
+    const root = document.documentElement;
+    root.style.setProperty('--color-primary', theme.primaryColor);
+    root.style.setProperty('--color-secondary', theme.secondaryColor);
+    root.style.setProperty('--font-base', theme.baseFontSize);
+    root.style.setProperty('--spacing-base', theme.baseSpacing);
+
+    localStorage.setItem('appTheme', JSON.stringify(theme));
+  }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ themeVars, setThemeVars }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-}
-
-// Convenience hook
-export function useTheme() {
-  return useContext(ThemeContext);
 }
