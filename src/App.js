@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Feeds from './pages/feeds';
+import Notes from './pages/notes';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 
@@ -40,10 +41,10 @@ export default function App() {
             }
           />
           <Route
-            path="/profile"
+            path="/notes"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Notes />
               </ProtectedRoute>
             }
           />
@@ -55,9 +56,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Layout>
     </Router>
   );
 }
-
