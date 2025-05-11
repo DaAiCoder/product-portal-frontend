@@ -1,6 +1,6 @@
+// File: src/components/DashboardLayout.js
 import React, { useState } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Link } from 'react-router-dom';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -21,27 +21,25 @@ export default function DashboardLayout({ children }) {
   });
 
   const onLayoutChange = (currentLayout, allLayouts) => {
-    const lg = allLayouts.lg || currentLayout;
-    setLayout(lg);
-    localStorage.setItem('dashboardLayout', JSON.stringify(lg));
+    // for non-responsive use currentLayout, otherwise pick the 'lg' size
+    const newLayout = allLayouts.lg || currentLayout;
+    setLayout(newLayout);
+    localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
   };
 
   return (
-  <ResponsiveGridLayout
+    <ResponsiveGridLayout
       className="layout"
       layouts={{ lg: layout }}
-      layout={layout}               // ensure you pass the current layout
       breakpoints={{ lg: 1200 }}
       cols={{ lg: 12 }}
       rowHeight={30}
+      resizeHandles={['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']}
       onLayoutChange={onLayoutChange}
-      // if your version needs `layout={layout}`, add it here:
-      layout={layout}
     >
-      {children}
       {React.Children.map(children, (child) => (
         <div
-          key={child.key}
+          key={child.props.id}
           className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded p-4 overflow-auto"
         >
           {child}
