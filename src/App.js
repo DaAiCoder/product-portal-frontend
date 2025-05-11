@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
@@ -12,6 +13,19 @@ import Dashboard from './pages/Dashboard';
 
 export default function App() {
   return (
+
+ <ThemeProvider>
+       <Router>
+         <Layout>
+           <Routes>
+            <Route path="/settings/theme" element={<ThemeEditor />} />
+             {/* existing routes */}
+           </Routes>
+         </Layout>
+       </Router>
+    </ThemeProvider>
+
+
     <Router>
       <Layout>
         <Routes>
