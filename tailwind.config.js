@@ -1,27 +1,15 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 module.exports = {
   content: [
-    './src/**/*.{js,jsx,ts,tsx}',
-    './public/index.html',
-    './src/globals.css'
+    "./src/**/*.{js,jsx,ts,tsx}",   // scan all JS/TS files in src/
+    "./public/index.html"           // your HTML entrypoint
   ],
-  darkMode: 'class',
   theme: {
     extend: {
-      colors: {
-        primary: 'var(--color-primary)',
-        secondary: 'var(--color-secondary)',
-      },
-      fontSize: {
-        base: 'var(--font-base)',
-      },
-      spacing: {
-        DEFAULT: 'var(--spacing)',
-      },
+      // you can add custom colors, fonts, spacing here,
+      // and inject CSS variables from your ThemeContext
     },
   },
-  variants: {
-    extend: {},
-  },
   plugins: [],
+  darkMode: "class",  // since you toggle 'dark' class on <html>
 };
