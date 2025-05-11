@@ -1,36 +1,44 @@
-//ThemeEditor.js
-
 import React, { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 export default function ThemeEditor() {
-  const { tokens, setToken } = useContext(ThemeContext);
+  const { theme, setTheme } = useContext(ThemeContext);
+
+  // Guard in case context isn’t ready
+  const sections = theme ? Object.entries(theme) : [];
+
+  const updateValue = (section, key, value) => {
+    setTheme({
+      ...theme,
+      [section]: {
+        ...theme[section],
+        [key]: value,
+      },
+    });
+  };
 
   return (
-    <div className="p-6 max-w-xl mx-auto space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900">
       <h1 className="text-2xl font-bold">Theme Editor</h1>
-
-      <div className="space-y-4">
-        {Object.entries(tokens).map(([key, val]) => (
-          <div key={key} className="flex items-center space-x-4">
-            <label className="w-32 capitalize">{key.replace(/([A-Z])/g, ' $1')}</label>
-            {key.startsWith('color') ? (
-              <input
-                type="color"
-                value={val}
-                onChange={(e) => setToken(key, e.target.value)}
-              />
-            ) : (
-              <input
-                type="text"
-                value={val}
-                onChange={(e) => setToken(key, e.target.value)}
-                className="border px-2 py-1 rounded"
-              />
-            )}
+      {sections.map(([section, values]) => (
+        <div key={section}>
+          <h2 className="text-xl font-semibold capitalize">{section}</h2>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            {Object.entries(values).map(([key, val]) => (
+              <div key={key} className="flex flex-col">
+                <label className="capitalize mb-1">{key}</label>
+                <input
+                  type="text"
+                  value={val}
+                  onChange={(e) => updateValue(section, key, e.target.value)}
+                  className="px-3 py-2 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
+

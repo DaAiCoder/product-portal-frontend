@@ -1,47 +1,37 @@
-// File: src/context/ThemeContext.js
+import React, { createContext, useState } from 'react';
 
-import React, { createContext, useState, useEffect } from 'react';
+// A sensible default so ThemeEditor’s Object.entries(theme) never breaks
+const defaultTheme = {
+  colors: {
+    primary: '#1d4ed8',
+    secondary: '#9333ea',
+  },
+  fonts: {
+    base: '1rem',
+  },
+  spacing: {
+    base: '1rem',
+  },
+};
 
 export const ThemeContext = createContext({
-  theme: {
-    primaryColor: '#3B82F6',    // Tailwind blue-500
-    secondaryColor: '#10B981',  // Tailwind green-500
-    baseFontSize: '1rem',
-    baseSpacing: '1rem',
-  },
+  theme: defaultTheme,
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    // Load from localStorage or use defaults
     try {
-      const stored = JSON.parse(localStorage.getItem('appTheme'));
-      return stored || {
-        primaryColor: '#3B82F6',
-        secondaryColor: '#10B981',
-        baseFontSize: '1rem',
-        baseSpacing: '1rem',
-      };
+      const saved = JSON.parse(localStorage.getItem('themeSettings'));
+      return saved || defaultTheme;
     } catch {
-      return {
-        primaryColor: '#3B82F6',
-        secondaryColor: '#10B981',
-        baseFontSize: '1rem',
-        baseSpacing: '1rem',
-      };
+      return defaultTheme;
     }
   });
 
-  // Apply CSS variables and persist on theme changes
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.setProperty('--color-primary', theme.primaryColor);
-    root.style.setProperty('--color-secondary', theme.secondaryColor);
-    root.style.setProperty('--font-base', theme.baseFontSize);
-    root.style.setProperty('--spacing-base', theme.baseSpacing);
-
-    localStorage.setItem('appTheme', JSON.stringify(theme));
+  // Persist on change
+  React.useEffect(() => {
+    localStorage.setItem('themeSettings', JSON.stringify(theme));
   }, [theme]);
 
   return (
