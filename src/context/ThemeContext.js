@@ -1,7 +1,8 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
-// A sensible default so ThemeEditor’s Object.entries(theme) never breaks
-const defaultTheme = {
+export const ThemeContext = createContext();
+
+const DEFAULT_SETTINGS = {
   colors: {
     primary: '#1d4ed8',
     secondary: '#9333ea',
@@ -14,28 +15,36 @@ const defaultTheme = {
   },
 };
 
-export const ThemeContext = createContext({
-  theme: defaultTheme,
-  setTheme: () => {},
-});
-
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('themeSettings'));
-      return saved || defaultTheme;
-    } catch {
-      return defaultTheme;
-    }
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('themeSettings');
+    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
   });
 
-  // Persist on change
-  React.useEffect(() => {
-    localStorage.setItem('themeSettings', JSON.stringify(theme));
-  }, [theme]);
+  // Apply CSS variables & persist on change
+  useEffect(() => {
+    localStorage.setItem('themeSettings', JSON.stringify(settings));
+    const root = document.documentElement;
+    Object.entries(settings.colors).forEach(
+      ([k, v]) => root.style.setProperty(`--color-${k}`, v)
+    );
+    Object.entries(settings.fonts).forEach(
+      ([k, v]) => root.style.setProperty(`--font-${k}`, v)
+    );
+    Object.entries(settings.spacing).forEach(
+      ([k, v]) => root.style.setProperty(`--spacing-${k}`, v)
+    );
+  }, [settings]);
+
+  const updateSetting = (category, key, value) => {
+    setSettings(s => ({
+      ...s,
+      [category]: { ...s[category], [key]: value },
+    }));
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ settings, updateSetting }}>
       {children}
     </ThemeContext.Provider>
   );
