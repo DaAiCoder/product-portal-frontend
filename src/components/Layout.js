@@ -78,14 +78,14 @@ export default function Layout({ children }) {
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${
+      className={min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${
         focusMode ? 'overflow-hidden' : ''
-      }`}
+      }}
     >
       <header
-        className={`bg-white dark:bg-gray-800 shadow ${
+        className={bg-white dark:bg-gray-800 shadow ${
           focusMode ? 'fixed w-full z-20' : ''
-        }`}
+        }}
       >
         <div className="max-w-7xl mx-auto py-4 px-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
@@ -136,7 +136,7 @@ export default function Layout({ children }) {
                       <FaUser />
                     </button>
                     {menuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded">
+                      <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
                         <Link
                           to="/profile"
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -144,14 +144,6 @@ export default function Layout({ children }) {
                         >
                           <FaUser />
                           <span>Profile</span>
-                        </Link>
-                        <Link
-                          to="/theme"
-                          className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <FaMoon />
-                          <span>Theme</span>
                         </Link>
                         <button
                           onClick={handleLogout}
@@ -178,15 +170,15 @@ export default function Layout({ children }) {
       </header>
 
       <main
-        className={`flex-1 relative overflow-hidden pt-16 ${
+        className={flex-1 relative overflow-hidden pt-16 ${
           focusMode ? 'p-0' : 'p-6'
-        }`}
+        }}
       >
         {!focusMode ? (
           <>
             <div
               className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-              style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
+              style={{ backgroundImage: url(${bgImages[bgIndex]}) }}
             />
             <div className="relative z-10 p-6">{children}</div>
           </>
