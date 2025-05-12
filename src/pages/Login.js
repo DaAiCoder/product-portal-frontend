@@ -2,65 +2,58 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = process.env.REACT_APP_API_URL;
-
-export default function Login() {
-  const navigate = useNavigate();
+export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    const body = new URLSearchParams({
-      username,
-      password,
-      grant_type: 'password',
+    const form = new URLSearchParams();
+    form.append('username', username);
+    form.append('password', password);
+
+    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || ''}/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form.toString(),
     });
-    try {
-      const res = await fetch(`${API_URL}/auth/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Login failed');
-      localStorage.setItem('authToken', data.access_token);
-      navigate('/');
-    } catch (err) {
-      setError(err.message);
+    if (!res.ok) {
+      const err = await res.json();
+      return alert(err.detail || 'Login failed');
     }
+    const { access_token } = await res.json();
+    // ← **Store the token so subsequent calls can use it**
+    localStorage.setItem('authToken', access_token);
+    // Redirect to feeds (or dashboard)
+    navigate('/feeds');
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto space-y-4">
-      <h2 className="text-xl font-semibold">Login/Sign up</h2>
-      {error && <p className="text-red-500">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleLogin} className="max-w-sm mx-auto p-4 space-y-4">
+      <div>
+        <label>Username</label>
         <input
-          type="text"
-          placeholder="Username"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={e => setUsername(e.target.value)}
           className="w-full px-3 py-2 border rounded"
-          required
         />
+      </div>
+      <div>
+        <label>Password</label>
         <input
           type="password"
-          placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
           className="w-full px-3 py-2 border rounded"
-          required
         />
-        <button
-          type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded"
-        >
-          Sign in
-        </button>
-      </form>
-    </div>
+      </div>
+      <button
+        type="submit"
+        className="w-full py-2 bg-blue-600 text-white rounded"
+      >
+        Login
+      </button>
+    </form>
   );
 }
