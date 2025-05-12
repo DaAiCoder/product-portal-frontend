@@ -1,4 +1,4 @@
-// File: src/pages/feeds.js
+// File: src/ pages/feeds.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
