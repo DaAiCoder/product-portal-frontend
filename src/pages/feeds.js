@@ -258,4 +258,5 @@ export default function FeedsPage() {
         </section>
       )}
     </div>
-);
+  );
+}
