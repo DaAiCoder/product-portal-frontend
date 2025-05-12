@@ -30,7 +30,7 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Persist theme on load/change
+  // Load & persist theme
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -42,23 +42,20 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background
+  // Cycle background images
   useEffect(() => {
-    const iv = setInterval(
-      () => setBgIndex((i) => (i + 1) % bgImages.length),
-      10000
-    );
+    const iv = setInterval(() => setBgIndex(i => (i + 1) % bgImages.length), 10000);
     return () => clearInterval(iv);
   }, []);
 
-  // Persist focusMode
+  // Persist focus mode
   useEffect(() => {
     localStorage.setItem('focusMode', JSON.stringify(focusMode));
   }, [focusMode]);
 
-  // Close profile menu on outside click
+  // Close profile dropdown on outside click
   useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
@@ -67,9 +64,9 @@ export default function Layout({ children }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
-  const toggleMenu = () => setMenuOpen((open) => !open);
-  const toggleFocus = () => setFocusMode((f) => !f);
+  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  const toggleMenu = () => setMenuOpen(open => !open);
+  const toggleFocus = () => setFocusMode(f => !f);
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     navigate('/login');
@@ -77,98 +74,68 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div
-      className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${
-        focusMode ? 'overflow-hidden' : ''
-      }`}
-    >
-      <header
-        className={`bg-white dark:bg-gray-800 shadow ${
-          focusMode ? 'fixed w-full z-20' : ''
-        }`}
-      >
+    <div className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${focusMode ? 'overflow-hidden' : ''}`}>
+      <header className={`bg-white dark:bg-gray-800 shadow ${focusMode ? 'fixed w-full z-20' : ''}`}>
         <div className="max-w-7xl mx-auto py-4 px-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
             Product Portal
           </h1>
           <nav className="flex items-center space-x-4">
-            {/* Focus Mode Toggle */}
-            <button
-              onClick={toggleFocus}
-              className="flex items-center space-x-1 px-3 py-1 bg-yellow-400 text-white rounded"
-            >
+            {/* Focus Mode toggle */}
+            <button onClick={toggleFocus} className="flex items-center space-x-1 px-3 py-1 bg-yellow-400 text-white rounded">
               {focusMode ? <FaTimesCircle /> : <FaBullseye />}
               <span>{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
             </button>
 
             {!focusMode && (
               <>
-                <Link
-                  to="/"
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <FaHome />
-                  <span>Home</span>
+                <Link to="/" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                  <FaHome /><span>Home</span>
                 </Link>
-                <Link
-                  to="/feeds"
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <FaRss />
-                  <span>Feeds</span>
+                <Link to="/feeds" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                  <FaRss /><span>Feeds</span>
                 </Link>
+
                 {!isAuthenticated ? (
-                  <Link
-                    to="/login"
-                    className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    <FaSignInAlt />
-                    <span>Login</span>
+                  <Link to="/login" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                    <FaSignInAlt /><span>Login</span>
                   </Link>
                 ) : (
                   <div className="relative" ref={menuRef}>
-                    <button
-                      onClick={toggleMenu}
-                      className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                      aria-haspopup="true"
-                      aria-expanded={menuOpen}
-                    >
+                    <button onClick={toggleMenu} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                       <FaUser />
                     </button>
                     {menuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded">
+                        {/* NEW: Link to Profile page */}
                         <Link
                           to="/profile"
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setMenuOpen(false)}
                         >
-                          <FaUser />
-                          <span>Profile</span>
+                          <FaUser /><span>Profile</span>
                         </Link>
+                        {/* NEW: Link to Theme settings */}
                         <Link
                           to="/theme"
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setMenuOpen(false)}
                         >
-                          <FaMoon />
-                          <span>Theme</span>
+                          <FaMoon /><span>Theme</span>
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="flex items-center space-x-1 w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          <FaSignInAlt />
-                          <span>Logout</span>
+                          <FaSignInAlt /><span>Logout</span>
                         </button>
                       </div>
                     )}
                   </div>
                 )}
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  aria-label="Toggle Theme"
-                >
+
+                {/* Theme toggle button */}
+                <button onClick={toggleTheme} className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                   {theme === 'dark' ? <FaSun /> : <FaMoon />}
                 </button>
               </>
@@ -177,11 +144,8 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      <main
-        className={`flex-1 relative overflow-hidden pt-16 ${
-          focusMode ? 'p-0' : 'p-6'
-        }`}
-      >
+      {/* Main content with rotating background */}
+      <main className={`flex-1 relative overflow-hidden pt-16 ${focusMode ? 'p-0' : 'p-6'}`}>
         {!focusMode ? (
           <>
             <div
@@ -195,6 +159,7 @@ export default function Layout({ children }) {
         )}
       </main>
 
+      {/* Footer */}
       {!focusMode && (
         <footer className="bg-white dark:bg-gray-800">
           <div className="max-w-7xl mx-auto py-3 px-6 text-center text-sm text-gray-500 dark:text-gray-400">

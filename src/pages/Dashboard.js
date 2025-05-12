@@ -1,5 +1,5 @@
-// File: src/pages/Dashboard.js
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
 import NotesPage from './notes';
 import FeedsPage from './feeds';
@@ -24,11 +24,34 @@ export default function Dashboard() {
           localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
         }}
       >
-        <div key="notes">
-          <NotesPage />
+        {/* Notes Widget */}
+        <div key="notes" className="flex flex-col bg-white dark:bg-gray-800 p-4 rounded shadow h-full">
+          <h3 className="text-lg font-semibold mb-2">Notes</h3>
+          <div className="flex-grow overflow-auto">
+            <NotesPage />
+          </div>
+          {/* VIEW: links to /notes */}
+          <Link
+            to="/notes"
+            className="mt-4 text-blue-600 dark:text-blue-400 font-medium hover:underline"
+          >
+            View Notes
+          </Link>
         </div>
-        <div key="feeds">
-          <FeedsPage />
+
+        {/* Feeds Widget */}
+        <div key="feeds" className="flex flex-col bg-white dark:bg-gray-800 p-4 rounded shadow h-full">
+          <h3 className="text-lg font-semibold mb-2">Feeds</h3>
+          <div className="flex-grow overflow-auto">
+            <FeedsPage />
+          </div>
+          {/* VIEW: links to /feeds */}
+          <Link
+            to="/feeds"
+            className="mt-4 text-blue-600 dark:text-blue-400 font-medium hover:underline"
+          >
+            View Feeds
+          </Link>
         </div>
       </DashboardLayout>
     </div>
