@@ -1,97 +1,111 @@
-import React, { useEffect, useState } from 'react';
-import {
-  listNotes,
-  createNote,
-  updateNote,
-  deleteNote,
-} from '../services/notesService';
+// File: src/pages/notes.js
+import React, { useState, useEffect } from 'react';
 
-export default function Notes() {
+export default function NotesPage() {
+  // State for all notes and the currently entered text
   const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [newContent, setNewContent] = useState('');
+  const [currentText, setCurrentText] = useState('');
+  const [editingId, setEditingId] = useState(null);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await listNotes();
-      setNotes(data);
-    } catch (err) {
-      console.error(err);
-      setError('Could not load notes');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load saved notes from localStorage on mount
   useEffect(() => {
-    load();
+    const stored = JSON.parse(localStorage.getItem('notes')) || [];
+    setNotes(stored);
   }, []);
 
-  const handleCreate = async () => {
-    try {
-      await createNote({ content_html: newContent });
-      setNewContent('');
-      load();
-    } catch {
-      setError('Failed to create note');
-    }
+  // Utility to persist notes array
+  const saveNotes = (newNotes) => {
+    setNotes(newNotes);
+    localStorage.setItem('notes', JSON.stringify(newNotes));
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteNote(id);
-      load();
-    } catch {
-      setError('Failed to delete note');
-    }
+  // Add a new note
+  const handleAdd = () => {
+    if (!currentText.trim()) return;
+    const newNote = { id: Date.now(), text: currentText.trim() };
+    saveNotes([...notes, newNote]);
+    setCurrentText('');
   };
 
-  if (loading) return <p>Loading notes…</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  // Delete a note by id
+  const handleDelete = (id) => {
+    saveNotes(notes.filter((n) => n.id !== id));
+  };
+
+  // Begin editing: populate textarea and set editingId
+  const handleEdit = (note) => {
+    setEditingId(note.id);
+    setCurrentText(note.text);
+  };
+
+  // Finish editing an existing note
+  const handleUpdate = () => {
+    saveNotes(
+      notes.map((n) =>
+        n.id === editingId ? { ...n, text: currentText.trim() } : n
+      )
+    );
+    setEditingId(null);
+    setCurrentText('');
+  };
 
   return (
-    <div className="max-w-xl mx-auto space-y-4 p-6">
-      <h2 className="text-2xl font-bold">Your Notes</h2>
+    <div className="max-w-3xl mx-auto py-4 px-4">
+      <h2 className="text-2xl font-bold mb-4">Notes</h2>
 
-      <div className="space-y-2">
-        {notes.length === 0 ? (
-          <p>No notes yet. Create one below!</p>
+      {/* Input area for Add or Update */}
+      <div className="mb-4">
+        <textarea
+          rows="3"
+          value={currentText}
+          onChange={(e) => setCurrentText(e.target.value)}
+          placeholder="Write a note..."
+          className="w-full border border-gray-300 dark:border-gray-700 rounded p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+        />
+        {editingId ? (
+          <button
+            onClick={handleUpdate}
+            className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Update Note
+          </button>
         ) : (
-          notes.map((n) => (
-            <div key={n.id} className="border p-3 rounded">
-              <div
-                className="prose"
-                dangerouslySetInnerHTML={{ __html: n.content_html }}
-              />
+          <button
+            onClick={handleAdd}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Add Note
+          </button>
+        )}
+      </div>
+
+      {/* List of existing notes */}
+      <ul className="space-y-2">
+        {notes.map((note) => (
+          <li
+            key={note.id}
+            className="bg-white dark:bg-gray-800 p-4 rounded shadow flex justify-between items-start"
+          >
+            <p className="whitespace-pre-wrap flex-1 text-gray-900 dark:text-gray-100">
+              {note.text}
+            </p>
+            <div className="flex space-x-2 ml-4">
               <button
-                onClick={() => handleDelete(n.id)}
-                className="mt-2 text-sm text-red-600 hover:underline"
+                onClick={() => handleEdit(note)}
+                className="text-yellow-500 hover:text-yellow-700"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(note.id)}
+                className="text-red-500 hover:text-red-700"
               >
                 Delete
               </button>
             </div>
-          ))
-        )}
-      </div>
-
-      <div className="mt-6">
-        <h3 className="font-semibold">New Note</h3>
-        <textarea
-          value={newContent}
-          onChange={(e) => setNewContent(e.target.value)}
-          rows={4}
-          className="w-full border rounded p-2"
-          placeholder="Enter your note here…"
-        />
-        <button
-          onClick={handleCreate}
-          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Add Note
-        </button>
-      </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
