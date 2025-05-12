@@ -136,7 +136,7 @@ export default function Layout({ children }) {
                       <FaUser />
                     </button>
                     {menuOpen && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded">
                         <Link
                           to="/profile"
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -144,6 +144,14 @@ export default function Layout({ children }) {
                         >
                           <FaUser />
                           <span>Profile</span>
+                        </Link>
+                        <Link
+                          to="/theme"
+                          className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <FaMoon />
+                          <span>Theme</span>
                         </Link>
                         <button
                           onClick={handleLogout}
