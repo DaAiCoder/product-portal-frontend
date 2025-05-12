@@ -1,6 +1,16 @@
 // File: src/components/Layout.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  FaHome,
+  FaRss,
+  FaSignInAlt,
+  FaUser,
+  FaMoon,
+  FaSun,
+  FaBullseye,
+  FaTimesCircle,
+} from 'react-icons/fa';
 
 export default function Layout({ children }) {
   const [theme, setTheme] = useState('light');
@@ -20,24 +30,24 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Persist and apply theme
+  // Persist theme on load/change
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
     else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
       setTheme('dark');
   }, []);
-
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background images
+  // Rotate background
   useEffect(() => {
-    const iv = setInterval(() => {
-      setBgIndex((i) => (i + 1) % bgImages.length);
-    }, 10000);
+    const iv = setInterval(
+      () => setBgIndex((i) => (i + 1) % bgImages.length),
+      10000
+    );
     return () => clearInterval(iv);
   }, []);
 
@@ -85,31 +95,35 @@ export default function Layout({ children }) {
             {/* Focus Mode Toggle */}
             <button
               onClick={toggleFocus}
-              className="px-3 py-1 bg-yellow-400 text-white rounded"
+              className="flex items-center space-x-1 px-3 py-1 bg-yellow-400 text-white rounded"
             >
-              {focusMode ? '🔙 Exit Focus' : '🎯 Focus Mode'}
+              {focusMode ? <FaTimesCircle /> : <FaBullseye />}
+              <span>{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
             </button>
 
             {!focusMode && (
               <>
                 <Link
                   to="/"
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  Home
+                  <FaHome />
+                  <span>Home</span>
                 </Link>
                 <Link
                   to="/feeds"
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  Feeds
+                  <FaRss />
+                  <span>Feeds</span>
                 </Link>
                 {!isAuthenticated ? (
                   <Link
                     to="/login"
-                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   >
-                    Login
+                    <FaSignInAlt />
+                    <span>Login</span>
                   </Link>
                 ) : (
                   <div className="relative" ref={menuRef}>
@@ -119,22 +133,24 @@ export default function Layout({ children }) {
                       aria-haspopup="true"
                       aria-expanded={menuOpen}
                     >
-                      👤
+                      <FaUser />
                     </button>
                     {menuOpen && (
                       <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
                         <Link
                           to="/profile"
-                          className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setMenuOpen(false)}
                         >
-                          Profile
+                          <FaUser />
+                          <span>Profile</span>
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="flex items-center space-x-1 w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          Logout
+                          <FaSignInAlt />
+                          <span>Logout</span>
                         </button>
                       </div>
                     )}
@@ -145,7 +161,7 @@ export default function Layout({ children }) {
                   className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                   aria-label="Toggle Theme"
                 >
-                  {theme === 'dark' ? '☀️' : '🌙'}
+                  {theme === 'dark' ? <FaSun /> : <FaMoon />}
                 </button>
               </>
             )}
