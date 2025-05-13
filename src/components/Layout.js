@@ -31,35 +31,37 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Persist theme on load/change
+  // Load and persist theme preference
   useEffect(() => {
     const stored = localStorage.getItem('theme');
-    if (stored) setTheme(stored);
-    else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
+    if (stored) {
+      setTheme(stored);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setTheme('dark');
+    }
   }, []);
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background
+  // Rotate background image
   useEffect(() => {
     const iv = setInterval(
-      () => setBgIndex((i) => (i + 1) % bgImages.length),
+      () => setBgIndex(i => (i + 1) % bgImages.length),
       10000
     );
     return () => clearInterval(iv);
   }, []);
 
-  // Persist focusMode
+  // Persist focus mode
   useEffect(() => {
     localStorage.setItem('focusMode', JSON.stringify(focusMode));
   }, [focusMode]);
 
   // Close profile menu on outside click
   useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
@@ -68,31 +70,21 @@ export default function Layout({ children }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
-  const toggleMenu = () => setMenuOpen((open) => !open);
-  const toggleFocus = () => setFocusMode((f) => !f);
-  const handleLogout = () => {
+  const toggleTheme    = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  const toggleMenu     = () => setMenuOpen(o => !o);
+  const toggleFocus    = () => setFocusMode(f => !f);
+  const handleLogout   = () => {
     localStorage.removeItem('authToken');
     navigate('/login');
     window.location.reload();
   };
 
   return (
-    <div
-      className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${
-        focusMode ? 'overflow-hidden' : ''
-      }`}
-    >
-      {/* Top header */}
-      <header
-        className={`bg-white dark:bg-gray-800 shadow ${
-          focusMode ? 'fixed w-full z-20' : ''
-        }`}
-      >
+    <div className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${focusMode ? 'overflow-hidden' : ''}`}>
+      {/* Top Header */}
+      <header className={`bg-white dark:bg-gray-800 shadow ${focusMode ? 'fixed w-full z-20' : ''}`}>
         <div className="max-w-7xl mx-auto py-4 px-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            Product Portal
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Product Portal</h1>
           <nav className="flex items-center space-x-4">
             {/* Focus Mode Toggle */}
             <button
@@ -105,27 +97,15 @@ export default function Layout({ children }) {
 
             {!focusMode && (
               <>
-                <Link
-                  to="/"
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <FaHome />
-                  <span>Home</span>
+                <Link to="/" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                  <FaHome /><span>Home</span>
                 </Link>
-                <Link
-                  to="/feeds"
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <FaRss />
-                  <span>Feeds</span>
+                <Link to="/feeds" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                  <FaRss /><span>Feeds</span>
                 </Link>
                 {!isAuthenticated ? (
-                  <Link
-                    to="/login"
-                    className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    <FaSignInAlt />
-                    <span>Login</span>
+                  <Link to="/login" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                    <FaSignInAlt /><span>Login</span>
                   </Link>
                 ) : (
                   <div className="relative" ref={menuRef}>
@@ -144,15 +124,13 @@ export default function Layout({ children }) {
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setMenuOpen(false)}
                         >
-                          <FaUser />
-                          <span>Profile</span>
+                          <FaUser /><span>Profile</span>
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="flex items-center space-x-1 w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          <FaSignInAlt />
-                          <span>Logout</span>
+                          <FaSignInAlt /><span>Logout</span>
                         </button>
                       </div>
                     )}
@@ -171,15 +149,10 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      {/* Sidebar + Main Content */}
+      {/* Sidebar & Main Content */}
       <div className="flex pt-16 flex-1">
         <Sidebar />
-
-        <main
-          className={`flex-1 relative overflow-hidden ${
-            focusMode ? 'p-0' : 'p-6'
-          } pl-16`}
-        >
+        <main className={`flex-1 relative overflow-hidden ${focusMode ? 'p-0' : 'p-6'} pl-16`}>
           {!focusMode ? (
             <>
               <div
@@ -206,4 +179,3 @@ export default function Layout({ children }) {
   );
 }
 
-\\layout.js
