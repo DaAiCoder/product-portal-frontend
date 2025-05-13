@@ -206,3 +206,4 @@ export default function Layout({ children }) {
   );
 }
 
+\\layout.js
