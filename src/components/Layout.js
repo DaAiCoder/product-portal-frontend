@@ -19,6 +19,7 @@ export default function Layout({ children }) {
   const [focusMode, setFocusMode] = useState(
     () => JSON.parse(localStorage.getItem('focusMode')) || false
   );
+  const [query, setQuery] = useState('');
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
   const navigate = useNavigate();
   const menuRef = useRef();
@@ -33,11 +34,9 @@ export default function Layout({ children }) {
   // Load and persist theme preference
   useEffect(() => {
     const stored = localStorage.getItem('theme');
-    if (stored) {
-      setTheme(stored);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (stored) setTheme(stored);
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
       setTheme('dark');
-    }
   }, []);
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -69,10 +68,10 @@ export default function Layout({ children }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const toggleTheme    = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
-  const toggleMenu     = () => setMenuOpen(o => !o);
-  const toggleFocus    = () => setFocusMode(f => !f);
-  const handleLogout   = () => {
+  const toggleTheme  = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  const toggleMenu   = () => setMenuOpen(o => !o);
+  const toggleFocus  = () => setFocusMode(f => !f);
+  const handleLogout = () => {
     localStorage.removeItem('authToken');
     navigate('/login');
     window.location.reload();
@@ -82,9 +81,31 @@ export default function Layout({ children }) {
     <div className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${focusMode ? 'overflow-hidden' : ''}`}>
       {/* Top Header */}
       <header className={`bg-white dark:bg-gray-800 shadow ${focusMode ? 'fixed w-full z-20' : ''}`}>
-        <div className="max-w-7xl mx-auto py-4 px-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Product Portal</h1>
-          <nav className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto py-4 px-6 flex items-center">
+          {/* Logo */}
+          <h1 className="flex-none text-2xl font-bold text-gray-800 dark:text-gray-200">
+            Product Portal
+          </h1>
+
+          {/* AI Prompt Box */}
+          <div className="flex-grow px-4">
+            <input
+              type="text"
+              placeholder="Ask anything"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  console.log('Ask:', query);
+                  // TODO: Integrate AI query handler
+                }
+              }}
+            />
+          </div>
+
+          {/* Nav */}
+          <nav className="flex-none flex items-center space-x-4">
             {/* Focus Mode Toggle */}
             <button
               onClick={toggleFocus}
@@ -96,12 +117,20 @@ export default function Layout({ children }) {
 
             {!focusMode && (
               <>
-                <Link to="/" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                  <FaHome /><span>Home</span>
+                <Link
+                  to="/"
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <FaHome />
+                  <span>Home</span>
                 </Link>
                 {!isAuthenticated ? (
-                  <Link to="/login" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                    <FaSignInAlt /><span>Login</span>
+                  <Link
+                    to="/login"
+                    className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <FaSignInAlt />
+                    <span>Login</span>
                   </Link>
                 ) : (
                   <div className="relative" ref={menuRef}>
@@ -120,13 +149,15 @@ export default function Layout({ children }) {
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setMenuOpen(false)}
                         >
-                          <FaUser /><span>Profile</span>
+                          <FaUser />
+                          <span>Profile</span>
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="flex items-center space-x-1 w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          <FaSignInAlt /><span>Logout</span>
+                          <FaSignInAlt />
+                          <span>Logout</span>
                         </button>
                       </div>
                     )}
@@ -174,4 +205,3 @@ export default function Layout({ children }) {
     </div>
   );
 }
-
