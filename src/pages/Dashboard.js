@@ -1,18 +1,19 @@
+// File: src/pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
 import WidgetWrapper from '../components/WidgetWrapper';
-import DateTimeWidget from '../widgets/DateTimeWidget';
-// import other widgets as needed
+
+// ⚠️ Fixed import path:
+import DateTimeWidget from '../components/widgets/DateTimeWidget';
 
 export default function Dashboard() {
   const storedLayout = JSON.parse(localStorage.getItem('dashboardLayout'));
   const [layout, setLayout] = useState(
     storedLayout || [
       { i: 'datetime', x: 0, y: 0, w: 4, h: 4 },
-      // …your other defaults
+      // …other defaults
     ]
   );
-
   const [titles, setTitles] = useState({});
   const [favorites, setFavorites] = useState({});
 
@@ -61,7 +62,7 @@ export default function Dashboard() {
           </WidgetWrapper>
         </div>
 
-        {/* …repeat for each additional widget */}
+        {/* …repeat for each widget */}
       </GridLayout>
     </div>
   );
