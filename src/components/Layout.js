@@ -1,6 +1,7 @@
 // File: src/components/Layout.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Sidebar from './Sidebar';
 import {
   FaHome,
   FaRss,
@@ -30,7 +31,7 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Load & persist theme
+  // Persist theme on load/change
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -42,7 +43,7 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Cycle background images every 10s
+  // Rotate background
   useEffect(() => {
     const iv = setInterval(
       () => setBgIndex((i) => (i + 1) % bgImages.length),
@@ -51,12 +52,12 @@ export default function Layout({ children }) {
     return () => clearInterval(iv);
   }, []);
 
-  // Persist focusMode toggle
+  // Persist focusMode
   useEffect(() => {
     localStorage.setItem('focusMode', JSON.stringify(focusMode));
   }, [focusMode]);
 
-  // Close dropdown when clicking outside
+  // Close profile menu on outside click
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -82,6 +83,7 @@ export default function Layout({ children }) {
         focusMode ? 'overflow-hidden' : ''
       }`}
     >
+      {/* Top header */}
       <header
         className={`bg-white dark:bg-gray-800 shadow ${
           focusMode ? 'fixed w-full z-20' : ''
@@ -110,7 +112,6 @@ export default function Layout({ children }) {
                   <FaHome />
                   <span>Home</span>
                 </Link>
-
                 <Link
                   to="/feeds"
                   className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -118,7 +119,6 @@ export default function Layout({ children }) {
                   <FaRss />
                   <span>Feeds</span>
                 </Link>
-
                 {!isAuthenticated ? (
                   <Link
                     to="/login"
@@ -138,8 +138,7 @@ export default function Layout({ children }) {
                       <FaUser />
                     </button>
                     {menuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded">
-                        {/* Profile Link */}
+                      <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
                         <Link
                           to="/profile"
                           className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -147,15 +146,6 @@ export default function Layout({ children }) {
                         >
                           <FaUser />
                           <span>Profile</span>
-                        </Link>
-                        {/* Theme Link */}
-                        <Link
-                          to="/theme"
-                          className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <FaMoon />
-                          <span>Theme</span>
                         </Link>
                         <button
                           onClick={handleLogout}
@@ -168,8 +158,6 @@ export default function Layout({ children }) {
                     )}
                   </div>
                 )}
-
-                {/* Theme Toggle Button */}
                 <button
                   onClick={toggleTheme}
                   className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
@@ -183,24 +171,30 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      <main
-        className={`flex-1 relative overflow-hidden pt-16 ${
-          focusMode ? 'p-0' : 'p-6'
-        }`}
-      >
-        {!focusMode ? (
-          <>
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-              style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
-            />
-            <div className="relative z-10 p-6">{children}</div>
-          </>
-        ) : (
-          <div className="relative z-10">{children}</div>
-        )}
-      </main>
+      {/* Sidebar + Main Content */}
+      <div className="flex pt-16 flex-1">
+        <Sidebar />
 
+        <main
+          className={`flex-1 relative overflow-hidden ${
+            focusMode ? 'p-0' : 'p-6'
+          } pl-16`}
+        >
+          {!focusMode ? (
+            <>
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+                style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
+              />
+              <div className="relative z-10 p-6">{children}</div>
+            </>
+          ) : (
+            <div className="relative z-10">{children}</div>
+          )}
+        </main>
+      </div>
+
+      {/* Footer */}
       {!focusMode && (
         <footer className="bg-white dark:bg-gray-800">
           <div className="max-w-7xl mx-auto py-3 px-6 text-center text-sm text-gray-500 dark:text-gray-400">
