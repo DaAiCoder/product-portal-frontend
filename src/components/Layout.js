@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import HelpWidget from './HelpWidget';
 import {
   FaHome,
   FaSignInAlt,
@@ -10,6 +11,7 @@ import {
   FaSun,
   FaBullseye,
   FaTimesCircle,
+  FaPlus,
 } from 'react-icons/fa';
 
 export default function Layout({ children }) {
@@ -31,7 +33,7 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Load and persist theme preference
+  // Load & persist theme
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -43,12 +45,9 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background image
+  // Rotate background every 10s
   useEffect(() => {
-    const iv = setInterval(
-      () => setBgIndex(i => (i + 1) % bgImages.length),
-      10000
-    );
+    const iv = setInterval(() => setBgIndex(i => (i + 1) % bgImages.length), 10000);
     return () => clearInterval(iv);
   }, []);
 
@@ -57,7 +56,7 @@ export default function Layout({ children }) {
     localStorage.setItem('focusMode', JSON.stringify(focusMode));
   }, [focusMode]);
 
-  // Close profile menu on outside click
+  // Close profile menu when clicking outside
   useEffect(() => {
     const handler = e => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -78,9 +77,16 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 ${focusMode ? 'overflow-hidden' : ''}`}>
-      {/* Top Header */}
-      <header className={`bg-white dark:bg-gray-800 shadow ${focusMode ? 'fixed w-full z-20' : ''}`}>
+    <div className={`
+      min-h-screen flex flex-col 
+      bg-gray-50 dark:bg-gray-900 
+      ${focusMode ? 'overflow-hidden' : ''}
+    `}>
+      {/* Top header */}
+      <header className={`
+        bg-white dark:bg-gray-800 shadow 
+        ${focusMode ? 'fixed w-full z-20' : ''}
+      `}>
         <div className="max-w-7xl mx-auto py-4 px-6 flex items-center">
           {/* Logo */}
           <h1 className="flex-none text-2xl font-bold text-gray-800 dark:text-gray-200">
@@ -98,15 +104,15 @@ export default function Layout({ children }) {
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                   console.log('Ask:', query);
-                  // TODO: Integrate AI query handler
+                  // TODO: wire up AI handler
                 }
               }}
             />
           </div>
 
-          {/* Nav */}
+          {/* Right nav */}
           <nav className="flex-none flex items-center space-x-4">
-            {/* Focus Mode Toggle */}
+            {/* Focus Mode */}
             <button
               onClick={toggleFocus}
               className="flex items-center space-x-1 px-3 py-1 bg-yellow-400 text-white rounded"
@@ -117,6 +123,7 @@ export default function Layout({ children }) {
 
             {!focusMode && (
               <>
+                {/* Home */}
                 <Link
                   to="/"
                   className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -124,6 +131,8 @@ export default function Layout({ children }) {
                   <FaHome />
                   <span>Home</span>
                 </Link>
+
+                {/* Login / Profile */}
                 {!isAuthenticated ? (
                   <Link
                     to="/login"
@@ -163,6 +172,8 @@ export default function Layout({ children }) {
                     )}
                   </div>
                 )}
+
+                {/* Theme toggle */}
                 <button
                   onClick={toggleTheme}
                   className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
@@ -176,10 +187,15 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      {/* Sidebar & Main Content */}
+      {/* Sidebar + Main content */}
       <div className="flex pt-16 flex-1">
         <Sidebar />
-        <main className={`flex-1 relative overflow-hidden ${focusMode ? 'p-0' : 'p-6'} pl-16`}>
+
+        <main className={`
+          flex-1 relative overflow-hidden 
+          ${focusMode ? 'p-0' : 'p-6'} 
+          pl-16
+        `}>
           {!focusMode ? (
             <>
               <div
@@ -193,6 +209,16 @@ export default function Layout({ children }) {
           )}
         </main>
       </div>
+
+      {/* Help widget & Quick-Add FAB */}
+      <HelpWidget />
+      <Link
+        to="/widgets"
+        className="fixed bottom-4 left-4 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
+        aria-label="Add Widget"
+      >
+        <FaPlus size={24} />
+      </Link>
 
       {/* Footer */}
       {!focusMode && (
