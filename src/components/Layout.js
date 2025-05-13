@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import {
   FaHome,
-  FaRss,
   FaSignInAlt,
   FaUser,
   FaMoon,
@@ -99,9 +98,6 @@ export default function Layout({ children }) {
               <>
                 <Link to="/" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                   <FaHome /><span>Home</span>
-                </Link>
-                <Link to="/feeds" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                  <FaRss /><span>Feeds</span>
                 </Link>
                 {!isAuthenticated ? (
                   <Link to="/login" className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
