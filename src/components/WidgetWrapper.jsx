@@ -10,9 +10,12 @@ export default function WidgetWrapper({
   favorite,
   onRename,
   onToggleFavorite,
+  onSettings,
+  onHide,
   children,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
   const handleDoubleClick = () => {
     const newTitle = prompt('Enter new title:', title);
@@ -20,19 +23,15 @@ export default function WidgetWrapper({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded shadow h-full flex flex-col">
-      {/* ───────────────────────
-          WIDGET TITLE BAR (#2)
-      ─────────────────────── */}
-      <div
-        className="
-          widget-title-bar 
-          flex items-center 
-          px-3 py-2 
-          bg-gray-100 dark:bg-gray-700 
-          border-b border-gray-200 dark:border-gray-600
-        "
-      >
+    <div
+      className="bg-white dark:bg-gray-800 rounded shadow h-full flex flex-col"
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenuPos({ x: e.clientX, y: e.clientY });
+        setMenuOpen(true);
+      }}
+    >
+      <div className="widget-title-bar flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
         {/* ① Drag handle */}
         <span
           className="drag-handle cursor-move mr-2 text-gray-500 dark:text-gray-400"
@@ -41,7 +40,7 @@ export default function WidgetWrapper({
           <FaGripVertical />
         </span>
 
-        {/* ② Title (double-click to edit) */}
+        {/* ② Title (double-click to rename) */}
         <h3
           className="flex-1 font-semibold text-gray-800 dark:text-gray-200 cursor-pointer select-none"
           onDoubleClick={handleDoubleClick}
@@ -54,23 +53,12 @@ export default function WidgetWrapper({
           {favorite ? <FaStar /> : <FaRegStar />}
         </button>
 
-        {/* ④ 3-dot menu */}
-        <button onClick={() => setMenuOpen(o => !o)} className="p-1">
+        {/* ④ Ellipsis menu toggle */}
+        <button onClick={() => setMenuOpen((o) => !o)} className="p-1">
           <FaEllipsisV />
         </button>
-
-        {/* ⑤ Context menu */}
-        {menuOpen && (
-          <WidgetContextMenu
-            widgetId={id}
-            onClose={() => setMenuOpen(false)}
-          />
-        )}
       </div>
 
-      {/* ───────────────────────
-          WIDGET BODY
-      ─────────────────────── */}
       <div className="flex-1 overflow-auto p-4">
         {loading ? (
           <div className="animate-pulse h-full bg-gray-200 dark:bg-gray-700 rounded" />
@@ -78,6 +66,17 @@ export default function WidgetWrapper({
           children
         )}
       </div>
+
+      {/* ⑤ Custom context menu */}
+      {menuOpen && (
+        <WidgetContextMenu
+          position={menuPos}
+          widgetId={id}
+          onClose={() => setMenuOpen(false)}
+          onSettings={onSettings}
+          onHide={onHide}
+        />
+      )}
     </div>
   );
 }
