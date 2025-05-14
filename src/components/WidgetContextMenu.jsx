@@ -15,8 +15,8 @@ export default function WidgetContextMenu({
 
   const menu = (
     <div
+      className="widget-context-menu bg-white dark:bg-gray-800 shadow-lg rounded w-40 z-[9999]"
       style={{ position: 'absolute', top, left }}
-      className="bg-white dark:bg-gray-800 shadow-lg rounded w-40 z-[9999]"
     >
       <button
         onClick={() => {

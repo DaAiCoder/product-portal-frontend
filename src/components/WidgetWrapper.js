@@ -1,3 +1,4 @@
+// File: src/components/WidgetWrapper.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
@@ -15,15 +16,20 @@ export default function WidgetWrapper({
   const [menuOpen, setMenuOpen] = useState(false);
   const [contextPos, setContextPos] = useState({ x: 100, y: 100 });
   const wrapperRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
-    const handleClick = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+    const handleMouseDown = (e) => {
+      const clickedInsideWrapper = wrapperRef.current?.contains(e.target);
+      const clickedButton = buttonRef.current?.contains(e.target);
+      const clickedMenu = document.querySelector('.widget-context-menu')?.contains(e.target);
+      if (!clickedInsideWrapper && !clickedMenu && !clickedButton) {
         setMenuOpen(false);
       }
     };
-    window.addEventListener('click', handleClick);
-    return () => window.removeEventListener('click', handleClick);
+
+    window.addEventListener('mousedown', handleMouseDown);
+    return () => window.removeEventListener('mousedown', handleMouseDown);
   }, []);
 
   const handleContextMenu = (e) => {
@@ -47,6 +53,7 @@ export default function WidgetWrapper({
         </div>
         <div className="relative">
           <button
+            ref={buttonRef}
             onClick={(e) => {
               e.stopPropagation();
               setContextPos({ x: e.pageX, y: e.pageY });
