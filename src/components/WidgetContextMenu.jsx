@@ -1,42 +1,46 @@
-// src/components/WidgetContextMenu.jsx
-import React, { useState, useEffect, useRef } from 'react';
+// File: src/components/WidgetContextMenu.jsx
+import React, { useEffect, useRef } from 'react';
+import { FaCog, FaEyeSlash } from 'react-icons/fa';
 
-export default function WidgetContextMenu({ targetRef, widgetId }) {
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef();
+export default function WidgetContextMenu({
+  position,
+  widgetId,
+  onClose,
+  onSettings,
+  onHide,
+}) {
+  const ref = useRef();
 
-  // Open when header is right-clicked; close on outside click
+  // Close when clicking elsewhere
   useEffect(() => {
     const handler = (e) => {
-      if (targetRef.current && targetRef.current.contains(e.target)) {
-        e.preventDefault();
-        setOpen(true);
-      } else if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpen(false);
+      if (ref.current && !ref.current.contains(e.target)) {
+        onClose();
       }
     };
-    window.addEventListener('contextmenu', handler);
-    return () => window.removeEventListener('contextmenu', handler);
-  }, [targetRef]);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
 
-  const hideWidget = () => {
-    // TODO: hook in hide logic
-    setOpen(false);
-  };
-  const openSettings = () => {
-    // TODO: open widget settings for widgetId
-    setOpen(false);
-  };
-
-  if (!open) return null;
   return (
-    <div ref={menuRef} className="absolute bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow-md z-50">
-      <button onClick={openSettings} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left">
-        Settings
-      </button>
-      <button onClick={hideWidget} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left">
-        Hide
-      </button>
-    </div>
+    <ul
+      ref={ref}
+      className="absolute bg-white dark:bg-gray-800 shadow-lg rounded overflow-hidden z-50"
+      style={{ top: position.y, left: position.x, minWidth: 160 }}
+    >
+      <li
+        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+        onClick={() => { onSettings(widgetId); onClose(); }}
+      >
+        <FaCog className="mr-2" /> Settings
+      </li>
+      <li
+        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+        onClick={() => { onHide(widgetId); onClose(); }}
+      >
+        <FaEyeSlash className="mr-2" /> Hide
+      </li>
+    </ul>
   );
 }
+
