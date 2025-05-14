@@ -1,8 +1,8 @@
 // File: src/utils/widgetLibrary.js
-import DateTimeWidget from '../components/widgets/DateTimeWidget';
-import TimerWidget    from '../components/widgets/TimerWidget';
-import QuoteWidget    from '../components/widgets/QuoteWidget';
-import WeatherWidget  from '../components/widgets/WeatherWidget';
+import DateTimeWidget from '../components/DateTimeWidget';
+import PomodoroWidget from '../components/PomodoroWidget';
+import QuoteWidget from '../components/widgets/QuoteWidget';
+import WeatherWidget from '../components/widgets/WeatherWidget';
 import AiSummaryWidget from '../components/widgets/AiSummaryWidget';
 
 export const widgetLibrary = [
@@ -14,11 +14,11 @@ export const widgetLibrary = [
     Component: DateTimeWidget,
   },
   {
-    id: 'timer',
-    defaultTitle: 'Focus Timer',
+    id: 'pomodoro',
+    defaultTitle: 'Pomodoro Timer',
     defaultW: 4,
     defaultH: 4,
-    Component: TimerWidget,
+    Component: PomodoroWidget,
   },
   {
     id: 'quote',
