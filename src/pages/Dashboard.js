@@ -1,69 +1,86 @@
-// File: src/pages/Dashboard.jsx
+// File: src/pages/dashboard.js
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
 import WidgetWrapper from '../components/WidgetWrapper';
+import { widgetLibrary } from '../utils/widgetLibrary';
+import { FaPlus } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
-// ⚠️ Fixed import path:
-import DateTimeWidget from '../components/widgets/DateTimeWidget';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 export default function Dashboard() {
-  const storedLayout = JSON.parse(localStorage.getItem('dashboardLayout'));
+  const defaultLayout = widgetLibrary.map((w, i) => ({
+    i: w.id,
+    x: (i * w.defaultW) % 12,
+    y: Math.floor((i * w.defaultW) / 12) * w.defaultH,
+    w: w.defaultW,
+    h: w.defaultH,
+  }));
+
   const [layout, setLayout] = useState(
-    storedLayout || [
-      { i: 'datetime', x: 0, y: 0, w: 4, h: 4 },
-      // …other defaults
-    ]
+    () => JSON.parse(localStorage.getItem('dashboardLayout')) || defaultLayout
   );
-  const [titles, setTitles] = useState({});
-  const [favorites, setFavorites] = useState({});
-
   useEffect(() => {
-    setTitles(JSON.parse(localStorage.getItem('widgetTitles')) || {});
-    setFavorites(JSON.parse(localStorage.getItem('widgetFavs')) || {});
-  }, []);
+    localStorage.setItem('dashboardLayout', JSON.stringify(layout));
+  }, [layout]);
 
-  const onLayoutChange = (newLayout) => {
-    setLayout(newLayout);
-    localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
-  };
+  const [titles, setTitles]  = useState(() => JSON.parse(localStorage.getItem('widgetTitles')) || {});
+  const [favorites, setFavs] = useState(() => JSON.parse(localStorage.getItem('widgetFavs')) || {});
+  const [hidden, setHidden]  = useState(() => JSON.parse(localStorage.getItem('widgetHidden')) || []);
 
-  const handleRename = (id, newTitle) => {
-    const updated = { ...titles, [id]: newTitle };
-    setTitles(updated);
-    localStorage.setItem('widgetTitles', JSON.stringify(updated));
-  };
+  useEffect(() => localStorage.setItem('widgetTitles', JSON.stringify(titles)), [titles]);
+  useEffect(() => localStorage.setItem('widgetFavs', JSON.stringify(favorites)), [favorites]);
+  useEffect(() => localStorage.setItem('widgetHidden', JSON.stringify(hidden)), [hidden]);
 
-  const handleFav = (id) => {
-    const updated = { ...favorites, [id]: !favorites[id] };
-    setFavorites(updated);
-    localStorage.setItem('widgetFavs', JSON.stringify(updated));
-  };
+  const onLayoutChange = (newLayout) => setLayout(newLayout);
+  const handleRename   = (id, newTitle) => setTitles((t) => ({ ...t, [id]: newTitle }));
+  const handleFav      = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
+  const handleHide     = (id) => setHidden((h) => Array.from(new Set([...h, id])));
+
+  const visibleWidgets = widgetLibrary.filter((w) => !hidden.includes(w.id));
+  const pinnedWidgets  = visibleWidgets.filter((w) => favorites[w.id]);
+  const otherWidgets   = visibleWidgets.filter((w) => !favorites[w.id]);
+
+  const renderWidgets = (widgets) =>
+    widgets.map(({ id, defaultTitle, Component }) => (
+      <div key={id}>
+        <WidgetWrapper
+          id={id}
+          title={titles[id] || defaultTitle}
+          loading={false}
+          favorite={Boolean(favorites[id])}
+          onRename={handleRename}
+          onToggleFavorite={handleFav}
+          onHide={handleHide}
+        >
+          <Component />
+        </WidgetWrapper>
+      </div>
+    ));
 
   return (
-    <div className="p-6">
+    <div className="p-6 relative">
       <GridLayout
         className="layout"
         layout={layout}
-        onLayoutChange={onLayoutChange}
         cols={12}
         rowHeight={30}
         width={1200}
+        onLayoutChange={onLayoutChange}
         draggableHandle=".drag-handle"
+        isResizable
       >
-        <div key="datetime">
-          <WidgetWrapper
-            id="datetime"
-            title={titles.datetime || 'Date & Time'}
-            onRename={handleRename}
-            onToggleFavorite={handleFav}
-            loading={false}
-          >
-            <DateTimeWidget />
-          </WidgetWrapper>
-        </div>
-
-        {/* …repeat for each widget */}
+        {renderWidgets(pinnedWidgets)}
+        {renderWidgets(otherWidgets)}
       </GridLayout>
+
+      <Link
+        to="/widgets"
+        className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
+      >
+        <FaPlus size={24} />
+      </Link>
     </div>
   );
 }
