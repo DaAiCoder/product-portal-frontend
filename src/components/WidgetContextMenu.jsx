@@ -1,4 +1,6 @@
+// File: src/components/WidgetContextMenu.jsx
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 export default function WidgetContextMenu({
   widgetId,
@@ -11,10 +13,10 @@ export default function WidgetContextMenu({
   const top = typeof position?.y === 'number' ? position.y : 100;
   const left = typeof position?.x === 'number' ? position.x : 100;
 
-  return (
+  const menu = (
     <div
       style={{ position: 'absolute', top, left }}
-      className="bg-white dark:bg-gray-800 shadow-lg rounded w-40 z-50"
+      className="bg-white dark:bg-gray-800 shadow-lg rounded w-40 z-[9999]"
     >
       <button
         onClick={() => {
@@ -45,4 +47,6 @@ export default function WidgetContextMenu({
       </button>
     </div>
   );
+
+  return createPortal(menu, document.body);
 }
