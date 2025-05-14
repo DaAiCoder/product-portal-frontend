@@ -1,6 +1,6 @@
 // File: src/components/WidgetWrapper.js
 import React, { useState, useRef, useEffect } from 'react';
-import { FaStar, FaRegStar, FaEllipsisV } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
 
 export default function WidgetWrapper({
@@ -11,6 +11,8 @@ export default function WidgetWrapper({
   onRename,
   onToggleFavorite,
   onHide,
+  showSettings = false,
+  onOpenSettings,
   children,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -20,14 +22,11 @@ export default function WidgetWrapper({
 
   useEffect(() => {
     const handleMouseDown = (e) => {
-      const clickedInsideWrapper = wrapperRef.current?.contains(e.target);
-      const clickedButton = buttonRef.current?.contains(e.target);
+      const clickedInside = wrapperRef.current?.contains(e.target);
       const clickedMenu = document.querySelector('.widget-context-menu')?.contains(e.target);
-      if (!clickedInsideWrapper && !clickedMenu && !clickedButton) {
-        setMenuOpen(false);
-      }
+      const clickedBtn = buttonRef.current?.contains(e.target);
+      if (!clickedInside && !clickedMenu && !clickedBtn) setMenuOpen(false);
     };
-
     window.addEventListener('mousedown', handleMouseDown);
     return () => window.removeEventListener('mousedown', handleMouseDown);
   }, []);
@@ -44,14 +43,23 @@ export default function WidgetWrapper({
       onContextMenu={handleContextMenu}
       ref={wrapperRef}
     >
-      <div className="flex items-center justify-between p-2 border-b dark:border-gray-700 drag-handle">
+      <div className="flex items-center justify-between p-2 border-b dark:border-gray-700 drag-handle bg-gray-50 dark:bg-gray-800">
         <div className="flex items-center space-x-2">
           <span className="font-semibold text-gray-800 dark:text-white">{title}</span>
           <button onClick={() => onToggleFavorite(id)} className="text-yellow-500 hover:text-yellow-400">
             {favorite ? <FaStar /> : <FaRegStar />}
           </button>
         </div>
-        <div className="relative">
+        <div className="flex items-center space-x-2">
+          {showSettings && (
+            <button
+              onClick={() => onOpenSettings?.(id)}
+              className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
+              title="Settings"
+            >
+              <FaCog />
+            </button>
+          )}
           <button
             ref={buttonRef}
             onClick={(e) => {
@@ -60,6 +68,7 @@ export default function WidgetWrapper({
               setMenuOpen((o) => !o);
             }}
             className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
+            title="More"
           >
             <FaEllipsisV />
           </button>
