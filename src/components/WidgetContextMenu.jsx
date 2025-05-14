@@ -1,46 +1,28 @@
 // File: src/components/WidgetContextMenu.jsx
-import React, { useEffect, useRef } from 'react';
-import { FaCog, FaEyeSlash } from 'react-icons/fa';
+import React from 'react';
 
 export default function WidgetContextMenu({
-  position,
   widgetId,
   onClose,
-  onSettings,
   onHide,
+  onToggleFavorite,
+  isFavorite,
 }) {
-  const ref = useRef();
-
-  // Close when clicking elsewhere
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [onClose]);
-
   return (
-    <ul
-      ref={ref}
-      className="absolute bg-white dark:bg-gray-800 shadow-lg rounded overflow-hidden z-50"
-      style={{ top: position.y, left: position.x, minWidth: 160 }}
-    >
-      <li
-        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-        onClick={() => { onSettings(widgetId); onClose(); }}
+    <div className="absolute top-full right-0 mt-1 w-32 bg-white dark:bg-gray-800 shadow-lg rounded z-50">
+      <button
+        onClick={() => { onToggleFavorite(widgetId); onClose(); }}
+        className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
       >
-        <FaCog className="mr-2" /> Settings
-      </li>
-      <li
-        className="flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+        {isFavorite ? 'Unfavorite' : 'Favorite'}
+      </button>
+      <button
         onClick={() => { onHide(widgetId); onClose(); }}
+        className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
       >
-        <FaEyeSlash className="mr-2" /> Hide
-      </li>
-    </ul>
+        Hide
+      </button>
+    </div>
   );
 }
 
