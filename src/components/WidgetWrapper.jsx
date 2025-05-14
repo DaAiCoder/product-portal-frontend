@@ -1,5 +1,5 @@
 // File: src/components/WidgetWrapper.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaGripVertical, FaStar, FaRegStar, FaEllipsisV } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
 
@@ -17,9 +17,44 @@ export default function WidgetWrapper({
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
-  const handleDoubleClick = () => {
-    const newTitle = prompt('Enter new title:', title);
-    if (newTitle) onRename(id, newTitle);
+  // Inline edit state (#10)
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(title);
+  const inputRef = useRef();
+
+  // When title prop changes (e.g. reset), sync inputValue
+  useEffect(() => {
+    setInputValue(title);
+  }, [title]);
+
+  // Focus the input when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleTitleDoubleClick = () => {
+    setIsEditing(true);
+  };
+
+  const finishEditing = () => {
+    const newTitle = inputValue.trim() || title;
+    setIsEditing(false);
+    if (newTitle !== title) {
+      onRename(id, newTitle);
+    }
+  };
+
+  const handleInputKey = (e) => {
+    if (e.key === 'Enter') {
+      finishEditing();
+    }
+    if (e.key === 'Escape') {
+      setInputValue(title);
+      setIsEditing(false);
+    }
   };
 
   return (
@@ -32,7 +67,7 @@ export default function WidgetWrapper({
       }}
     >
       <div className="widget-title-bar flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-        {/* ① Drag handle */}
+        {/* Drag handle */}
         <span
           className="drag-handle cursor-move mr-2 text-gray-500 dark:text-gray-400"
           title="Drag to move"
@@ -40,20 +75,31 @@ export default function WidgetWrapper({
           <FaGripVertical />
         </span>
 
-        {/* ② Title (double-click to rename) */}
-        <h3
-          className="flex-1 font-semibold text-gray-800 dark:text-gray-200 cursor-pointer select-none"
-          onDoubleClick={handleDoubleClick}
-        >
-          {title}
-        </h3>
+        {/* Inline editing of title */}
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            className="flex-1 bg-transparent border-b border-blue-500 focus:outline-none text-gray-800 dark:text-gray-200"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={finishEditing}
+            onKeyDown={handleInputKey}
+          />
+        ) : (
+          <h3
+            className="flex-1 font-semibold text-gray-800 dark:text-gray-200 cursor-text select-none"
+            onDoubleClick={handleTitleDoubleClick}
+          >
+            {title}
+          </h3>
+        )}
 
-        {/* ③ Favorite toggle */}
+        {/* Favorite toggle */}
         <button onClick={() => onToggleFavorite(id)} className="p-1 mr-2">
           {favorite ? <FaStar /> : <FaRegStar />}
         </button>
 
-        {/* ④ Ellipsis menu toggle */}
+        {/* Ellipsis menu */}
         <button onClick={() => setMenuOpen((o) => !o)} className="p-1">
           <FaEllipsisV />
         </button>
@@ -67,7 +113,6 @@ export default function WidgetWrapper({
         )}
       </div>
 
-      {/* ⑤ Custom context menu */}
       {menuOpen && (
         <WidgetContextMenu
           position={menuPos}
