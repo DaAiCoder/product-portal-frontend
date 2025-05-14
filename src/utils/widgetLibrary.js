@@ -1,9 +1,9 @@
 // File: src/utils/widgetLibrary.js
 import DateTimeWidget from '../components/DateTimeWidget';
 import PomodoroWidget from '../components/PomodoroWidget';
-import QuoteWidget from '../components/widgets/QuoteWidget';
-import WeatherWidget from '../components/widgets/WeatherWidget';
-import AiSummaryWidget from '../components/widgets/AiSummaryWidget';
+import QuoteWidget from '../components/QuoteWidget';
+import WeatherWidget from '../components/WeatherWidget';
+import AiSummaryWidget from '../components/BriefingWidget';
 
 export const widgetLibrary = [
   {
