@@ -9,9 +9,14 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
-import Profile from './pages/Profile';
-import FeedsPage from './pages/feeds';
 import Dashboard from './pages/Dashboard';
+import FeedsPage from './pages/feeds';
+import Email from './pages/Email';
+import Calendar from './pages/Calendar';
+import Notes from './pages/notes';
+import Files from './pages/files';
+import Clock from './pages/clock';
+import Profile from './pages/Profile';
 import WidgetDirectory from './pages/WidgetDirectory';
 import ThemeEditor from './components/ThemeEditor';
 
@@ -60,6 +65,56 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <FeedsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Email (protected) */}
+            <Route
+              path="/email"
+              element={
+                <ProtectedRoute>
+                  <Email />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Calendar (protected) */}
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Notes (protected) */}
+            <Route
+              path="/notes"
+              element={
+                <ProtectedRoute>
+                  <Notes />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Files (protected) */}
+            <Route
+              path="/files"
+              element={
+                <ProtectedRoute>
+                  <Files />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Clock (protected) */}
+            <Route
+              path="/clock"
+              element={
+                <ProtectedRoute>
+                  <Clock />
                 </ProtectedRoute>
               }
             />
