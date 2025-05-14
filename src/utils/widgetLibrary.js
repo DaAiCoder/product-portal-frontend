@@ -1,9 +1,9 @@
-// File: src/utils /widgetLibrary.js
-
+// File: src/utils/widgetLibrary.js
 import DateTimeWidget from '../components/widgets/DateTimeWidget';
 import TimerWidget    from '../components/widgets/TimerWidget';
 import QuoteWidget    from '../components/widgets/QuoteWidget';
-// …import any other widgets you have…
+import WeatherWidget  from '../components/widgets/WeatherWidget';
+import AiSummaryWidget from '../components/widgets/AiSummaryWidget';
 
 export const widgetLibrary = [
   {
@@ -15,7 +15,7 @@ export const widgetLibrary = [
   },
   {
     id: 'timer',
-    defaultTitle: 'Timer',
+    defaultTitle: 'Focus Timer',
     defaultW: 4,
     defaultH: 4,
     Component: TimerWidget,
@@ -27,5 +27,18 @@ export const widgetLibrary = [
     defaultH: 4,
     Component: QuoteWidget,
   },
-  // …add entries for your remaining widgets…
+  {
+    id: 'weather',
+    defaultTitle: 'Local Weather',
+    defaultW: 4,
+    defaultH: 4,
+    Component: WeatherWidget,
+  },
+  {
+    id: 'aisummary',
+    defaultTitle: 'Daily Briefing',
+    defaultW: 4,
+    defaultH: 4,
+    Component: AiSummaryWidget,
+  },
 ];
