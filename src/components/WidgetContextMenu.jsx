@@ -1,4 +1,3 @@
-// File: src/components/WidgetContextMenu.jsx
 import React from 'react';
 
 export default function WidgetContextMenu({
@@ -7,11 +6,14 @@ export default function WidgetContextMenu({
   onHide,
   onToggleFavorite,
   isFavorite,
-  position = { x: 0, y: 0 },
+  position = { x: 100, y: 100 },
 }) {
+  const top = typeof position?.y === 'number' ? position.y : 100;
+  const left = typeof position?.x === 'number' ? position.x : 100;
+
   return (
     <div
-      style={{ position: 'absolute', top: position.y, left: position.x }}
+      style={{ position: 'absolute', top, left }}
       className="bg-white dark:bg-gray-800 shadow-lg rounded w-40 z-50"
     >
       <button
@@ -44,4 +46,3 @@ export default function WidgetContextMenu({
     </div>
   );
 }
-
