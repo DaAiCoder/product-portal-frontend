@@ -1,33 +1,74 @@
-// src/pages/WidgetDirectory.jsx
+// File: src/pages/WidgetDirectory.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaClock, FaStopwatch, FaQuoteRight } from 'react-icons/fa';
 
-const widgets = [
-  { id: 'DateTime', name: 'Date & Time', thumbnail: '/thumbnails/datetime.png' },
-  { id: 'Weather', name: 'Weather', thumbnail: '/thumbnails/weather.png' },
-  // …add your other widget defs
+const AVAILABLE_WIDGETS = [
+  {
+    id: 'datetime',
+    label: 'Date & Time',
+    icon: <FaClock size={40} />,
+    w: 4,
+    h: 4,
+  },
+  {
+    id: 'timer',
+    label: 'Timer',
+    icon: <FaStopwatch size={40} />,
+    w: 4,
+    h: 4,
+  },
+  {
+    id: 'quote',
+    label: 'Quote of the Day',
+    icon: <FaQuoteRight size={40} />,
+    w: 4,
+    h: 4,
+  },
 ];
 
 export default function WidgetDirectory() {
   const navigate = useNavigate();
 
-  const handleAdd = (widgetId) => {
-    // TODO: dispatch action or update layout state to add widgetId
-    navigate('/');
+  const addWidget = (widget) => {
+    const stored = JSON.parse(localStorage.getItem('dashboardLayout')) || [];
+    if (stored.some((w) => w.i === widget.id)) {
+      alert(widget.label + ' is already on your dashboard.');
+      return;
+    }
+    const newItem = {
+      i: widget.id,
+      x: (stored.length * widget.w) % 12,
+      y: Infinity, // puts it at the bottom
+      w: widget.w,
+      h: widget.h,
+    };
+    const newLayout = [...stored, newItem];
+    localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
+    navigate('/dashboard');
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Widget Directory</h2>
-      <div className="grid grid-cols-3 gap-4">
-        {widgets.map((w) => (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">
+        Widget Directory
+      </h2>
+      <div className="grid grid-cols-3 gap-6">
+        {AVAILABLE_WIDGETS.map((widget) => (
           <div
-            key={w.id}
-            onClick={() => handleAdd(w.id)}
-            className="border hover:shadow-md rounded p-4 cursor-pointer"
+            key={widget.id}
+            className="flex flex-col items-center bg-white dark:bg-gray-800 p-4 rounded shadow"
           >
-            <img src={w.thumbnail} alt={w.name} className="mb-2 w-full h-32 object-cover rounded" />
-            <h3 className="text-lg font-medium">{w.name}</h3>
+            {widget.icon}
+            <span className="mt-2 text-lg text-gray-800 dark:text-gray-200">
+              {widget.label}
+            </span>
+            <button
+              onClick={() => addWidget(widget)}
+              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+            >
+              Add
+            </button>
           </div>
         ))}
       </div>
