@@ -23,10 +23,13 @@ export default function WidgetWrapper({
   useEffect(() => {
     const handleMouseDown = (e) => {
       const clickedInside = wrapperRef.current?.contains(e.target);
-      const clickedMenu = document.querySelector('.widget-context-menu')?.contains(e.target);
+      const clickedMenu = e.target.closest('.widget-context-menu');
       const clickedBtn = buttonRef.current?.contains(e.target);
-      if (!clickedInside && !clickedMenu && !clickedBtn) setMenuOpen(false);
+      if (!clickedInside && !clickedMenu && !clickedBtn) {
+        setMenuOpen(false);
+      }
     };
+
     window.addEventListener('mousedown', handleMouseDown);
     return () => window.removeEventListener('mousedown', handleMouseDown);
   }, []);
@@ -89,4 +92,3 @@ export default function WidgetWrapper({
     </div>
   );
 }
-
