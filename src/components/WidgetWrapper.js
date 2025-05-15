@@ -77,7 +77,18 @@ export default function WidgetWrapper({
           </button>
         </div>
       </div>
-      <div className="p-3 overflow-y-auto flex-1">{loading ? 'Loading...' : children}</div>
+
+      <div className="p-3 overflow-y-auto flex-1">
+        {loading ? (
+          <div className="w-full h-full animate-pulse flex flex-col space-y-3">
+            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+          </div>
+        ) : (
+          children
+        )}
+      </div>
 
       {menuOpen && (
         <WidgetContextMenu
