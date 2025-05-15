@@ -6,6 +6,7 @@ import WeatherWidget from '../components/WeatherWidget';
 import AiSummaryWidget from '../components/BriefingWidget';
 import ChatWidget from '../components/widgets/ChatWidget';
 import CalculatorWidget from '../components/widgets/CalculatorWidget';
+import WorldClockWidget from '../components/widgets/WorldClockWidget';
 
 export const widgetLibrary = [
   {
@@ -57,5 +58,13 @@ export const widgetLibrary = [
   defaultW: 4,
   defaultH: 5,
   Component: CalculatorWidget,
+},
+
+{
+  id: 'worldclock',
+  defaultTitle: 'World Clock',
+  defaultW: 4,
+  defaultH: 6,
+  Component: WorldClockWidget,
 },
 ];
