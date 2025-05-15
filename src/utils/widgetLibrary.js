@@ -4,6 +4,7 @@ import PomodoroWidget from '../components/PomodoroWidget';
 import QuoteWidget from '../components/QuoteWidget';
 import WeatherWidget from '../components/WeatherWidget';
 import AiSummaryWidget from '../components/BriefingWidget';
+import ChatWidget from '../components/widgets/ChatWidget';
 
 export const widgetLibrary = [
   {
@@ -41,4 +42,11 @@ export const widgetLibrary = [
     defaultH: 4,
     Component: AiSummaryWidget,
   },
+{
+  id: 'chat',
+  defaultTitle: 'Chat',
+  defaultW: 6,
+  defaultH: 8,
+  Component: ChatWidget,
+},
 ];
