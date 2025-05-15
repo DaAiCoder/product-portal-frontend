@@ -1,4 +1,3 @@
-// File: src/components/WidgetWrapper.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
@@ -19,6 +18,26 @@ export default function WidgetWrapper({
   const [contextPos, setContextPos] = useState({ x: 100, y: 100 });
   const wrapperRef = useRef(null);
   const buttonRef = useRef(null);
+
+  const [bgStyle, setBgStyle] = useState(() => {
+    const saved = localStorage.getItem(`widgetBg-${id}`);
+    return saved ? JSON.parse(saved) : { type: 'default', color: '' };
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`widgetBg-${id}`, JSON.stringify(bgStyle));
+  }, [bgStyle]);
+
+  const getBgClass = () => {
+    if (bgStyle.type === 'light') return 'bg-white';
+    if (bgStyle.type === 'dark') return 'bg-gray-900';
+    if (bgStyle.type === 'custom') return '';
+    return 'bg-white dark:bg-gray-900';
+  };
+
+  const getBgStyle = () => {
+    return bgStyle.type === 'custom' ? { backgroundColor: bgStyle.color } : {};
+  };
 
   useEffect(() => {
     const handleMouseDown = (e) => {
@@ -42,7 +61,8 @@ export default function WidgetWrapper({
 
   return (
     <div
-      className="bg-white dark:bg-gray-900 rounded shadow-lg h-full flex flex-col"
+      className={`${getBgClass()} rounded shadow-lg h-full flex flex-col`}
+      style={getBgStyle()}
       onContextMenu={handleContextMenu}
       ref={wrapperRef}
     >
@@ -77,18 +97,7 @@ export default function WidgetWrapper({
           </button>
         </div>
       </div>
-
-      <div className="p-3 overflow-y-auto flex-1">
-        {loading ? (
-          <div className="w-full h-full animate-pulse flex flex-col space-y-3">
-            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/3"></div>
-            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
-            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
-          </div>
-        ) : (
-          children
-        )}
-      </div>
+      <div className="p-3 overflow-y-auto flex-1">{loading ? 'Loading...' : children}</div>
 
       {menuOpen && (
         <WidgetContextMenu
