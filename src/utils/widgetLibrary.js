@@ -5,6 +5,7 @@ import QuoteWidget from '../components/QuoteWidget';
 import WeatherWidget from '../components/WeatherWidget';
 import AiSummaryWidget from '../components/BriefingWidget';
 import ChatWidget from '../components/widgets/ChatWidget';
+import CalculatorWidget from '../components/widgets/CalculatorWidget';
 
 export const widgetLibrary = [
   {
@@ -48,5 +49,13 @@ export const widgetLibrary = [
   defaultW: 6,
   defaultH: 8,
   Component: ChatWidget,
+},
+
+{
+  id: 'calculator',
+  defaultTitle: 'Calculator',
+  defaultW: 4,
+  defaultH: 5,
+  Component: CalculatorWidget,
 },
 ];
