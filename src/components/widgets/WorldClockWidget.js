@@ -1,23 +1,11 @@
 // File: src/components/widgets/WorldClockWidget.js
 import React, { useState, useEffect } from 'react';
+import moment from 'moment-timezone';
 
 const DEFAULT_ZONES = ['America/New_York', 'Europe/London', 'Asia/Tokyo'];
-const COMMON_ZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Berlin',
-  'Europe/Paris',
-  'Asia/Tokyo',
-  'Asia/Shanghai',
-  'Asia/Kolkata',
-  'Australia/Sydney',
-  'Africa/Lagos',
-];
 
 export default function WorldClockWidget() {
+  const allTimeZones = moment.tz.names();
   const [zones, setZones] = useState(() =>
     JSON.parse(localStorage.getItem('worldClockZones')) || DEFAULT_ZONES
   );
@@ -40,14 +28,13 @@ export default function WorldClockWidget() {
       setError('Zone already added.');
       return;
     }
-    try {
-      new Intl.DateTimeFormat('en-US', { timeZone: newZone }).format(); // Validate zone
-      setZones([...zones, newZone]);
-      setNewZone('');
-      setError('');
-    } catch {
+    if (!allTimeZones.includes(newZone)) {
       setError('Invalid time zone.');
+      return;
     }
+    setZones([...zones, newZone]);
+    setNewZone('');
+    setError('');
   };
 
   const handleRemoveZone = (zone) => {
@@ -79,21 +66,24 @@ export default function WorldClockWidget() {
       </div>
 
       <div className="mt-2 space-y-2">
-        <select
+        <input
+          list="timezones"
           value={newZone}
           onChange={(e) => {
             setNewZone(e.target.value);
             setError('');
           }}
+          placeholder="Search or type a time zone..."
           className="w-full p-2 rounded border dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Select a time zone</option>
-          {COMMON_ZONES.filter((z) => !zones.includes(z)).map((zone) => (
-            <option key={zone} value={zone}>
-              {zone}
-            </option>
-          ))}
-        </select>
+        />
+        <datalist id="timezones">
+          {allTimeZones
+            .filter((z) => !zones.includes(z))
+            .map((zone) => (
+              <option key={zone} value={zone} />
+            ))}
+        </datalist>
+
         <button
           onClick={handleAddZone}
           className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
