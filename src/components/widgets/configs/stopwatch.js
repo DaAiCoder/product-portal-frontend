@@ -10,7 +10,7 @@ export default function PomodoroWidget() {
   }, [running]);
   return (
     <div className="h-full flex flex-col justify-center items-center">
-      <h3 className="text-xl font-semibold mb-2">Pomodoro Timer</h3>
+      <h3 className="text-xl font-semibold mb-2">Spotwatch</h3>
       <p className="text-2xl">{Math.floor(seconds/60).toString().padStart(2,'0')}:{(seconds%60).toString().padStart(2,'0')}</p>
       <button
         onClick={() => setRunning(r => !r)}
