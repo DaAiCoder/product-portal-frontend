@@ -19,6 +19,7 @@ import Clock from './pages/clock';
 import Profile from './pages/Profile';
 import WidgetDirectory from './pages/WidgetDirectory';
 import ThemeEditor from './components/ThemeEditor';
+import ChatPage from './pages/chat'; // ✅ New line
 
 export default function App() {
   return (
@@ -29,7 +30,7 @@ export default function App() {
             {/* Public */}
             <Route path="/login" element={<Login />} />
 
-            {/* Onboarding (protected) */}
+            {/* Onboarding */}
             <Route
               path="/onboarding"
               element={
@@ -39,7 +40,7 @@ export default function App() {
               }
             />
 
-            {/* Home (protected) */}
+            {/* Protected Routes */}
             <Route
               path="/"
               element={
@@ -48,8 +49,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Dashboard (protected) */}
             <Route
               path="/dashboard"
               element={
@@ -58,8 +57,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Feeds (protected) */}
             <Route
               path="/feeds"
               element={
@@ -68,8 +65,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Email (protected) */}
             <Route
               path="/email"
               element={
@@ -78,8 +73,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Calendar (protected) */}
             <Route
               path="/calendar"
               element={
@@ -88,8 +81,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Notes (protected) */}
             <Route
               path="/notes"
               element={
@@ -98,8 +89,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Files (protected) */}
             <Route
               path="/files"
               element={
@@ -108,8 +97,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Clock (protected) */}
             <Route
               path="/clock"
               element={
@@ -118,8 +105,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Profile (protected) */}
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <ChatPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/profile"
               element={
@@ -128,8 +121,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Widget Directory (protected) */}
             <Route
               path="/widgets"
               element={
@@ -138,8 +129,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Theme Editor (protected) */}
             <Route
               path="/theme"
               element={
@@ -149,7 +138,7 @@ export default function App() {
               }
             />
 
-            {/* Redirect any unknown path to home */}
+            {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
