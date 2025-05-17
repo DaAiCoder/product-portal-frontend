@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export default function WidgetWrapper({
   id,
@@ -99,7 +101,17 @@ export default function WidgetWrapper({
           </button>
         </div>
       </div>
-      <div className="p-3 overflow-y-auto flex-1">{loading ? 'Loading...' : children}</div>
+      <div className="p-3 overflow-y-auto flex-1">
+        {loading ? (
+          <div className="space-y-3">
+            <Skeleton height={24} />
+            <Skeleton count={3} />
+            <Skeleton width={'80%'} />
+          </div>
+        ) : (
+          children
+        )}
+      </div>
 
       {menuOpen && (
         <WidgetContextMenu
@@ -114,3 +126,4 @@ export default function WidgetWrapper({
     </div>
   );
 }
+
