@@ -1,5 +1,7 @@
+// File: src/components/widgets/WidgetWrapper.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
+
 import WidgetContextMenu from './WidgetContextMenu';
 
 export default function WidgetWrapper({
@@ -68,6 +70,7 @@ export default function WidgetWrapper({
     >
       <div className="flex items-center justify-between p-2 border-b dark:border-gray-700 drag-handle bg-gray-50 dark:bg-gray-800">
         <div className="flex items-center space-x-2">
+          <span className="text-gray-400 mr-1 cursor-move select-none">☰</span>
           <span className="font-semibold text-gray-800 dark:text-white">{title}</span>
           <button onClick={() => onToggleFavorite(id)} className="text-yellow-500 hover:text-yellow-400">
             {favorite ? <FaStar /> : <FaRegStar />}
