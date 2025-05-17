@@ -1,20 +1,17 @@
 // File: src/components/WidgetContextMenu.jsx
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { createPortal } from 'react-dom';
 
-export default function WidgetContextMenu({
-  widgetId,
-  onClose,
-  onHide,
-  onToggleFavorite,
-  isFavorite,
-  position = { x: 100, y: 100 },
-}) {
+const WidgetContextMenu = forwardRef(function WidgetContextMenu(
+  { widgetId, onClose, onHide, onToggleFavorite, isFavorite, position = { x: 100, y: 100 } },
+  ref
+) {
   const top = typeof position?.y === 'number' ? position.y : 100;
   const left = typeof position?.x === 'number' ? position.x : 100;
 
   const menu = (
     <div
+      ref={ref}
       className="widget-context-menu bg-white dark:bg-gray-800 shadow-lg rounded w-40 z-[9999]"
       style={{ position: 'absolute', top, left }}
     >
@@ -49,4 +46,6 @@ export default function WidgetContextMenu({
   );
 
   return createPortal(menu, document.body);
-}
+});
+
+export default WidgetContextMenu;
