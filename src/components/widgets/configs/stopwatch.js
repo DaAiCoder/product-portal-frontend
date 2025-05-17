@@ -1,4 +1,4 @@
-import PomodoroWidget from '../stopwatch';
+import PomodoroWidget from '../PomodoroWidget';
 
 export default {
   id: 'stopwatch',
