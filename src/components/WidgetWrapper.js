@@ -1,4 +1,4 @@
-// File: src/components/widgets/WidgetWrapper.js
+// File: src/components/WidgetWrapper.js
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
@@ -19,7 +19,7 @@ export default function WidgetWrapper({
   const [contextPos, setContextPos] = useState({ x: 100, y: 100 });
   const wrapperRef = useRef(null);
   const buttonRef = useRef(null);
-  const menuRef = useRef(null); // <-- NEW
+  const menuRef = useRef(null);
 
   const [bgStyle, setBgStyle] = useState(() => {
     const saved = localStorage.getItem(`widgetBg-${id}`);
@@ -103,16 +103,15 @@ export default function WidgetWrapper({
       <div className="p-3 overflow-y-auto flex-1">{loading ? 'Loading...' : children}</div>
 
       {menuOpen && (
-        <div ref={menuRef}>
-          <WidgetContextMenu
-            widgetId={id}
-            onClose={() => setMenuOpen(false)}
-            onHide={onHide}
-            onToggleFavorite={onToggleFavorite}
-            isFavorite={favorite}
-            position={contextPos}
-          />
-        </div>
+        <WidgetContextMenu
+          ref={menuRef}
+          widgetId={id}
+          onClose={() => setMenuOpen(false)}
+          onHide={onHide}
+          onToggleFavorite={onToggleFavorite}
+          isFavorite={favorite}
+          position={contextPos}
+        />
       )}
     </div>
   );
