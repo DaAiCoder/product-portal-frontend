@@ -1,6 +1,6 @@
 // File: src/utils/widgetLibrary.js
 import datetime from '../components/widgets/configs/datetime';
-import pomodoro from '../components/widgets/configs/stopwatch';
+import stopwatch from '../components/widgets/configs/stopwatch';
 import quote from '../components/widgets/configs/quote';
 import weather from '../components/widgets/configs/weather';
 import aisummary from '../components/widgets/configs/aisummary';
