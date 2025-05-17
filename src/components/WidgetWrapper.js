@@ -19,7 +19,6 @@ export default function WidgetWrapper({
   const [contextPos, setContextPos] = useState({ x: 100, y: 100 });
   const wrapperRef = useRef(null);
   const buttonRef = useRef(null);
-  const menuRef = useRef(null);
 
   const [bgStyle, setBgStyle] = useState(() => {
     const saved = localStorage.getItem(`widgetBg-${id}`);
@@ -42,17 +41,17 @@ export default function WidgetWrapper({
   };
 
   useEffect(() => {
-    const handleMouseDown = (e) => {
-      const clickedInsideWrapper = wrapperRef.current?.contains(e.target);
-      const clickedButton = buttonRef.current?.contains(e.target);
-      const clickedMenu = menuRef.current?.contains(e.target);
-      if (!clickedInsideWrapper && !clickedButton && !clickedMenu) {
+    const handleClickOutside = (e) => {
+      const insideWidget = wrapperRef.current?.contains(e.target);
+      const insideButton = buttonRef.current?.contains(e.target);
+      const insideMenu = e.target.closest('.widget-context-menu');
+      if (!insideWidget && !insideButton && !insideMenu) {
         setMenuOpen(false);
       }
     };
 
-    window.addEventListener('mousedown', handleMouseDown);
-    return () => window.removeEventListener('mousedown', handleMouseDown);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
   }, []);
 
   const handleContextMenu = (e) => {
@@ -104,7 +103,6 @@ export default function WidgetWrapper({
 
       {menuOpen && (
         <WidgetContextMenu
-          ref={menuRef}
           widgetId={id}
           onClose={() => setMenuOpen(false)}
           onHide={onHide}
