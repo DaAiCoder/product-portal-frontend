@@ -2,79 +2,30 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import {
-  FaBars,
-  FaThLarge,
-  FaEnvelope,
-  FaCalendarAlt,
-  FaStickyNote,
-  FaFolderOpen,
-  FaClock,
-  FaShareAlt,
-  FaFacebook,
-  FaInstagram,
-  FaTwitter,
-  FaRss,
-  FaComments,
-} from 'react-icons/fa';
-
-const INITIAL_PROD = [
-  { id: 'email', to: '/email', icon: <FaEnvelope />, label: 'Email' },
-  { id: 'calendar', to: '/calendar', icon: <FaCalendarAlt />, label: 'Calendar' },
-  { id: 'notes', to: '/notes', icon: <FaStickyNote />, label: 'Notes' },
-  { id: 'files', to: '/files', icon: <FaFolderOpen />, label: 'Files' },
-  { id: 'clock', to: '/clock', icon: <FaClock />, label: 'Clock' },
-];
-
-const INITIAL_SOC = [
-  { id: 'facebook', to: '/social/facebook', icon: <FaFacebook />, label: 'Facebook' },
-  { id: 'instagram', to: '/social/instagram', icon: <FaInstagram />, label: 'Instagram' },
-  { id: 'twitter', to: '/social/twitter', icon: <FaTwitter />, label: 'Twitter (X)' },
-  { id: 'rss', to: '/social/rss', icon: <FaRss />, label: 'RSS Feeds' },
-];
+import { FaBars } from 'react-icons/fa';
+import { sidebarSections } from '../utils/sidebarLinks';
 
 export default function Sidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(
     () => JSON.parse(localStorage.getItem('sidebarCollapsed')) || false
   );
-  const [openProd, setOpenProd] = useState(false);
-  const [openSocial, setOpenSocial] = useState(false);
-  const [prodTools, setProdTools] = useState(INITIAL_PROD);
-  const [socTools, setSocTools] = useState(INITIAL_SOC);
-
-  useEffect(() => {
-    const savedProd = JSON.parse(localStorage.getItem('sidebarProdOrder'));
-    const savedSoc = JSON.parse(localStorage.getItem('sidebarSocialOrder'));
-    if (savedProd) {
-      const ordered = savedProd.map((id) => INITIAL_PROD.find((t) => t.id === id)).filter(Boolean);
-      setProdTools(ordered);
-    }
-    if (savedSoc) {
-      const ordered = savedSoc.map((id) => INITIAL_SOC.find((t) => t.id === id)).filter(Boolean);
-      setSocTools(ordered);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('sidebarCollapsed', JSON.stringify(collapsed));
-  }, [collapsed]);
-
-  const prodActive = prodTools.some((t) => location.pathname.startsWith(t.to));
-  const socialActive = socTools.some((t) => location.pathname.startsWith(t.to));
+  const [openSections, setOpenSections] = useState({ productivity: true, social: true });
 
   const onDragEnd = ({ source, destination }) => {
     if (!destination || source.droppableId !== destination.droppableId) return;
-    const list = source.droppableId === 'prod' ? prodTools : socTools;
-    const setter = source.droppableId === 'prod' ? setProdTools : setSocTools;
-    const copy = Array.from(list);
+
+    const section = sidebarSections.find((s) => s.id === source.droppableId);
+    if (!section || !section.items) return;
+
+    const copy = Array.from(section.items);
     const [moved] = copy.splice(source.index, 1);
     copy.splice(destination.index, 0, moved);
-    setter(copy);
-    localStorage.setItem(
-      source.droppableId === 'prod' ? 'sidebarProdOrder' : 'sidebarSocialOrder',
-      JSON.stringify(copy.map((t) => t.id))
-    );
+    section.items = copy;
+  };
+
+  const toggleSection = (id) => {
+    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -91,134 +42,84 @@ export default function Sidebar() {
           <FaBars size={20} />
         </button>
 
-        {/* Productivity Section */}
-        <div className="mt-6 relative">
-          <button
-            onClick={() => {
-              setOpenProd((p) => !p);
-              if (!openProd) setOpenSocial(false);
-            }}
-            className={`w-full flex items-center px-4 py-2 rounded ${
-              prodActive
-                ? 'bg-blue-500 text-white dark:bg-blue-400'
-                : 'text-gray-600 dark:text-gray-300'
-            } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
-          >
-            <FaThLarge size={20} />
-            {!collapsed && <span className="ml-3">Productivity</span>}
-          </button>
+        {sidebarSections.map((section) => {
+          if (section.items) {
+            const isOpen = openSections[section.id];
+            const isActive = section.items.some((item) => location.pathname.startsWith(item.to));
+            const color = section.color;
 
-          {!collapsed && openProd && (
-            <Droppable droppableId="prod">
-              {(provided) => (
-                <div
-                  id="prod-menu"
-                  className="mt-1"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
+            return (
+              <div key={section.id} className="mt-4 relative">
+                <button
+                  onClick={() => toggleSection(section.id)}
+                  className={`w-full flex items-center px-4 py-2 rounded ${
+                    isActive
+                      ? `bg-${color}-500 text-white dark:bg-${color}-400`
+                      : 'text-gray-600 dark:text-gray-300'
+                  } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
                 >
-                  {prodTools.map((tool, idx) => (
-                    <Draggable key={tool.id} draggableId={tool.id} index={idx}>
-                      {(prov) => (
-                        <NavLink
-                          to={tool.to}
-                          ref={prov.innerRef}
-                          {...prov.draggableProps}
-                          {...prov.dragHandleProps}
-                          className={({ isActive }) =>
-                            `flex items-center px-8 py-2 rounded mb-1 ${
-                              isActive
-                                ? 'bg-blue-500 text-white dark:bg-blue-400'
-                                : 'text-gray-600 dark:text-gray-300'
-                            } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
-                          }
-                        >
-                          {tool.icon}
-                          <span className="ml-3">{tool.label}</span>
-                        </NavLink>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          )}
-        </div>
+                  {section.icon}
+                  {!collapsed && <span className="ml-3">{section.label}</span>}
+                </button>
 
-        {/* Social Feeds Section */}
-        <div className="mt-4 relative">
-          <button
-            onClick={() => {
-              setOpenSocial((s) => !s);
-              if (!openSocial) setOpenProd(false);
-            }}
-            className={`w-full flex items-center px-4 py-2 rounded ${
-              socialActive
-                ? 'bg-green-500 text-white dark:bg-green-400'
-                : 'text-gray-600 dark:text-gray-300'
-            } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
-          >
-            <FaShareAlt size={20} />
-            {!collapsed && <span className="ml-3">Social Feeds</span>}
-          </button>
-
-          {!collapsed && openSocial && (
-            <Droppable droppableId="social">
-              {(provided) => (
-                <div
-                  id="social-menu"
-                  className="mt-1"
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
+                {!collapsed && isOpen && (
+                  <Droppable droppableId={section.id}>
+                    {(provided) => (
+                      <div
+                        className="mt-1"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {section.items.map((item, idx) => (
+                          <Draggable key={item.id} draggableId={item.id} index={idx}>
+                            {(prov) => (
+                              <NavLink
+                                to={item.to}
+                                ref={prov.innerRef}
+                                {...prov.draggableProps}
+                                {...prov.dragHandleProps}
+                                className={({ isActive }) =>
+                                  `flex items-center px-8 py-2 rounded mb-1 ${
+                                    isActive
+                                      ? `bg-${color}-500 text-white dark:bg-${color}-400`
+                                      : 'text-gray-600 dark:text-gray-300'
+                                  } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
+                                }
+                              >
+                                {item.icon}
+                                <span className="ml-3">{item.label}</span>
+                              </NavLink>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                )}
+              </div>
+            );
+          } else {
+            return (
+              <div key={section.id} className="mt-4">
+                <NavLink
+                  to={section.to}
+                  className={({ isActive }) =>
+                    `w-full flex items-center px-4 py-2 rounded ${
+                      isActive
+                        ? `bg-${section.color}-500 text-white dark:bg-${section.color}-400`
+                        : 'text-gray-600 dark:text-gray-300'
+                    } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
+                  }
                 >
-                  {socTools.map((tool, idx) => (
-                    <Draggable key={tool.id} draggableId={tool.id} index={idx}>
-                      {(prov) => (
-                        <NavLink
-                          to={tool.to}
-                          ref={prov.innerRef}
-                          {...prov.draggableProps}
-                          {...prov.dragHandleProps}
-                          className={({ isActive }) =>
-                            `flex items-center px-8 py-2 rounded mb-1 ${
-                              isActive
-                                ? 'bg-green-500 text-white dark:bg-green-400'
-                                : 'text-gray-600 dark:text-gray-300'
-                            } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
-                          }
-                        >
-                          {tool.icon}
-                          <span className="ml-3">{tool.label}</span>
-                        </NavLink>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          )}
-        </div>
-
-        {/* Chat Section (Standalone) */}
-        <div className="mt-4">
-          <NavLink
-            to="/chat"
-            className={({ isActive }) =>
-              `w-full flex items-center px-4 py-2 rounded ${
-                isActive
-                  ? 'bg-purple-500 text-white dark:bg-purple-400'
-                  : 'text-gray-600 dark:text-gray-300'
-              } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
-            }
-          >
-            <FaComments size={20} />
-            {!collapsed && <span className="ml-3">Chat</span>}
-          </NavLink>
-        </div>
+                  {section.icon}
+                  {!collapsed && <span className="ml-3">{section.label}</span>}
+                </NavLink>
+              </div>
+            );
+          }
+        })}
       </nav>
     </DragDropContext>
   );
 }
-
