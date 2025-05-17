@@ -10,14 +10,28 @@ import {
   FaTwitter,
   FaRss,
   FaComments,
+  FaCubes,
 } from 'react-icons/fa';
+
+import { widgetLibrary } from './widgetLibrary';
+
+const widgetIcons = {
+  datetime: '📅',
+  stopwatch: '⏱️',
+  quote: '💬',
+  weather: '☁️',
+  aisummary: '🧠',
+  chat: '💬',
+  calculator: '🧮',
+  worldclock: '🌍',
+};
 
 export const sidebarSections = [
   {
     id: 'productivity',
     label: 'Productivity',
     color: 'blue',
-    icon: null, // Section icon optional
+    icon: null,
     items: [
       { id: 'email', to: '/email', icon: <FaEnvelope />, label: 'Email' },
       { id: 'calendar', to: '/calendar', icon: <FaCalendarAlt />, label: 'Calendar' },
@@ -44,5 +58,17 @@ export const sidebarSections = [
     color: 'purple',
     icon: <FaComments />,
     to: '/chat',
+  },
+  {
+    id: 'widgets',
+    label: 'Widgets',
+    color: 'gray',
+    icon: <FaCubes />,
+    items: widgetLibrary.map((w) => ({
+      id: w.id,
+      to: `/widgets/${w.id}`,
+      icon: widgetIcons[w.id] || '🧩',
+      label: w.defaultTitle,
+    })),
   },
 ];
