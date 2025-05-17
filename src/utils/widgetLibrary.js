@@ -9,6 +9,18 @@ import calculator from '../components/widgets/configs/calculator';
 import worldclock from '../components/widgets/configs/worldclock';
 
 export const widgetLibrary = [
+  datetime,
+  stopwatch,
+  quote,
+  weather,
+  aisummary,
+  chat,
+  calculator,
+  worldclock,
+];
+
+
+export const widgetLibrary = [
   {
     ...datetime,
     defaultW: 4,
