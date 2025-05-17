@@ -24,7 +24,6 @@ const INITIAL_PROD = [
   { id: 'notes', to: '/notes', icon: <FaStickyNote />, label: 'Notes' },
   { id: 'files', to: '/files', icon: <FaFolderOpen />, label: 'Files' },
   { id: 'clock', to: '/clock', icon: <FaClock />, label: 'Clock' },
-  { id: 'chat', to: '/chat', icon: <FaComments />, label: 'Chat' },
 ];
 
 const INITIAL_SOC = [
@@ -78,16 +77,6 @@ export default function Sidebar() {
     );
   };
 
-  const toggleProd = () => {
-    setOpenProd((p) => !p);
-    if (!openProd) setOpenSocial(false);
-  };
-
-  const toggleSocial = () => {
-    setOpenSocial((s) => !s);
-    if (!openSocial) setOpenProd(false);
-  };
-
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <nav
@@ -105,7 +94,10 @@ export default function Sidebar() {
         {/* Productivity Section */}
         <div className="mt-6 relative">
           <button
-            onClick={toggleProd}
+            onClick={() => {
+              setOpenProd((p) => !p);
+              if (!openProd) setOpenSocial(false);
+            }}
             className={`w-full flex items-center px-4 py-2 rounded ${
               prodActive
                 ? 'bg-blue-500 text-white dark:bg-blue-400'
@@ -154,10 +146,13 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Social Section */}
+        {/* Social Feeds Section */}
         <div className="mt-4 relative">
           <button
-            onClick={toggleSocial}
+            onClick={() => {
+              setOpenSocial((s) => !s);
+              if (!openSocial) setOpenProd(false);
+            }}
             className={`w-full flex items-center px-4 py-2 rounded ${
               socialActive
                 ? 'bg-green-500 text-white dark:bg-green-400'
@@ -201,27 +196,26 @@ export default function Sidebar() {
                   ))}
                   {provided.placeholder}
                 </div>
-
-{/* Chat Section (Standalone) */}
-<div className="mt-4">
-  <NavLink
-    to="/chat"
-    className={({ isActive }) =>
-      `w-full flex items-center px-4 py-2 rounded ${
-        isActive
-          ? 'bg-purple-500 text-white dark:bg-purple-400'
-          : 'text-gray-600 dark:text-gray-300'
-      } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
-    }
-  >
-    <FaComments size={20} />
-    {!collapsed && <span className="ml-3">Chat</span>}
-  </NavLink>
-</div>
-
               )}
             </Droppable>
           )}
+        </div>
+
+        {/* Chat Section (Standalone) */}
+        <div className="mt-4">
+          <NavLink
+            to="/chat"
+            className={({ isActive }) =>
+              `w-full flex items-center px-4 py-2 rounded ${
+                isActive
+                  ? 'bg-purple-500 text-white dark:bg-purple-400'
+                  : 'text-gray-600 dark:text-gray-300'
+              } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
+            }
+          >
+            <FaComments size={20} />
+            {!collapsed && <span className="ml-3">Chat</span>}
+          </NavLink>
         </div>
       </nav>
     </DragDropContext>
