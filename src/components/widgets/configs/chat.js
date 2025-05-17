@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatWidget from '../components/widgets/ChatWidget';
 
-export default ChatWidget;
-
 
 function ChatWidget() {
   const [messages, setMessages] = useState([
