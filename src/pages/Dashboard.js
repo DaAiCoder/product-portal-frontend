@@ -1,4 +1,3 @@
-// File: src/pages/dashboard.js
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
 import WidgetWrapper from '../components/WidgetWrapper';
@@ -19,9 +18,12 @@ export default function Dashboard() {
     h: w.defaultH,
   }));
 
-  const [layout, setLayout] = useState(() =>
-    JSON.parse(localStorage.getItem('dashboardLayout')) || defaultLayout
-  );
+  const savedLayout = JSON.parse(localStorage.getItem('dashboardLayout'));
+  const validLayout = Array.isArray(savedLayout)
+    ? savedLayout.filter((l) => widgetLibrary.some((w) => w.id === l.i))
+    : null;
+
+  const [layout, setLayout] = useState(() => validLayout?.length ? validLayout : defaultLayout);
   const [titles, setTitles] = useState(() =>
     JSON.parse(localStorage.getItem('widgetTitles')) || {}
   );
