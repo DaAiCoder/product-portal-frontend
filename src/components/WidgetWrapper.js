@@ -2,8 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+import Skeleton from 'react-loading-skeleton'; // ✅ NO CSS import for v3.5.0
 
 export default function WidgetWrapper({
   id,
@@ -126,4 +125,3 @@ export default function WidgetWrapper({
     </div>
   );
 }
-
