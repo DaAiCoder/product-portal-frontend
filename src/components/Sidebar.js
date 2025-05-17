@@ -201,6 +201,24 @@ export default function Sidebar() {
                   ))}
                   {provided.placeholder}
                 </div>
+
+{/* Chat Section (Standalone) */}
+<div className="mt-4">
+  <NavLink
+    to="/chat"
+    className={({ isActive }) =>
+      `w-full flex items-center px-4 py-2 rounded ${
+        isActive
+          ? 'bg-purple-500 text-white dark:bg-purple-400'
+          : 'text-gray-600 dark:text-gray-300'
+      } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`
+    }
+  >
+    <FaComments size={20} />
+    {!collapsed && <span className="ml-3">Chat</span>}
+  </NavLink>
+</div>
+
               )}
             </Droppable>
           )}
