@@ -1,7 +1,6 @@
-// File: src/components/widgets/CalculatorWidget.js
 import React, { useState } from 'react';
 
-export default function CalculatorWidget() {
+function CalculatorWidget() {
   const [expression, setExpression] = useState('');
   const [result, setResult] = useState('');
 
@@ -57,3 +56,11 @@ export default function CalculatorWidget() {
     </div>
   );
 }
+
+export default {
+  id: 'calculator',
+  defaultTitle: 'Calculator',
+  defaultW: 4,
+  defaultH: 5,
+  Component: CalculatorWidget,
+};
