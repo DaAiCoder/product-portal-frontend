@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaStar, FaRegStar, FaEllipsisV, FaCog } from 'react-icons/fa';
 import WidgetContextMenu from './WidgetContextMenu';
-import Skeleton from 'react-loading-skeleton'; // assuming already installed
+import Skeleton from 'react-loading-skeleton';
 
 export default function WidgetWrapper({
   id,
@@ -18,24 +18,28 @@ export default function WidgetWrapper({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [contextPos, setContextPos] = useState({ x: 100, y: 100 });
-  const [editing, setEditing] = useState(false);
-  const [titleInput, setTitleInput] = useState(() => {
-    return localStorage.getItem(`widgetTitle-${id}`) || title;
-  });
-
   const wrapperRef = useRef(null);
   const buttonRef = useRef(null);
-  const inputRef = useRef(null);
+
+  const [bgStyle, setBgStyle] = useState(() => {
+    const saved = localStorage.getItem(`widgetBg-${id}`);
+    return saved ? JSON.parse(saved) : { type: 'default', color: '' };
+  });
 
   useEffect(() => {
-    localStorage.setItem(`widgetTitle-${id}`, titleInput);
-  }, [titleInput]);
+    localStorage.setItem(`widgetBg-${id}`, JSON.stringify(bgStyle));
+  }, [bgStyle]);
 
-  useEffect(() => {
-    if (editing && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [editing]);
+  const getBgClass = () => {
+    if (bgStyle.type === 'light') return 'bg-white';
+    if (bgStyle.type === 'dark') return 'bg-gray-900';
+    if (bgStyle.type === 'custom') return '';
+    return 'bg-white dark:bg-gray-900';
+  };
+
+  const getBgStyle = () => {
+    return bgStyle.type === 'custom' ? { backgroundColor: bgStyle.color } : {};
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -44,7 +48,6 @@ export default function WidgetWrapper({
       const insideMenu = e.target.closest('.widget-context-menu');
       if (!insideWidget && !insideButton && !insideMenu) {
         setMenuOpen(false);
-        setEditing(false);
       }
     };
 
@@ -52,46 +55,30 @@ export default function WidgetWrapper({
     return () => window.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const handleTitleSubmit = () => {
-    setEditing(false);
-    if (onRename) onRename(id, titleInput);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleTitleSubmit();
-    } else if (e.key === 'Escape') {
-      setEditing(false);
-    }
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    setContextPos({ x: e.pageX, y: e.pageY });
+    setMenuOpen(true);
   };
 
   return (
     <div
-      className="bg-white dark:bg-gray-900 rounded shadow-lg h-full flex flex-col"
+      className={`${getBgClass()} rounded shadow-lg h-full flex flex-col`}
+      style={getBgStyle()}
+      onContextMenu={handleContextMenu}
       ref={wrapperRef}
     >
       <div className="flex items-center justify-between p-2 border-b dark:border-gray-700 drag-handle bg-gray-50 dark:bg-gray-800">
         <div className="flex items-center space-x-2">
-          <span className="text-gray-400 mr-1 cursor-move select-none">☰</span>
-          {editing ? (
-            <input
-              ref={inputRef}
-              value={titleInput}
-              onChange={(e) => setTitleInput(e.target.value)}
-              onBlur={handleTitleSubmit}
-              onKeyDown={handleKeyDown}
-              className="text-sm rounded px-2 py-1 border dark:bg-gray-700 dark:text-white"
-            />
-          ) : (
-            <span
-              onClick={() => setEditing(true)}
-              className="font-semibold text-gray-800 dark:text-white cursor-pointer"
-              title="Click to rename"
-            >
-              {titleInput}
-            </span>
-          )}
-          <button onClick={() => onToggleFavorite(id)} className="text-yellow-500 hover:text-yellow-400">
+          <span className="text-gray-400 mr-1 cursor-move select-none text-lg">☰</span>
+          <span className="font-semibold text-gray-800 dark:text-white truncate max-w-[150px]">
+            {title}
+          </span>
+          <button
+            onClick={() => onToggleFavorite(id)}
+            className="text-yellow-500 hover:text-yellow-400"
+            title="Favorite"
+          >
             {favorite ? <FaStar /> : <FaRegStar />}
           </button>
         </div>
@@ -119,6 +106,7 @@ export default function WidgetWrapper({
           </button>
         </div>
       </div>
+
       <div className="p-3 overflow-y-auto flex-1">
         {loading ? (
           <div className="space-y-3">
