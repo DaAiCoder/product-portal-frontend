@@ -2,12 +2,28 @@
 import React, { useState, useEffect } from 'react';
 
 const DEFAULT_ZONES = ['America/New_York', 'Europe/London', 'Asia/Tokyo'];
+const COMMON_ZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'Europe/London',
+  'Europe/Berlin',
+  'Europe/Paris',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Asia/Kolkata',
+  'Australia/Sydney',
+  'Africa/Lagos',
+];
 
 export default function WorldClockWidget() {
   const [zones, setZones] = useState(() =>
     JSON.parse(localStorage.getItem('worldClockZones')) || DEFAULT_ZONES
   );
+  const [newZone, setNewZone] = useState('');
   const [now, setNow] = useState(new Date());
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
@@ -19,9 +35,18 @@ export default function WorldClockWidget() {
   }, [zones]);
 
   const handleAddZone = () => {
-    const newZone = prompt('Enter IANA time zone (e.g., Europe/Paris):');
-    if (newZone && !zones.includes(newZone)) {
+    if (!newZone) return;
+    if (zones.includes(newZone)) {
+      setError('Zone already added.');
+      return;
+    }
+    try {
+      new Intl.DateTimeFormat('en-US', { timeZone: newZone }).format(); // Validate zone
       setZones([...zones, newZone]);
+      setNewZone('');
+      setError('');
+    } catch {
+      setError('Invalid time zone.');
     }
   };
 
@@ -31,7 +56,7 @@ export default function WorldClockWidget() {
 
   return (
     <div className="h-full flex flex-col justify-between">
-      <div className="space-y-2 mb-2 overflow-y-auto">
+      <div className="space-y-2 mb-3 overflow-y-auto max-h-64">
         {zones.map((zone) => (
           <div
             key={zone}
@@ -52,12 +77,31 @@ export default function WorldClockWidget() {
           </div>
         ))}
       </div>
-      <button
-        onClick={handleAddZone}
-        className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
-      >
-        Add Time Zone
-      </button>
+
+      <div className="mt-2 space-y-2">
+        <select
+          value={newZone}
+          onChange={(e) => {
+            setNewZone(e.target.value);
+            setError('');
+          }}
+          className="w-full p-2 rounded border dark:bg-gray-800 dark:text-white"
+        >
+          <option value="">Select a time zone</option>
+          {COMMON_ZONES.filter((z) => !zones.includes(z)).map((zone) => (
+            <option key={zone} value={zone}>
+              {zone}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleAddZone}
+          className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded"
+        >
+          Add Time Zone
+        </button>
+        {error && <div className="text-red-500 text-xs">{error}</div>}
+      </div>
     </div>
   );
 }
