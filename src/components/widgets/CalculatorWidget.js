@@ -31,18 +31,24 @@ export default function CalculatorWidget() {
     'C', '⌫'
   ];
 
+  const getButtonClass = (btn) => {
+    if (btn === '=') return 'bg-green-600 hover:bg-green-700';
+    if (btn === 'C' || btn === '⌫') return 'bg-red-500 hover:bg-red-600';
+    return 'bg-blue-600 hover:bg-blue-700';
+  };
+
   return (
     <div className="h-full flex flex-col justify-between text-gray-800 dark:text-white">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded p-3 mb-3 text-right">
-        <div className="text-sm text-gray-500 dark:text-gray-400">{expression || '0'}</div>
-        <div className="text-xl font-semibold">{result || '0'}</div>
+      <div className="bg-gray-200 dark:bg-gray-800 rounded-lg p-4 mb-4 shadow-inner font-mono">
+        <div className="text-sm text-gray-500 dark:text-gray-400 break-words min-h-[1.25rem]">{expression || '0'}</div>
+        <div className="text-2xl font-bold mt-1 text-right">{result || '0'}</div>
       </div>
       <div className="grid grid-cols-4 gap-2">
         {buttons.map((btn) => (
           <button
             key={btn}
             onClick={() => handleInput(btn)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
+            className={`${getButtonClass(btn)} text-white font-semibold py-2 rounded transition duration-150 ease-in-out`}
           >
             {btn}
           </button>
