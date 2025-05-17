@@ -1,4 +1,4 @@
-import ChatWidgetComponent from '../components/widgets/ChatWidget';
+import ChatWidgetComponent from '../ChatWidget';
 
 export default {
   id: 'chat',
