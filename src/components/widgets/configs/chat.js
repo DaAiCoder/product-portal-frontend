@@ -1,3 +1,9 @@
-import ChatWidgetConfig from '../ChatWidget';
+import ChatWidget from '../ChatWidget';
 
-export default ChatWidgetConfig;
+export default {
+  id: 'chat',
+  defaultTitle: 'Chat',
+  defaultW: 6,
+  defaultH: 8,
+  Component: ChatWidget.Component,
+};
