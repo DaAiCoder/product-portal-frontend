@@ -7,14 +7,21 @@ import { cn } from '../utils/cn';
 export default function Sidebar() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
+
+  const toggleSection = (id) => {
+    setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
-    <aside className={cn(
-      "h-full bg-white dark:bg-gray-950 border-r dark:border-gray-800 transition-all duration-200 ease-in-out",
-      collapsed ? "w-16" : "w-60"
-    )}>
+    <aside
+      className={cn(
+        "fixed top-0 left-0 h-full z-40 bg-white dark:bg-gray-950 shadow-md border-r dark:border-gray-800 transition-all duration-200 ease-in-out",
+        collapsed ? "w-16" : "w-64"
+      )}
+    >
       <div className="flex justify-between items-center px-4 py-3 border-b dark:border-gray-800">
-        {!collapsed && <h2 className="text-lg font-semibold">My Dashboard</h2>}
+        {!collapsed && <h2 className="text-lg font-semibold">Dashboard</h2>}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white"
@@ -24,51 +31,64 @@ export default function Sidebar() {
       </div>
 
       <div className="overflow-y-auto p-2">
-        {sidebarSections.map((section) => (
-          <div key={section.id} className="mb-4">
-            <div className={cn(
-              "text-xs font-bold uppercase tracking-wide px-2 py-1 mb-1",
-              collapsed ? "text-center text-gray-400" : "text-gray-500"
-            )}>
-              {collapsed ? (
-                <div title={section.label}>•</div>
-              ) : (
-                section.label
+        {sidebarSections.map((section) => {
+          const isExpanded = expandedSections[section.id];
+
+          return (
+            <div key={section.id} className="mb-3">
+              <button
+                onClick={() => toggleSection(section.id)}
+                className={cn(
+                  "flex items-center justify-between w-full px-2 py-2 text-sm font-semibold rounded hover:bg-gray-100 dark:hover:bg-gray-800",
+                  "text-gray-700 dark:text-gray-200"
+                )}
+              >
+                <div className="flex items-center space-x-2">
+                  {section.icon && <span className="text-lg">{section.icon}</span>}
+                  {!collapsed && <span>{section.label}</span>}
+                </div>
+                {!collapsed && section.items?.length > 0 && (
+                  <span className="text-xs">{isExpanded ? '−' : '+'}</span>
+                )}
+              </button>
+
+              {!collapsed && isExpanded && section.items && (
+                <div className="ml-6 mt-1 space-y-1">
+                  {section.items.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={item.to}
+                      className={cn(
+                        "block px-2 py-1 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition",
+                        location.pathname === item.to
+                          ? "bg-gray-200 dark:bg-gray-800 font-semibold"
+                          : "text-gray-600 dark:text-gray-300"
+                      )}
+                    >
+                      {item.icon && <span className="mr-2">{item.icon}</span>}
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Direct route link fallback if section has no items */}
+              {section.to && !collapsed && (
+                <Link
+                  to={section.to}
+                  className={cn(
+                    "block px-2 py-2 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition",
+                    location.pathname === section.to
+                      ? "bg-gray-200 dark:bg-gray-800 font-semibold"
+                      : "text-gray-700 dark:text-gray-300"
+                  )}
+                >
+                  {section.label}
+                </Link>
               )}
             </div>
-
-            {section.items && section.items.map((item) => (
-              <Link
-                key={item.id}
-                to={item.to}
-                className={cn(
-                  "flex items-center px-2 py-2 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition",
-                  location.pathname === item.to
-                    ? "bg-gray-200 dark:bg-gray-800 font-semibold"
-                    : "text-gray-700 dark:text-gray-300"
-                )}
-              >
-                <span className="text-lg">{item.icon}</span>
-                {!collapsed && <span className="ml-3">{item.label}</span>}
-              </Link>
-            ))}
-
-            {section.to && (
-              <Link
-                to={section.to}
-                className={cn(
-                  "flex items-center px-2 py-2 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition",
-                  location.pathname === section.to
-                    ? "bg-gray-200 dark:bg-gray-800 font-semibold"
-                    : "text-gray-700 dark:text-gray-300"
-                )}
-              >
-                <span className="text-lg">{section.icon}</span>
-                {!collapsed && <span className="ml-3">{section.label}</span>}
-              </Link>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );
