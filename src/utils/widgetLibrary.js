@@ -9,6 +9,7 @@ import aisummary from '../components/widgets/configs/aisummary';
 import chat from '../components/widgets/configs/chat';
 import calculator from '../components/widgets/configs/calculator';
 import worldclock from '../components/widgets/configs/worldclock';
+import NotesWidget from '../components/widgets/configs/NotesWidget';
 
 export const widgetLibrary = [
   {
@@ -67,4 +68,16 @@ export const widgetLibrary = [
     w: 4,
     h: 4,
   },
+
+  {
+      {
+    ...NotesWidget,
+    icon: <FaStickyNote size={40} />,
+    label: 'Notepad',
+    w: 4,
+    h: 4,
+  },
+
+  },
+
 ];
