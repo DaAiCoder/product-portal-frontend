@@ -1,7 +1,7 @@
 // File: src/pages/WidgetDirectory.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { widgetLibrary } from '../lib/widgetLibrary'; // unified config
+import { widgetLibrary } from '../utils/widgetLibrary';
 
 export default function WidgetDirectory() {
   const navigate = useNavigate();
