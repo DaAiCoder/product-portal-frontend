@@ -1,31 +1,7 @@
 // File: src/pages/WidgetDirectory.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaClock, FaStopwatch, FaQuoteRight } from 'react-icons/fa';
-
-const AVAILABLE_WIDGETS = [
-  {
-    id: 'datetime',
-    label: 'Date & Time',
-    icon: <FaClock size={40} />,
-    w: 4,
-    h: 4,
-  },
-  {
-    id: 'timer',
-    label: 'Timer',
-    icon: <FaStopwatch size={40} />,
-    w: 4,
-    h: 4,
-  },
-  {
-    id: 'quote',
-    label: 'Quote of the Day',
-    icon: <FaQuoteRight size={40} />,
-    w: 4,
-    h: 4,
-  },
-];
+import { widgetLibrary } from '../lib/widgetLibrary'; // unified config
 
 export default function WidgetDirectory() {
   const navigate = useNavigate();
@@ -39,7 +15,7 @@ export default function WidgetDirectory() {
     const newItem = {
       i: widget.id,
       x: (stored.length * widget.w) % 12,
-      y: Infinity, // puts it at the bottom
+      y: Infinity,
       w: widget.w,
       h: widget.h,
     };
@@ -53,14 +29,16 @@ export default function WidgetDirectory() {
       <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">
         Widget Directory
       </h2>
-      <div className="grid grid-cols-3 gap-6">
-        {AVAILABLE_WIDGETS.map((widget) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        {widgetLibrary.map((widget) => (
           <div
             key={widget.id}
             className="flex flex-col items-center bg-white dark:bg-gray-800 p-4 rounded shadow"
           >
-            {widget.icon}
-            <span className="mt-2 text-lg text-gray-800 dark:text-gray-200">
+            {widget.icon && (
+              <div className="mb-2 text-blue-500">{widget.icon}</div>
+            )}
+            <span className="text-lg text-gray-800 dark:text-gray-200">
               {widget.label}
             </span>
             <button
