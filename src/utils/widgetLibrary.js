@@ -70,7 +70,6 @@ export const widgetLibrary = [
   },
 
   {
-      {
     ...NotesWidget,
     icon: <FaStickyNote size={40} />,
     label: 'Notepad',
@@ -78,6 +77,5 @@ export const widgetLibrary = [
     h: 4,
   },
 
-  },
 
 ];
