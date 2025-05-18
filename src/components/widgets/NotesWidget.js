@@ -4,7 +4,7 @@ import {
   createNote,
   updateNote,
   deleteNote,
-} from '../../utils/notesService';
+} from '../../services/notesService';
 
 function NotesWidget() {
   const [notes, setNotes] = useState('');
