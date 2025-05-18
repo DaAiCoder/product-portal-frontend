@@ -1,5 +1,5 @@
 // File: src/utils/widgetLibrary.js
-import { FaClock, FaStopwatch, FaQuoteRight, FaCloudSun, FaRobot, FaComments, FaCalculator, FaGlobe } from 'react-icons/fa';
+import { FaClock, FaStopwatch, FaQuoteRight, FaCloudSun, FaRobot, FaComments, FaCalculator, FaStickyNote, FaGlobe } from 'react-icons/fa';
 
 import datetime from '../components/widgets/configs/datetime';
 import stopwatch from '../components/widgets/configs/stopwatch';
