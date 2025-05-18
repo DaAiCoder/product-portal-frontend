@@ -9,7 +9,7 @@ import aisummary from '../components/widgets/configs/aisummary';
 import chat from '../components/widgets/configs/chat';
 import calculator from '../components/widgets/configs/calculator';
 import worldclock from '../components/widgets/configs/worldclock';
-import NotesWidget from '../components/widgets/configs/NotesWidget';
+import Notes from '../components/widgets/configs/Notes';
 
 export const widgetLibrary = [
   {
@@ -70,7 +70,7 @@ export const widgetLibrary = [
   },
 
   {
-    ...NotesWidget,
+    ...Notes,
     icon: <FaStickyNote size={40} />,
     label: 'Notepad',
     w: 4,
