@@ -1,37 +1,71 @@
-import React, { useEffect, useState } from 'react';
+iimport React, { useEffect, useState } from 'react';
+import {
+  listNotes,
+  createNote,
+  updateNote,
+  deleteNote,
+} from '../../utils/notesService';
 
 function NotesWidget() {
   const [notes, setNotes] = useState('');
+  const [noteId, setNoteId] = useState(null);
 
-  // Load saved notes on init
   useEffect(() => {
-    const saved = localStorage.getItem('user_notes');
-    if (saved) setNotes(saved);
+    async function fetchNotes() {
+      try {
+        const data = await listNotes();
+        if (data.length > 0) {
+          setNotes(data[0].content);
+          setNoteId(data[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load notes', err);
+      }
+    }
+    fetchNotes();
   }, []);
 
-  // Save notes to localStorage daily (and on change)
   useEffect(() => {
-    const save = setTimeout(() => {
-      localStorage.setItem('user_notes', notes);
-    }, 500); // Debounced save
-    return () => clearTimeout(save);
+    const saveTimeout = setTimeout(() => {
+      if (noteId) {
+        updateNote(noteId, { content: notes });
+      } else if (notes.trim()) {
+        createNote({ content: notes }).then((res) => setNoteId(res.id));
+      }
+    }, 1000);
+    return () => clearTimeout(saveTimeout);
   }, [notes]);
+
+  const handleDelete = async () => {
+    if (!noteId) return;
+    await deleteNote(noteId);
+    setNotes('');
+    setNoteId(null);
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(notes);
-    alert('Notes copied to clipboard');
+    alert('Notes copied!');
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 h-full flex flex-col">
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-lg font-semibold">📝 Notes</h2>
-        <button
-          onClick={handleCopy}
-          className="text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-        >
-          Copy
-        </button>
+        <div className="space-x-2">
+          <button
+            onClick={handleCopy}
+            className="text-sm px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+          >
+            Copy
+          </button>
+          <button
+            onClick={handleDelete}
+            className="text-sm px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Clear
+          </button>
+        </div>
       </div>
       <textarea
         value={notes}
