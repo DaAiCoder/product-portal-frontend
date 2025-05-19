@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { sidebarSections } from '../utils/sidebarLinks';
 import { cn } from '../utils/cn';
+import ThemeToggle from './ThemeToggle'; // ⬅️ Add this line
 
 export default function Sidebar() {
   const location = useLocation();
@@ -29,6 +30,13 @@ export default function Sidebar() {
           {collapsed ? '›' : '‹'}
         </button>
       </div>
+
+      {/* Theme toggle placed here */}
+      {!collapsed && (
+        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
+          <ThemeToggle />
+        </div>
+      )}
 
       <div className="overflow-y-auto p-2">
         {sidebarSections.map((section) => {
@@ -72,7 +80,6 @@ export default function Sidebar() {
                 </div>
               )}
 
-              {/* Direct route link fallback if section has no items */}
               {section.to && !collapsed && (
                 <Link
                   to={section.to}
