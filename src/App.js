@@ -11,7 +11,7 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import FeedsPage from './pages/feeds';
-import Email from './pages/Email';
+import Email from './pages/emailpage';
 import Calendar from './pages/Calendar';
 import Notes from './pages/notes';
 import Files from './pages/files';
