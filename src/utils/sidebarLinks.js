@@ -33,7 +33,7 @@ export const sidebarSections = [
     color: 'blue',
     icon: null,
     items: [
-      { id: 'email', to: '/email', icon: <FaEnvelope />, label: 'Email' },
+      { id: 'email', to: '/email', icon: <FaEnvelope />, label: 'Email' }, // ✅ Links to emailpage.js route
       { id: 'calendar', to: '/calendar', icon: <FaCalendarAlt />, label: 'Calendar' },
       { id: 'notes', to: '/notes', icon: <FaStickyNote />, label: 'Notes' },
       { id: 'files', to: '/files', icon: <FaFolderOpen />, label: 'Files' },
