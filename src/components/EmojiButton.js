@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-
-const EMOJIS = ['😀', '😎', '🎯', '🔥', '💡', '✅', '😴', '🚀', '📅', '💻', '📌', '❤️'];
+import EmojiPicker from 'emoji-picker-react';
 
 export default function EmojiButton({ onSelect }) {
   const [open, setOpen] = useState(false);
@@ -27,19 +26,17 @@ export default function EmojiButton({ onSelect }) {
         😊
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow p-2 grid grid-cols-4 gap-2 max-w-[200px]">
-          {EMOJIS.map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => {
-                onSelect(emoji);
-                setOpen(false);
-              }}
-              className="text-xl hover:scale-125 transition"
-            >
-              {emoji}
-            </button>
-          ))}
+        <div className="absolute z-50 mt-2 right-0">
+          <EmojiPicker
+            theme="dark"
+            onEmojiClick={(emojiData) => {
+              onSelect(emojiData.emoji);
+              setOpen(false);
+            }}
+            searchDisabled={false}
+            skinTonesDisabled={false}
+            lazyLoadEmojis={true}
+          />
         </div>
       )}
     </div>
