@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 
-export default function EmojiButton({ onSelect }) {
+export default function EmojiButton({ onSelect, position = 'top-full right-0' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
@@ -25,10 +25,13 @@ export default function EmojiButton({ onSelect }) {
       >
         😊
       </button>
+
       {open && (
-        <div className="absolute z-50 mt-2 left-0 max-w-sm">
+        <div
+          className={`absolute z-50 ${position} mt-2 max-w-[320px]`}
+        >
           <EmojiPicker
-            theme="dark"
+            theme="auto"
             onEmojiClick={(emojiData) => {
               onSelect(emojiData.emoji);
               setOpen(false);
@@ -42,4 +45,3 @@ export default function EmojiButton({ onSelect }) {
     </div>
   );
 }
-
