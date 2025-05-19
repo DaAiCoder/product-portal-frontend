@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import EmojiButton from '../EmojiButton';
+import EmojiButton from '../../EmojiButton';
 
 function ChatWidget() {
   const [messages, setMessages] = useState([]);
