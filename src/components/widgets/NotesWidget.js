@@ -7,7 +7,6 @@ import {
 } from '../../services/notesService';
 import EmojiButton from '../EmojiButton';
 
-
 function NotesWidget() {
   const [notes, setNotes] = useState('');
   const [noteId, setNoteId] = useState(null);
@@ -82,3 +81,4 @@ function NotesWidget() {
 }
 
 export default NotesWidget;
+

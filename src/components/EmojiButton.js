@@ -27,7 +27,7 @@ export default function EmojiButton({ onSelect }) {
         😊
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow p-2 flex flex-wrap gap-2 max-w-[200px]">
+        <div className="absolute z-50 mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow p-2 grid grid-cols-4 gap-2 max-w-[200px]">
           {EMOJIS.map((emoji) => (
             <button
               key={emoji}
