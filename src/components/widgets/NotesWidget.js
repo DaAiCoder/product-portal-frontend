@@ -49,9 +49,9 @@ function NotesWidget() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold">📝 Notes</h2>
+    <div className="bg-white dark:bg-[#2a2a3b] rounded-xl shadow-md p-4 h-full flex flex-col border dark:border-gray-700">
+      <div className="flex justify-between items-center mb-2 drag-handle cursor-move">
+        <h2 className="text-lg font-semibold text-black dark:text-white">📝 Notes</h2>
         <div className="space-x-2">
           <button
             onClick={handleCopy}
