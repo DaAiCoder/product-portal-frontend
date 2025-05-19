@@ -17,7 +17,7 @@ export default function EmojiButton({ onSelect }) {
   }, []);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative inline-block" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
         className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-lg"
@@ -26,7 +26,7 @@ export default function EmojiButton({ onSelect }) {
         😊
       </button>
       {open && (
-        <div className="absolute z-50 mt-2 right-0">
+        <div className="absolute z-50 mt-2 left-0 max-w-sm">
           <EmojiPicker
             theme="dark"
             onEmojiClick={(emojiData) => {
@@ -42,3 +42,4 @@ export default function EmojiButton({ onSelect }) {
     </div>
   );
 }
+
