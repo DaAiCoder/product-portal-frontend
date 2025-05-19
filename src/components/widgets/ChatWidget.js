@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import EmojiButton from '../EmojiButton';
 
 function ChatWidget() {
   const [messages, setMessages] = useState([]);
@@ -29,7 +30,6 @@ function ChatWidget() {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex flex-col h-full">
-      {/* Message list */}
       <div className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1">
         {messages.map((msg, i) =>
           msg?.text ? (
@@ -49,8 +49,8 @@ function ChatWidget() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
+        <EmojiButton onSelect={(emoji) => setInput((i) => i + emoji)} />
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

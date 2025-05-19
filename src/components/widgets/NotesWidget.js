@@ -5,6 +5,7 @@ import {
   updateNote,
   deleteNote,
 } from '../../services/notesService';
+import EmojiButton from '../EmojiButton';
 
 function NotesWidget() {
   const [notes, setNotes] = useState('');
@@ -52,7 +53,8 @@ function NotesWidget() {
     <div className="bg-white dark:bg-[#2a2a3b] rounded-xl shadow-md p-4 h-full flex flex-col border dark:border-gray-700">
       <div className="flex justify-between items-center mb-2 drag-handle cursor-move">
         <h2 className="text-lg font-semibold text-black dark:text-white">📝 Notes</h2>
-        <div className="space-x-2">
+        <div className="space-x-2 flex items-center">
+          <EmojiButton onSelect={(emoji) => setNotes((n) => n + emoji)} />
           <button
             onClick={handleCopy}
             className="text-sm px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
