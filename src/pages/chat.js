@@ -1,7 +1,5 @@
 import React from 'react';
-import chat from '../components/widgets/configs/chat';
-
-const ChatWidget = chat.Component;
+import ChatWidget from '../components/widgets/ChatWidget';
 
 export default function ChatPage() {
   return (

@@ -8,8 +8,6 @@ import {
 import EmojiButton from '../EmojiButton';
 
 
-
-
 function NotesWidget() {
   const [notes, setNotes] = useState('');
   const [noteId, setNoteId] = useState(null);

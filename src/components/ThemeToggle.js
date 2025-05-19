@@ -4,24 +4,24 @@ function ThemeToggle() {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('portal-theme') || 'light';
-    setTheme(savedTheme);
-    applyTheme(savedTheme);
+    // On mount, load saved theme or fallback to system preference
+    const stored = localStorage.getItem('portal-theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = stored || (systemPrefersDark ? 'dark' : 'light');
+    setTheme(initialTheme);
+    applyTheme(initialTheme);
   }, []);
 
   const applyTheme = (theme) => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
   };
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
-    localStorage.setItem('portal-theme', newTheme);
     applyTheme(newTheme);
+    localStorage.setItem('portal-theme', newTheme);
   };
 
   return (
