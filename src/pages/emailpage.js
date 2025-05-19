@@ -6,9 +6,8 @@ export default function EmailDashboard() {
   const [selectedAccountId, setSelectedAccountId] = useState(null);
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [composeMode, setComposeMode] = useState(false);
-  const [form, setForm] = useState({ to: '', subject: '', body: '' });
+  const [folder, setFolder] = useState("INBOX");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchAccounts();
@@ -23,150 +22,91 @@ export default function EmailDashboard() {
         setSelectedAccountId(data[0].id);
       }
     } catch (err) {
-      console.error('Failed to fetch email accounts:', err);
-      setAccounts([]); // fallback to empty
+      console.error('Error loading accounts', err);
     }
   };
 
   useEffect(() => {
     if (selectedAccountId) fetchInbox();
-  }, [selectedAccountId]);
+  }, [selectedAccountId, folder]);
 
   const fetchInbox = async () => {
-    setRefreshing(true);
+    setLoading(true);
     try {
-      const res = await axios.get(`/api/email/inbox?account_id=${selectedAccountId}`);
+      const res = await axios.get(`/api/email/inbox?account_id=${selectedAccountId}&folder=${folder}`);
       setEmails(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to fetch inbox:', err);
-      setEmails([]);
     }
-    setRefreshing(false);
+    setLoading(false);
   };
 
-  const handleSend = async () => {
+  const handleSelectEmail = async (uid) => {
     try {
-      await axios.post('/api/email/send', {
-        account_id: selectedAccountId,
-        to: form.to,
-        subject: form.subject,
-        body: form.body,
-      });
-      alert('Email sent!');
-      setComposeMode(false);
-      setForm({ to: '', subject: '', body: '' });
+      const res = await axios.get(`/api/email/message/${uid}?account_id=${selectedAccountId}&folder=${folder}`);
+      setSelectedEmail(res.data);
     } catch (err) {
-      alert('Failed to send email.');
-      console.error(err);
-    }
-  };
-
-  const handleDelete = async (uid) => {
-    try {
-      await axios.delete(`/api/email/message/${uid}?account_id=${selectedAccountId}`);
-      fetchInbox();
-    } catch (err) {
-      console.error('Failed to delete email:', err);
+      console.error('Failed to fetch message:', err);
     }
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">📧 Email Dashboard</h2>
-        <button onClick={() => setComposeMode(true)} className="bg-blue-600 text-white px-3 py-1 rounded">
-          + Compose
-        </button>
+    <div className="flex h-[85vh]">
+      {/* Folders */}
+      <div className="w-1/6 border-r p-4 bg-gray-50 dark:bg-gray-900">
+        <h2 className="font-bold text-lg mb-4">Folders</h2>
+        {["INBOX", "Sent", "Drafts", "Trash"].map((f) => (
+          <div
+            key={f}
+            className={`cursor-pointer p-2 rounded hover:bg-blue-100 dark:hover:bg-gray-700 ${
+              folder === f ? "bg-blue-200 dark:bg-gray-800 font-semibold" : ""
+            }`}
+            onClick={() => {
+              setSelectedEmail(null);
+              setFolder(f);
+            }}
+          >
+            {f}
+          </div>
+        ))}
       </div>
 
-      <div className="mb-4">
-        <label className="mr-2 font-semibold">Account:</label>
-        <select
-          value={selectedAccountId || ''}
-          onChange={(e) => setSelectedAccountId(e.target.value)}
-          className="border px-2 py-1 rounded"
-        >
-          {accounts.map((acc) => (
-            <option key={acc.id} value={acc.id}>
-              {acc.label || acc.email_address}
-            </option>
-          ))}
-        </select>
-        <button onClick={fetchInbox} className="ml-4 text-sm text-blue-500 underline">
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div className="border rounded p-2 max-h-[70vh] overflow-y-auto">
-          <h3 className="font-semibold mb-2">Inbox</h3>
-          {emails.map((email) => (
+      {/* Email List */}
+      <div className="w-2/5 border-r overflow-y-auto p-4">
+        <h2 className="font-bold text-lg mb-4">{folder}</h2>
+        {loading ? (
+          <p>Loading...</p>
+        ) : emails.length === 0 ? (
+          <p>No emails found.</p>
+        ) : (
+          emails.map((email) => (
             <div
               key={email.uid}
-              className="cursor-pointer hover:bg-gray-100 p-2 border-b"
-              onClick={() => setSelectedEmail(email)}
+              className="cursor-pointer border-b py-3 hover:bg-gray-100 dark:hover:bg-gray-800"
+              onClick={() => handleSelectEmail(email.uid)}
             >
-              <p className="font-medium">{email.subject || '(No Subject)'}</p>
-              <p className="text-sm text-gray-500">{email.from}</p>
+              <p className="font-semibold text-sm truncate">{email.subject}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{email.from}</p>
               <p className="text-xs text-gray-400">{email.date}</p>
+              <p className="text-sm mt-1 text-gray-700 dark:text-gray-300 truncate">{email.body}</p>
             </div>
-          ))}
-        </div>
-
-        <div className="col-span-2 border rounded p-4 max-h-[70vh] overflow-y-auto">
-          {selectedEmail ? (
-            <>
-              <h3 className="text-lg font-bold">{selectedEmail.subject || '(No Subject)'}</h3>
-              <p className="text-sm text-gray-500 mb-2">From: {selectedEmail.from}</p>
-              <div className="mb-4 whitespace-pre-wrap">{selectedEmail.body}</div>
-              <button
-                onClick={() => handleDelete(selectedEmail.uid)}
-                className="text-sm text-red-500 underline"
-              >
-                Delete
-              </button>
-            </>
-          ) : (
-            <p>Select an email to view it.</p>
-          )}
-        </div>
+          ))
+        )}
       </div>
 
-      {composeMode && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded shadow-md w-96">
-            <h3 className="text-lg font-bold mb-2">Compose Email</h3>
-            <input
-              type="text"
-              placeholder="To"
-              value={form.to}
-              onChange={(e) => setForm({ ...form, to: e.target.value })}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              type="text"
-              placeholder="Subject"
-              value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <textarea
-              placeholder="Body"
-              value={form.body}
-              onChange={(e) => setForm({ ...form, body: e.target.value })}
-              className="w-full h-32 p-2 border rounded"
-            />
-            <div className="flex justify-end mt-3">
-              <button onClick={handleSend} className="bg-green-600 text-white px-3 py-1 rounded mr-2">
-                Send
-              </button>
-              <button onClick={() => setComposeMode(false)} className="text-gray-600">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Email Viewer */}
+      <div className="w-3/6 p-6 overflow-y-auto">
+        {selectedEmail ? (
+          <>
+            <h2 className="text-xl font-bold mb-2">{selectedEmail.subject}</h2>
+            <p className="text-sm text-gray-500 mb-1">From: {selectedEmail.from}</p>
+            <p className="text-sm text-gray-500 mb-4">Date: {selectedEmail.date}</p>
+            <div className="whitespace-pre-wrap text-sm">{selectedEmail.body}</div>
+          </>
+        ) : (
+          <p className="text-gray-500">Select an email to view it.</p>
+        )}
+      </div>
     </div>
   );
 }
