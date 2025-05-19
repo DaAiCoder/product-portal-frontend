@@ -6,14 +6,17 @@ function ChatWidget() {
   const messagesEndRef = useRef(null);
 
   const sendMessage = () => {
-    if (!input.trim()) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
     const newMsg = {
-      text: input,
+      text: trimmed,
       timestamp: new Date().toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
       }),
     };
+
     setMessages((prev) => [...prev, newMsg]);
     setInput('');
   };
@@ -28,17 +31,21 @@ function ChatWidget() {
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex flex-col h-full">
       {/* Message list */}
       <div className="flex-1 overflow-y-auto space-y-2 mb-2 pr-1">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className="bg-gray-100 dark:bg-gray-700 p-2 rounded max-w-[85%] break-words"
-          >
-            <p className="text-sm whitespace-pre-wrap text-black dark:text-white">
-              {msg.text}
-            </p>
-            <p className="text-xs text-right text-gray-500 mt-1">{msg.timestamp}</p>
-          </div>
-        ))}
+        {messages.map((msg, i) =>
+          msg?.text ? (
+            <div
+              key={i}
+              className="bg-gray-100 dark:bg-gray-700 p-2 rounded max-w-[85%] break-words"
+            >
+              <p className="text-sm whitespace-pre-wrap text-black dark:text-white">
+                {msg.text}
+              </p>
+              <p className="text-xs text-right text-gray-500 mt-1">
+                {msg.timestamp || ''}
+              </p>
+            </div>
+          ) : null
+        )}
         <div ref={messagesEndRef} />
       </div>
 
