@@ -1,9 +1,10 @@
+// File: src/components/widgets/configs/chat.js
 import ChatWidget from '../ChatWidget';
 
-export default {
+const chat = {
   id: 'chat',
   defaultTitle: 'Chat',
-  defaultW: 6,
-  defaultH: 8,
-  Component: ChatWidget.Component,
+  Component: ChatWidget,
 };
+
+export default chat;
