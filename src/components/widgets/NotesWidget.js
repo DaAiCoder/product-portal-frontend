@@ -5,7 +5,9 @@ import {
   updateNote,
   deleteNote,
 } from '../../services/notesService';
-import EmojiButton from '../../EmojiButton';
+import EmojiButton from '../EmojiButton';
+
+
 
 
 function NotesWidget() {
