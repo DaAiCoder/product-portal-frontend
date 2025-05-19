@@ -28,7 +28,7 @@ export default function EmojiButton({ onSelect, position = 'top-full right-0' })
 
       {open && (
         <div
-          className={`absolute z-50 ${position} mt-2 max-w-[320px]`}
+          className={`absolute z-50 ${position} mt-2 max-w-[320px] min-h-[300px]`}
         >
           <EmojiPicker
             theme="auto"
@@ -36,12 +36,13 @@ export default function EmojiButton({ onSelect, position = 'top-full right-0' })
               onSelect(emojiData.emoji);
               setOpen(false);
             }}
-            searchDisabled={false}
-            skinTonesDisabled={false}
             lazyLoadEmojis={true}
+            skinTonesDisabled={false}
+            searchDisabled={false}
           />
         </div>
       )}
     </div>
   );
 }
+
