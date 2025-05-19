@@ -15,10 +15,16 @@ export default function EmailDashboard() {
   }, []);
 
   const fetchAccounts = async () => {
-    const res = await axios.get('/api/email/accounts');
-    setAccounts(res.data);
-    if (res.data.length > 0) {
-      setSelectedAccountId(res.data[0].id);
+    try {
+      const res = await axios.get('/api/email/accounts');
+      const data = Array.isArray(res.data) ? res.data : [];
+      setAccounts(data);
+      if (data.length > 0) {
+        setSelectedAccountId(data[0].id);
+      }
+    } catch (err) {
+      console.error('Failed to fetch email accounts:', err);
+      setAccounts([]); // fallback to empty
     }
   };
 
@@ -28,26 +34,40 @@ export default function EmailDashboard() {
 
   const fetchInbox = async () => {
     setRefreshing(true);
-    const res = await axios.get(`/api/email/inbox?account_id=${selectedAccountId}`);
-    setEmails(res.data);
+    try {
+      const res = await axios.get(`/api/email/inbox?account_id=${selectedAccountId}`);
+      setEmails(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch inbox:', err);
+      setEmails([]);
+    }
     setRefreshing(false);
   };
 
   const handleSend = async () => {
-    await axios.post('/api/email/send', {
-      account_id: selectedAccountId,
-      to: form.to,
-      subject: form.subject,
-      body: form.body
-    });
-    alert('Email sent!');
-    setComposeMode(false);
-    setForm({ to: '', subject: '', body: '' });
+    try {
+      await axios.post('/api/email/send', {
+        account_id: selectedAccountId,
+        to: form.to,
+        subject: form.subject,
+        body: form.body,
+      });
+      alert('Email sent!');
+      setComposeMode(false);
+      setForm({ to: '', subject: '', body: '' });
+    } catch (err) {
+      alert('Failed to send email.');
+      console.error(err);
+    }
   };
 
   const handleDelete = async (uid) => {
-    await axios.delete(`/api/email/message/${uid}?account_id=${selectedAccountId}`);
-    fetchInbox();
+    try {
+      await axios.delete(`/api/email/message/${uid}?account_id=${selectedAccountId}`);
+      fetchInbox();
+    } catch (err) {
+      console.error('Failed to delete email:', err);
+    }
   };
 
   return (
