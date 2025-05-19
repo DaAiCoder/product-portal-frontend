@@ -28,7 +28,8 @@ export default function EmojiButton({ onSelect, position = 'top-full right-0' })
 
       {open && (
         <div
-          className={`absolute z-50 ${position} mt-2 max-w-[320px] min-h-[300px]`}
+          className={`absolute z-50 ${position} mt-2 max-w-[320px] min-w-[260px] min-h-[350px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-md overflow-auto`}
+          style={{ fontFamily: 'inherit' }}
         >
           <EmojiPicker
             theme="auto"
@@ -36,13 +37,13 @@ export default function EmojiButton({ onSelect, position = 'top-full right-0' })
               onSelect(emojiData.emoji);
               setOpen(false);
             }}
-            lazyLoadEmojis={true}
+            lazyLoadEmojis={false}
             skinTonesDisabled={false}
             searchDisabled={false}
+            width="100%"
           />
         </div>
       )}
     </div>
   );
 }
-
