@@ -4,16 +4,24 @@ function ThemeToggle() {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('portal-theme') || 'light';
-    setTheme(storedTheme);
-    document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+    const savedTheme = localStorage.getItem('portal-theme') || 'light';
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
   }, []);
+
+  const applyTheme = (theme) => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('portal-theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    applyTheme(newTheme);
   };
 
   return (
