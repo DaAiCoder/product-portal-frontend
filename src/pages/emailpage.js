@@ -69,6 +69,21 @@ export default function EmailDashboard() {
             {f}
           </div>
         ))}
+
+        <div className="mt-8">
+          <h3 className="font-semibold mb-2 text-sm text-gray-500">Accounts</h3>
+          <select
+            className="w-full p-2 border rounded text-sm"
+            value={selectedAccountId || ''}
+            onChange={(e) => setSelectedAccountId(e.target.value)}
+          >
+            {accounts.map((acc) => (
+              <option key={acc.id} value={acc.id}>
+                {acc.label || acc.email_address}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Email List */}
