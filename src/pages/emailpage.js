@@ -8,6 +8,17 @@ export default function EmailDashboard() {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [folder, setFolder] = useState("INBOX");
   const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newAccount, setNewAccount] = useState({
+    email_address: '',
+    imap_host: '',
+    imap_port: 993,
+    smtp_host: '',
+    smtp_port: 465,
+    password: '',
+    label: '',
+    use_ssl: true,
+  });
 
   useEffect(() => {
     fetchAccounts();
@@ -50,9 +61,31 @@ export default function EmailDashboard() {
     }
   };
 
+  const handleAddAccount = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/api/email/accounts', newAccount);
+      setShowAddForm(false);
+      setNewAccount({
+        email_address: '',
+        imap_host: '',
+        imap_port: 993,
+        smtp_host: '',
+        smtp_port: 465,
+        password: '',
+        label: '',
+        use_ssl: true,
+      });
+      fetchAccounts();
+    } catch (err) {
+      alert('Failed to add account.');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex h-[85vh]">
-      {/* Folders */}
+      {/* Sidebar */}
       <div className="w-1/6 border-r p-4 bg-gray-50 dark:bg-gray-900">
         <h2 className="font-bold text-lg mb-4">Folders</h2>
         {["INBOX", "Sent", "Drafts", "Trash"].map((f) => (
@@ -70,6 +103,7 @@ export default function EmailDashboard() {
           </div>
         ))}
 
+        {/* Account Dropdown */}
         <div className="mt-8">
           <h3 className="font-semibold mb-2 text-sm text-gray-500">Accounts</h3>
           <select
@@ -84,6 +118,81 @@ export default function EmailDashboard() {
             ))}
           </select>
         </div>
+
+        {/* Add Account Button */}
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="mt-4 text-blue-600 text-sm underline"
+        >
+          {showAddForm ? 'Cancel' : '➕ Add Account'}
+        </button>
+
+        {/* Add Account Form */}
+        {showAddForm && (
+          <form className="mt-3 space-y-2 text-sm" onSubmit={handleAddAccount}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={newAccount.email_address}
+              onChange={(e) => setNewAccount({ ...newAccount, email_address: e.target.value })}
+              className="w-full p-1 border rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="IMAP Host"
+              value={newAccount.imap_host}
+              onChange={(e) => setNewAccount({ ...newAccount, imap_host: e.target.value })}
+              className="w-full p-1 border rounded"
+              required
+            />
+            <input
+              type="number"
+              placeholder="IMAP Port"
+              value={newAccount.imap_port}
+              onChange={(e) => setNewAccount({ ...newAccount, imap_port: parseInt(e.target.value) })}
+              className="w-full p-1 border rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="SMTP Host"
+              value={newAccount.smtp_host}
+              onChange={(e) => setNewAccount({ ...newAccount, smtp_host: e.target.value })}
+              className="w-full p-1 border rounded"
+              required
+            />
+            <input
+              type="number"
+              placeholder="SMTP Port"
+              value={newAccount.smtp_port}
+              onChange={(e) => setNewAccount({ ...newAccount, smtp_port: parseInt(e.target.value) })}
+              className="w-full p-1 border rounded"
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={newAccount.password}
+              onChange={(e) => setNewAccount({ ...newAccount, password: e.target.value })}
+              className="w-full p-1 border rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Label (optional)"
+              value={newAccount.label}
+              onChange={(e) => setNewAccount({ ...newAccount, label: e.target.value })}
+              className="w-full p-1 border rounded"
+            />
+            <button
+              type="submit"
+              className="w-full bg-green-600 text-white py-1 rounded"
+            >
+              Save
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Email List */}
@@ -125,3 +234,4 @@ export default function EmailDashboard() {
     </div>
   );
 }
+
