@@ -1,34 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const PROVIDERS = {
-  gmail: {
-    label: 'Gmail',
-    imap_host: 'imap.gmail.com',
+const OAUTH_PROVIDERS = [
+  { key: 'google', label: 'Gmail' },
+  { key: 'outlook', label: 'Outlook / Hotmail' },
+  { key: 'yahoo', label: 'Yahoo' },
+  { key: 'aol', label: 'AOL' },
+  { key: 'icloud', label: 'iCloud' }
+];
+
+const DOMAIN_LOOKUP = {
+  "protonmail.com": {
+    imap_host: "imap.protonmail.com",
     imap_port: 993,
-    smtp_host: 'smtp.gmail.com',
+    smtp_host: "smtp.protonmail.com",
     smtp_port: 465
   },
-  yahoo: {
-    label: 'Yahoo',
-    imap_host: 'imap.mail.yahoo.com',
+  "zoho.com": {
+    imap_host: "imap.zoho.com",
     imap_port: 993,
-    smtp_host: 'smtp.mail.yahoo.com',
+    smtp_host: "smtp.zoho.com",
     smtp_port: 465
   },
-  outlook: {
-    label: 'Outlook / Hotmail',
-    imap_host: 'imap-mail.outlook.com',
+  "icloud.com": {
+    imap_host: "imap.mail.me.com",
     imap_port: 993,
-    smtp_host: 'smtp-mail.outlook.com',
+    smtp_host: "smtp.mail.me.com",
     smtp_port: 587
-  },
-  custom: {
-    label: 'Other / Manual',
-    imap_host: '',
-    imap_port: 993,
-    smtp_host: '',
-    smtp_port: 465
   }
 };
 
@@ -40,9 +38,8 @@ export default function EmailDashboard() {
   const [folder, setFolder] = useState("INBOX");
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [provider, setProvider] = useState("gmail");
-
-  const [form, setForm] = useState({
+  const [activeTab, setActiveTab] = useState("google");
+  const [manualForm, setManualForm] = useState({
     email_address: '',
     imap_host: '',
     imap_port: 993,
@@ -50,23 +47,16 @@ export default function EmailDashboard() {
     smtp_port: 465,
     password: '',
     label: '',
-    use_ssl: true,
+    use_ssl: true
   });
 
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
+  useEffect(() => { fetchAccounts(); }, []);
 
   const fetchAccounts = async () => {
-    try {
-      const res = await axios.get('/api/email/accounts');
-      const data = Array.isArray(res.data) ? res.data : [];
-      setAccounts(data);
-      if (data.length > 0) {
-        setSelectedAccountId(data[0].id);
-      }
-    } catch (err) {
-      console.error('Error loading accounts', err);
+    const res = await axios.get('/api/email/accounts');
+    setAccounts(res.data);
+    if (res.data.length > 0) {
+      setSelectedAccountId(res.data[0].id);
     }
   };
 
@@ -76,55 +66,48 @@ export default function EmailDashboard() {
 
   const fetchInbox = async () => {
     setLoading(true);
-    try {
-      const res = await axios.get(`/api/email/inbox?account_id=${selectedAccountId}&folder=${folder}`);
-      setEmails(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error('Failed to fetch inbox:', err);
-    }
+    const res = await axios.get(`/api/email/inbox?account_id=${selectedAccountId}&folder=${folder}`);
+    setEmails(res.data);
     setLoading(false);
   };
 
   const handleSelectEmail = async (uid) => {
-    try {
-      const res = await axios.get(`/api/email/message/${uid}?account_id=${selectedAccountId}&folder=${folder}`);
-      setSelectedEmail(res.data);
-    } catch (err) {
-      console.error('Failed to fetch message:', err);
-    }
+    const res = await axios.get(`/api/email/message/${uid}?account_id=${selectedAccountId}&folder=${folder}`);
+    setSelectedEmail(res.data);
   };
 
-  const handleProviderSelect = (key) => {
-    setProvider(key);
-    setForm({
-      ...form,
-      imap_host: PROVIDERS[key].imap_host,
-      imap_port: PROVIDERS[key].imap_port,
-      smtp_host: PROVIDERS[key].smtp_host,
-      smtp_port: PROVIDERS[key].smtp_port
-    });
+  const handleManualEmail = (email) => {
+    const domain = email.split("@")[1];
+    const match = DOMAIN_LOOKUP[domain];
+    setManualForm((prev) => ({
+      ...prev,
+      email_address: email,
+      imap_host: match?.imap_host || '',
+      imap_port: match?.imap_port || 993,
+      smtp_host: match?.smtp_host || '',
+      smtp_port: match?.smtp_port || 465
+    }));
   };
 
-  const handleSubmitAccount = async (e) => {
+  const handleManualSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post('/api/email/accounts', form);
-      setShowModal(false);
-      fetchAccounts();
-      setForm({
-        email_address: '',
-        imap_host: '',
-        imap_port: 993,
-        smtp_host: '',
-        smtp_port: 465,
-        password: '',
-        label: '',
-        use_ssl: true,
-      });
-    } catch (err) {
-      alert('Failed to add account');
-      console.error(err);
-    }
+    await axios.post('/api/email/accounts', manualForm);
+    setShowModal(false);
+    setManualForm({
+      email_address: '',
+      imap_host: '',
+      imap_port: 993,
+      smtp_host: '',
+      smtp_port: 465,
+      password: '',
+      label: '',
+      use_ssl: true
+    });
+    fetchAccounts();
+  };
+
+  const triggerOAuth = (provider) => {
+    window.location.href = `/auth/${provider}`;
   };
 
   return (
@@ -138,16 +121,12 @@ export default function EmailDashboard() {
             className={`cursor-pointer p-2 rounded hover:bg-blue-100 dark:hover:bg-gray-700 ${
               folder === f ? "bg-blue-200 dark:bg-gray-800 font-semibold" : ""
             }`}
-            onClick={() => {
-              setSelectedEmail(null);
-              setFolder(f);
-            }}
+            onClick={() => { setSelectedEmail(null); setFolder(f); }}
           >
             {f}
           </div>
         ))}
 
-        {/* Account Selector */}
         <div className="mt-8">
           <h3 className="font-semibold mb-2 text-sm text-gray-500">Accounts</h3>
           <select
@@ -163,7 +142,6 @@ export default function EmailDashboard() {
           </select>
         </div>
 
-        {/* Add Account Button */}
         <button
           onClick={() => setShowModal(true)}
           className="mt-4 text-blue-600 text-sm underline"
@@ -177,8 +155,6 @@ export default function EmailDashboard() {
         <h2 className="font-bold text-lg mb-4">{folder}</h2>
         {loading ? (
           <p>Loading...</p>
-        ) : emails.length === 0 ? (
-          <p>No emails found.</p>
         ) : (
           emails.map((email) => (
             <div
@@ -187,9 +163,9 @@ export default function EmailDashboard() {
               onClick={() => handleSelectEmail(email.uid)}
             >
               <p className="font-semibold text-sm truncate">{email.subject}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{email.from}</p>
+              <p className="text-sm text-gray-600 truncate">{email.from}</p>
               <p className="text-xs text-gray-400">{email.date}</p>
-              <p className="text-sm mt-1 text-gray-700 dark:text-gray-300 truncate">{email.body}</p>
+              <p className="text-sm mt-1 text-gray-700 truncate">{email.body}</p>
             </div>
           ))
         )}
@@ -212,91 +188,93 @@ export default function EmailDashboard() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded w-96 shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Add Email Account</h3>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded max-w-2xl w-full shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Connect Email Account</h3>
 
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {Object.keys(PROVIDERS).map((key) => (
+            <div className="flex space-x-2 mb-4">
+              {OAUTH_PROVIDERS.map((p) => (
                 <button
-                  key={key}
-                  onClick={() => handleProviderSelect(key)}
-                  className={`p-2 border rounded text-sm ${
-                    provider === key ? "bg-blue-500 text-white" : "bg-gray-100 dark:bg-gray-700"
+                  key={p.key}
+                  className={`px-4 py-2 rounded border text-sm ${
+                    activeTab === p.key ? 'bg-blue-600 text-white' : 'bg-gray-100'
                   }`}
+                  onClick={() => triggerOAuth(p.key)}
                 >
-                  {PROVIDERS[key].label}
+                  Sign in with {p.label}
                 </button>
               ))}
+              <button
+                className={`px-4 py-2 rounded border text-sm ${
+                  activeTab === "manual" ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                }`}
+                onClick={() => setActiveTab("manual")}
+              >
+                Other / Manual
+              </button>
             </div>
 
-            <form onSubmit={handleSubmitAccount} className="space-y-2 text-sm">
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={form.email_address}
-                onChange={(e) => setForm({ ...form, email_address: e.target.value })}
-                required
-                className="w-full p-2 border rounded"
-              />
-              {provider === "custom" && (
-                <>
-                  <input
-                    type="text"
-                    placeholder="IMAP Host"
-                    value={form.imap_host}
-                    onChange={(e) => setForm({ ...form, imap_host: e.target.value })}
-                    className="w-full p-2 border rounded"
-                  />
-                  <input
-                    type="number"
-                    placeholder="IMAP Port"
-                    value={form.imap_port}
-                    onChange={(e) => setForm({ ...form, imap_port: parseInt(e.target.value) })}
-                    className="w-full p-2 border rounded"
-                  />
-                  <input
-                    type="text"
-                    placeholder="SMTP Host"
-                    value={form.smtp_host}
-                    onChange={(e) => setForm({ ...form, smtp_host: e.target.value })}
-                    className="w-full p-2 border rounded"
-                  />
-                  <input
-                    type="number"
-                    placeholder="SMTP Port"
-                    value={form.smtp_port}
-                    onChange={(e) => setForm({ ...form, smtp_port: parseInt(e.target.value) })}
-                    className="w-full p-2 border rounded"
-                  />
-                </>
-              )}
-              <input
-                type="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="text"
-                placeholder="Label (optional)"
-                value={form.label}
-                onChange={(e) => setForm({ ...form, label: e.target.value })}
-                className="w-full p-2 border rounded"
-              />
-              <div className="flex justify-end space-x-2 mt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-1 text-sm border rounded"
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="bg-blue-600 text-white px-4 py-1 text-sm rounded">
-                  Save
-                </button>
-              </div>
-            </form>
+            {activeTab === "manual" && (
+              <form onSubmit={handleManualSubmit} className="grid grid-cols-2 gap-4 text-sm">
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  value={manualForm.email_address}
+                  onChange={(e) => handleManualEmail(e.target.value)}
+                  required
+                  className="col-span-2 p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="IMAP Host"
+                  value={manualForm.imap_host}
+                  onChange={(e) => setManualForm({ ...manualForm, imap_host: e.target.value })}
+                  className="p-2 border rounded"
+                />
+                <input
+                  type="number"
+                  placeholder="IMAP Port"
+                  value={manualForm.imap_port}
+                  onChange={(e) => setManualForm({ ...manualForm, imap_port: parseInt(e.target.value) })}
+                  className="p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="SMTP Host"
+                  value={manualForm.smtp_host}
+                  onChange={(e) => setManualForm({ ...manualForm, smtp_host: e.target.value })}
+                  className="p-2 border rounded"
+                />
+                <input
+                  type="number"
+                  placeholder="SMTP Port"
+                  value={manualForm.smtp_port}
+                  onChange={(e) => setManualForm({ ...manualForm, smtp_port: parseInt(e.target.value) })}
+                  className="p-2 border rounded"
+                />
+                <input
+                  type="password"
+                  placeholder="Password (App Password)"
+                  value={manualForm.password}
+                  onChange={(e) => setManualForm({ ...manualForm, password: e.target.value })}
+                  className="col-span-2 p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Label (optional)"
+                  value={manualForm.label}
+                  onChange={(e) => setManualForm({ ...manualForm, label: e.target.value })}
+                  className="col-span-2 p-2 border rounded"
+                />
+                <div className="col-span-2 flex justify-end space-x-2 mt-4">
+                  <button type="button" onClick={() => setShowModal(false)} className="px-4 py-1 border rounded">
+                    Cancel
+                  </button>
+                  <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">
+                    Save
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
