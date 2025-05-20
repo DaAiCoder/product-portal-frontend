@@ -1,3 +1,4 @@
+// FULL FILE: emailpage.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -54,9 +55,10 @@ export default function EmailDashboard() {
 
   const fetchAccounts = async () => {
     const res = await axios.get('/api/email/accounts');
-    setAccounts(res.data);
-    if (res.data.length > 0) {
-      setSelectedAccountId(res.data[0].id);
+    const data = Array.isArray(res.data) ? res.data : [];
+    setAccounts(data);
+    if (data.length > 0) {
+      setSelectedAccountId(data[0].id);
     }
   };
 
@@ -134,7 +136,7 @@ export default function EmailDashboard() {
             value={selectedAccountId || ''}
             onChange={(e) => setSelectedAccountId(e.target.value)}
           >
-            {accounts.map((acc) => (
+            {Array.isArray(accounts) && accounts.map((acc) => (
               <option key={acc.id} value={acc.id}>
                 {acc.label || acc.email_address}
               </option>
