@@ -4,7 +4,8 @@
 
 import React, { useState } from 'react';
 import { FaInbox, FaPaperPlane, FaFileAlt, FaTrash, FaGoogle, FaYahoo, FaEnvelope } from 'react-icons/fa';
-import EmailWidget from '@/components/widgets/EmailWidget';
+import EmailWidget from '../components/widgets/EmailWidget';
+
 
 const EmailPage = () => {
   const [activeFolder, setActiveFolder] = useState('Inbox');
