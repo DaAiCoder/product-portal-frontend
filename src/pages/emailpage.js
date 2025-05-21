@@ -109,7 +109,22 @@ export default function EmailDashboard() {
   };
 
   const triggerOAuth = (provider) => {
-    window.location.href = `/auth/${provider}`;
+    const width = 500;
+    const height = 600;
+    const left = (window.innerWidth - width) / 2;
+    const top = (window.innerHeight - height) / 2;
+    const popup = window.open(
+      `/auth/${provider}/login`,
+      `${provider}Login`,
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    const timer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(timer);
+        fetchAccounts(); // Refresh account list after auth
+      }
+    }, 1000);
   };
 
   return (
