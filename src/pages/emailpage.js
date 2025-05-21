@@ -1,131 +1,70 @@
-// components/pages/emailpage.js
-import React, { useState, useEffect } from 'react';
-import { MdDelete, MdOutlineAdd, MdOutlineEmail } from 'react-icons/md';
-import { FaGoogle, FaYahoo, FaEnvelope } from 'react-icons/fa';
-import { PiMicrosoftOutlookLogo } from 'react-icons/pi';
+
+// ✅ emailpage.js — Yahoo-style UI with folders + Add Account modal (Google login linked)
+import React, { useEffect, useState } from 'react';
+import EmailWidget from '../components/widgets/EmailWidget';
+import { FaInbox, FaPaperPlane, FaRegFileAlt, FaTrash, FaBug, FaPlus, FaGoogle, FaYahoo, FaMicrosoft } from 'react-icons/fa';
 
 const EmailPage = () => {
-  const [accounts, setAccounts] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupTab, setPopupTab] = useState('providers');
+  const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    fetchAccounts();
-    window.addEventListener('message', receiveMessage, false);
-    return () => window.removeEventListener('message', receiveMessage);
-  }, []);
-
-  const receiveMessage = (event) => {
-    if (event.data && event.data.type === 'oauth-success') {
-      const { token, email } = event.data;
-      localStorage.setItem('email_jwt', token);
-      localStorage.setItem('user_email', email);
-      fetchAccounts();
-      setShowPopup(false);
+  const openPopup = (provider) => {
+    if (provider === 'google') {
+      const width = 600;
+      const height = 700;
+      const left = (window.innerWidth - width) / 2;
+      const top = (window.innerHeight - height) / 2;
+      window.open(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/auth/google/login`,
+        'GoogleLogin',
+        `width=${width},height=${height},top=${top},left=${left}`
+      );
     }
-  };
-
-  const fetchAccounts = async () => {
-    const token = localStorage.getItem('email_jwt');
-    if (!token) return;
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/email/accounts`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      setAccounts(data.accounts || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const removeAccount = async (accountId) => {
-    const token = localStorage.getItem('email_jwt');
-    if (!token) return;
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/email/remove/${accountId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      fetchAccounts();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const triggerOAuth = (provider) => {
-    const popup = window.open(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/${provider}/login`, 'oauth', 'width=500,height=600');
-    const timer = setInterval(() => {
-      if (popup.closed) clearInterval(timer);
-    }, 500);
+    // Add logic for other providers later (Yahoo, Outlook, etc.)
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Email Accounts</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {accounts.map((acc, i) => (
-          <div key={i} className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded shadow">
-            <div className="flex items-center space-x-3">
-              <MdOutlineEmail size={24} />
-              <span>{acc.email}</span>
-            </div>
-            <button onClick={() => removeAccount(acc.id)} className="text-red-500 hover:text-red-700">
-              <MdDelete size={20} />
-            </button>
-          </div>
-        ))}
-        <button onClick={() => setShowPopup(true)} className="border border-dashed p-4 flex items-center justify-center rounded hover:bg-gray-100 dark:hover:bg-gray-700">
-          <MdOutlineAdd size={24} className="mr-2" />
-          Add Account
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar folders */}
+      <aside className="w-60 bg-white shadow p-4">
+        <h2 className="text-xl font-bold mb-4">Folders</h2>
+        <ul className="space-y-3 text-gray-700">
+          <li className="flex items-center gap-2"><FaInbox /> Inbox</li>
+          <li className="flex items-center gap-2"><FaPaperPlane /> Sent</li>
+          <li className="flex items-center gap-2"><FaRegFileAlt /> Drafts</li>
+          <li className="flex items-center gap-2"><FaTrash /> Trash</li>
+          <li className="flex items-center gap-2"><FaBug /> Spam</li>
+        </ul>
+        <button onClick={() => setShowModal(true)} className="mt-6 w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
+          <FaPlus /> Add Account
         </button>
-      </div>
+      </aside>
 
-      {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-[95%] max-w-2xl max-h-[95%] overflow-auto">
-            <div className="flex justify-between items-center border-b pb-2 mb-4">
-              <h2 className="text-lg font-semibold">Add Email Account</h2>
-              <button onClick={() => setShowPopup(false)} className="text-gray-500 hover:text-gray-800 dark:hover:text-white">✕</button>
+      {/* Email Panel */}
+      <main className="flex-1 p-6 overflow-y-auto">
+        <h1 className="text-2xl font-semibold mb-4">Email Accounts</h1>
+        <EmailWidget />
+      </main>
+
+      {/* Add Account Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative">
+            <button onClick={() => setShowModal(false)} className="absolute top-2 right-4 text-xl font-bold text-gray-500 hover:text-black">&times;</button>
+            <h2 className="text-xl font-semibold mb-4">Add Email Account</h2>
+            <div className="space-y-4">
+              <button onClick={() => openPopup('google')} className="w-full flex items-center gap-3 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                <FaGoogle /> Sign in with Google
+              </button>
+              <button className="w-full flex items-center gap-3 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                <FaYahoo /> Sign in with Yahoo
+              </button>
+              <button className="w-full flex items-center gap-3 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">
+                <FaMicrosoft /> Sign in with Outlook
+              </button>
+              <button className="w-full flex items-center gap-3 bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded">
+                Other / Manual Setup
+              </button>
             </div>
-            <div className="flex space-x-4 mb-4">
-              <button onClick={() => setPopupTab('providers')} className={`px-4 py-2 rounded ${popupTab === 'providers' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>Popular</button>
-              <button onClick={() => setPopupTab('manual')} className={`px-4 py-2 rounded ${popupTab === 'manual' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>Manual</button>
-            </div>
-
-            {popupTab === 'providers' && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <button onClick={() => triggerOAuth('google')} className="flex items-center space-x-2 p-3 border rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-                  <FaGoogle size={20} className="text-red-500" />
-                  <span>Gmail</span>
-                </button>
-                <button disabled className="flex items-center space-x-2 p-3 border rounded opacity-50 cursor-not-allowed">
-  <FaEnvelope size={20} className="text-blue-600" />
-  <span>Hotmail</span>
-</button>
-
-                <button disabled className="flex items-center space-x-2 p-3 border rounded opacity-50 cursor-not-allowed">
-                  <FaHotmail size={20} className="text-blue-600" />
-                  <span>Hotmail</span>
-                </button>
-                <button disabled className="flex items-center space-x-2 p-3 border rounded opacity-50 cursor-not-allowed">
-                  <PiMicrosoftOutlookLogo size={20} className="text-blue-500" />
-                  <span>Outlook</span>
-                </button>
-              </div>
-            )}
-
-            {popupTab === 'manual' && (
-              <EmailWidget onComplete={() => {
-                setPopupTab('providers');
-                setShowPopup(false);
-                fetchAccounts();
-              }} />
-            )}
           </div>
         </div>
       )}
