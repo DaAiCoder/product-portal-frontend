@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { MdDelete, MdOutlineAdd, MdOutlineEmail } from 'react-icons/md';
 import { FaGoogle, FaYahoo, FaHotmail, FaEnvelope } from 'react-icons/fa';
 import { PiMicrosoftOutlookLogo } from 'react-icons/pi';
-import EmailWidget from '../widgets/EmailWidget';
+import EmailWidget from '@/components/widgets/EmailWidget';
 
 const EmailPage = () => {
   const [accounts, setAccounts] = useState([]);
