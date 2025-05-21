@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { FaGoogle, FaYahoo, FaMicrosoft, FaPlus } from 'react-icons/fa';
-import '@/styles/emailpage.css';
+import '../styles/globals.css'
 
 const EmailWidget = dynamic(() => import('@/components/widgets/EmailWidget'), { ssr: false });
 
