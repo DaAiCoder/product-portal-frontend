@@ -1,7 +1,7 @@
 // components/pages/emailpage.js
 import React, { useState, useEffect } from 'react';
 import { MdDelete, MdOutlineAdd, MdOutlineEmail } from 'react-icons/md';
-import { FaGoogle, FaYahoo, FaHotmail, FaEnvelope } from 'react-icons/fa';
+import { FaGoogle, FaYahoo, FaEnvelope } from 'react-icons/fa';
 import { PiMicrosoftOutlookLogo } from 'react-icons/pi';
 
 const EmailPage = () => {
@@ -104,9 +104,10 @@ const EmailPage = () => {
                   <span>Gmail</span>
                 </button>
                 <button disabled className="flex items-center space-x-2 p-3 border rounded opacity-50 cursor-not-allowed">
-                  <FaYahoo size={20} className="text-purple-600" />
-                  <span>Yahoo</span>
-                </button>
+  <FaEnvelope size={20} className="text-blue-600" />
+  <span>Hotmail</span>
+</button>
+
                 <button disabled className="flex items-center space-x-2 p-3 border rounded opacity-50 cursor-not-allowed">
                   <FaHotmail size={20} className="text-blue-600" />
                   <span>Hotmail</span>
