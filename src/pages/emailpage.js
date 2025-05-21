@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { FaGoogle, FaYahoo, FaMicrosoft, FaPlus } from 'react-icons/fa';
 import '../styles/globals.css'
 
-const EmailWidget = dynamic(() => import('@/components/widgets/EmailWidget'), { ssr: false });
+const EmailWidget = dynamic(() => import('../components/widgets/EmailWidget'), { ssr: false });
 
 const EmailPage = () => {
   const [showModal, setShowModal] = useState(false);
