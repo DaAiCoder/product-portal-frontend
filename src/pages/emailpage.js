@@ -10,6 +10,7 @@ const EmailPage = () => {
     try {
       const res = await fetch('https://product-portal-backend-xo2c.onrender.com/api/email/accounts');
       const data = await res.json();
+      console.log("Fetched accounts:", data);
       setAccounts(data);
     } catch (err) {
       console.error('Failed to fetch email accounts:', err);
@@ -110,7 +111,7 @@ const EmailPage = () => {
       </div>
       <div className="flex-1 p-6 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Connected Accounts</h2>
-        {accounts.length === 0 ? (
+        {!Array.isArray(accounts) || accounts.length === 0 ? (
           <p className="text-gray-500">No email accounts connected.</p>
         ) : (
           <ul className="list-disc pl-5 space-y-1">
