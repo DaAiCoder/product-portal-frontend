@@ -1,14 +1,16 @@
 import React from 'react';
 
-const EmailWidget = ({ emailAccounts = [], onRefresh = () => {} }) => {
+const EmailWidget = ({ emailAccounts = [], account, onRefresh = () => {} }) => {
+  const emails = emailAccounts.length ? emailAccounts : account ? [account] : [];
+
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded shadow-md">
       <h2 className="text-lg font-semibold mb-2">📧 Email Accounts</h2>
-      {emailAccounts.length === 0 ? (
+      {emails.length === 0 ? (
         <p className="text-sm text-gray-500">No accounts connected.</p>
       ) : (
         <ul className="space-y-1">
-          {emailAccounts.map((email, index) => (
+          {emails.map((email, index) => (
             <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
               {email}
             </li>

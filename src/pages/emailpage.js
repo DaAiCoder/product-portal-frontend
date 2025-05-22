@@ -89,7 +89,7 @@ const EmailPage = () => {
       </div>
       <div className="email-main-content">
         {accounts.map((account, i) => (
-          <EmailWidget key={i} account={account} />
+          <EmailWidget key={i} account={account} onRefresh={fetchAccounts} />
         ))}
       </div>
       {showModal && <AccountPopup />}
