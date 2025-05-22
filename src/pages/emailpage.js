@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { FaGoogle, FaYahoo, FaMicrosoft, FaPlus } from 'react-icons/fa';
-import '../styles/globals.css'
-
-const EmailWidget = dynamic(() => import('../components/widgets/EmailWidget'), { ssr: false });
+import '../styles/globals.css';
 
 const EmailPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -88,9 +85,18 @@ const EmailPage = () => {
         <FolderList />
       </div>
       <div className="email-main-content">
-        {accounts.map((account, i) => (
-          <EmailWidget key={i} account={account} onRefresh={fetchAccounts} />
-        ))}
+        <h2 className="text-lg font-semibold mb-3">Connected Accounts</h2>
+        {accounts.length === 0 ? (
+          <p className="text-gray-600">No email accounts connected.</p>
+        ) : (
+          <ul className="list-disc pl-5 space-y-1">
+            {accounts.map((account, i) => (
+              <li key={i} className="text-sm text-gray-700">
+                {typeof account === 'string' ? account : account.email || 'Unknown'}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       {showModal && <AccountPopup />}
     </div>
