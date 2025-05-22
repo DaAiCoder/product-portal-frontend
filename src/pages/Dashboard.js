@@ -51,7 +51,7 @@ export default function Dashboard() {
     setSettingsOpen(true);
   };
 
-  const visibleWidgets = widgetLibrary.filter((w) => w.Component && !hidden.includes(w.id));
+  const visibleWidgets = []; // Temporarily disable all widgets
   const pinnedWidgets = visibleWidgets.filter((w) => favorites[w.id]);
   const otherWidgets = visibleWidgets.filter((w) => !favorites[w.id]);
 
