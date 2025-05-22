@@ -8,7 +8,7 @@ const EmailPage = () => {
 
   const fetchAccounts = async () => {
     try {
-      const res = await fetch('/api/email/accounts');
+      const res = await fetch('https://product-portal-backend-xo2c.onrender.com/api/email/accounts');
       const data = await res.json();
       setAccounts(data);
     } catch (err) {
@@ -25,7 +25,7 @@ const EmailPage = () => {
     let loginUrl = '';
     switch (provider) {
       case 'google':
-        loginUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/auth/google/email-connect`;
+        loginUrl = `https://product-portal-backend-xo2c.onrender.com/auth/google/email-connect`;
         break;
       case 'yahoo':
         alert('Yahoo login coming soon.');
@@ -128,4 +128,3 @@ const EmailPage = () => {
 };
 
 export default EmailPage;
-
