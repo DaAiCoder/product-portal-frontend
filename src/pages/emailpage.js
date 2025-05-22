@@ -25,11 +25,13 @@ const EmailPage = () => {
     let loginUrl = '';
     switch (provider) {
       case 'google':
-        loginUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google/email-connect`;
+        loginUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/auth/google/email-connect`;
         break;
       case 'yahoo':
+        alert('Yahoo login coming soon.');
+        return;
       case 'hotmail':
-        alert(`${provider} login coming soon.`);
+        alert('Hotmail login coming soon.');
         return;
       case 'manual':
         alert('Manual setup not yet implemented.');
@@ -126,3 +128,4 @@ const EmailPage = () => {
 };
 
 export default EmailPage;
+
