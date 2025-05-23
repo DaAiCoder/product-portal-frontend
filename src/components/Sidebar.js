@@ -1,4 +1,5 @@
 // File: src/components/Sidebar.js
+
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
@@ -42,12 +43,12 @@ const ALL_SECTIONS = {
     icon: <FaThLarge />,
     subKey: PROD_KEY,
     defaultItems: [
-      { id: 'email',     to: '/email',     icon: <FaEnvelope/>,    label: 'Email' },
-      { id: 'calendar',  to: '/calendar',  icon: <FaCalendarAlt/>, label: 'Calendar' },
-      { id: 'notes',     to: '/notes',     icon: <FaStickyNote/>,  label: 'Notes' },
-      { id: 'reminders', to: '/reminders', icon: <FaBell/>,         label: 'Reminders' },
-      { id: 'files',     to: '/files',     icon: <FaFolderOpen/>,  label: 'Files' },
-      { id: 'clock',     to: '/clock',     icon: <FaClock/>,       label: 'Clock' },
+      { id: 'email',     to: '/email',     icon: <FaEnvelope />,    label: 'Email' },
+      { id: 'calendar',  to: '/calendar',  icon: <FaCalendarAlt />, label: 'Calendar' },
+      { id: 'notes',     to: '/notes',     icon: <FaStickyNote />,  label: 'Notes' },
+      { id: 'reminders', to: '/reminders', icon: <FaBell />,         label: 'Reminders' },
+      { id: 'files',     to: '/files',     icon: <FaFolderOpen />,  label: 'Files' },
+      { id: 'clock',     to: '/clock',     icon: <FaClock />,        label: 'Clock' },
     ],
   },
   widgets: {
@@ -62,11 +63,11 @@ const ALL_SECTIONS = {
     icon: <FaShareAlt />,
     subKey: SOC_KEY,
     defaultItems: [
-      { id: 'unified',   to: '/unified',   icon: <FaThLarge/>,     label: 'Unified Feed' },
-      { id: 'instagram', to: '/instagram', icon: <FaInstagram/>,   label: 'Instagram' },
-      { id: 'twitter',   to: '/twitter',   icon: <FaTwitter/>,     label: 'Twitter/X' },
-      { id: 'facebook',  to: '/facebook',  icon: <FaFacebook/>,    label: 'Facebook' },
-      { id: 'reddit',    to: '/reddit',    icon: <FaRedditAlien/>, label: 'Reddit' },
+      { id: 'unified',   to: '/unified',   icon: <FaThLarge />,   label: 'Unified Feed' },
+      { id: 'instagram', to: '/instagram', icon: <FaInstagram />, label: 'Instagram' },
+      { id: 'twitter',   to: '/twitter',   icon: <FaTwitter />,   label: 'Twitter/X' },
+      { id: 'facebook',  to: '/facebook',  icon: <FaFacebook />,  label: 'Facebook' },
+      { id: 'reddit',    to: '/reddit',    icon: <FaRedditAlien />,label: 'Reddit' },
     ],
   },
   chat: {
@@ -80,8 +81,8 @@ const ALL_SECTIONS = {
     label: 'News',
     icon: <FaRss />,
     defaultItems: [
-      { id: 'feeds',    to: '/feeds',    icon: <FaRss/>,  label: 'RSS Subscriptions' },
-      { id: 'trending', to: '/trending', icon: <FaFire/>, label: 'Trending Topics' },
+      { id: 'feeds',    to: '/feeds',    icon: <FaRss />,  label: 'RSS Subscriptions' },
+      { id: 'trending', to: '/trending', icon: <FaFire />, label: 'Trending Topics' },
     ],
   },
   media: {
@@ -89,9 +90,9 @@ const ALL_SECTIONS = {
     label: 'Video & Media',
     icon: <FaYoutube />,
     defaultItems: [
-      { id: 'youtube',  to: '/youtube',  icon: <FaYoutube/>, label: 'YouTube Feeds' },
-      { id: 'music',    to: '/music',    icon: <FaMusic/>,   label: 'Music Discovery' },
-      { id: 'podcasts', to: '/podcasts', icon: <FaPodcast/>, label: 'Podcasts' },
+      { id: 'youtube',  to: '/youtube',  icon: <FaYoutube />, label: 'YouTube Feeds' },
+      { id: 'music',    to: '/music',    icon: <FaMusic />,   label: 'Music Discovery' },
+      { id: 'podcasts', to: '/podcasts', icon: <FaPodcast />, label: 'Podcasts' },
     ],
   },
 };
@@ -131,7 +132,6 @@ export default function Sidebar() {
 
   const onDragEnd = ({ source, destination, draggableId, type }) => {
     if (!destination) return;
-    // Reorder sections
     if (type === 'SECTION') {
       const items = Array.from(sectionOrder);
       items.splice(source.index, 1);
@@ -140,7 +140,6 @@ export default function Sidebar() {
       localStorage.setItem(SECTION_KEY, JSON.stringify(items));
       return;
     }
-    // Reorder productivity items
     if (source.droppableId === PROD_KEY && destination.droppableId === PROD_KEY) {
       const items = Array.from(prodItems);
       const [m] = items.splice(source.index, 1);
@@ -148,7 +147,6 @@ export default function Sidebar() {
       setProdItems(items);
       localStorage.setItem(PROD_KEY, JSON.stringify(items.map(i => i.id)));
     }
-    // Reorder social items
     if (source.droppableId === SOC_KEY && destination.droppableId === SOC_KEY) {
       const items = Array.from(socItems);
       const [m] = items.splice(source.index, 1);
@@ -161,10 +159,10 @@ export default function Sidebar() {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <nav
-        className={\`
+        className={`
           fixed top-0 left-0 h-full bg-white shadow-lg flex flex-col py-4
-          transition-all duration-300 z-30 \${collapsed ? 'w-16' : 'w-64'}
-        \`}
+          transition-all duration-300 z-30 ${collapsed ? 'w-16' : 'w-64'}
+        `}
       >
         {/* Collapse toggle */}
         <button
@@ -201,17 +199,17 @@ export default function Sidebar() {
                             ...os,
                             [secId]: !os[secId],
                           }))}
-                          className={\`
+                          className={`
                             flex items-center w-full px-4 py-2 rounded
-                            \${active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'}
+                            ${active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'}
                             hover:bg-gray-100 transition-colors
-                          \`}
+                          `}
                           {...dragProv.dragHandleProps}
                         >
                           {sec.icon}
                           {!collapsed && <span className="ml-3">{sec.label}</span>}
                           {!collapsed && sec.defaultItems && (
-                            <span className="ml-auto">{isOpen ? '−' : '+'}</span>
+                            <span className="ml-auto">{isOpen ? '-' : '+'}</span>
                           )}
                         </button>
 
@@ -241,9 +239,11 @@ export default function Sidebar() {
                                         <NavLink
                                           to={item.to}
                                           className={({ isActive }) =>
-                                            \`flex items-center px-4 py-2 rounded transition-colors \${isActive
-                                              ? 'bg-gray-300 text-gray-900'
-                                              : 'text-gray-600 hover:bg-gray-100'}\`
+                                            `flex items-center px-4 py-2 rounded transition-colors ${
+                                              isActive
+                                                ? 'bg-gray-300 text-gray-900'
+                                                : 'text-gray-600 hover:bg-gray-100'
+                                            }`
                                           }
                                         >
                                           {item.icon}
