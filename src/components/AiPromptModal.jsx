@@ -1,12 +1,14 @@
 // src/components/AiPromptModal.jsx
-import React from 'react';
-import AiChat from './AiChat';
+"use client";
+
+import React from "react";
+import AiChat from "./AiChat";
 
 export default function AiPromptModal({
   isOpen,
   onClose,
   defaultPrompt,
-  context = {}
+  context = {},
 }) {
   if (!isOpen) return null;
   return (
@@ -24,3 +26,4 @@ export default function AiPromptModal({
     </div>
   );
 }
+
