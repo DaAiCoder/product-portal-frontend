@@ -1,5 +1,19 @@
-// File: src/utils/widgetLibrary.js
-import { FaClock, FaStopwatch, FaQuoteRight, FaCloudSun, FaRobot, FaComments, FaCalculator, FaStickyNote, FaGlobe } from 'react-icons/fa';
+// src/utils/widgetLibrary.js
+
+import {
+  FaClock,
+  FaStopwatch,
+  FaQuoteRight,
+  FaCloudSun,
+  FaRobot,
+  FaComments,
+  FaCalculator,
+  FaStickyNote,
+  FaGlobe,
+  FaRss,
+  FaChartLine,
+  FaBasketballBall,
+} from 'react-icons/fa';
 
 import datetime from '../components/widgets/configs/datetime';
 import stopwatch from '../components/widgets/configs/stopwatch';
@@ -11,6 +25,9 @@ import calculator from '../components/widgets/configs/calculator';
 import worldclock from '../components/widgets/configs/worldclock';
 import notes from '../components/widgets/configs/notes';
 
+import RssWidget from '../components/widgets/RssWidget';
+import StocksWidget from '../components/widgets/StocksWidget';
+import SportsScoresWidget from '../components/widgets/SportsScoresWidget';
 
 export const widgetLibrary = [
   {
@@ -69,7 +86,6 @@ export const widgetLibrary = [
     w: 4,
     h: 4,
   },
-
   {
     ...notes,
     icon: <FaStickyNote size={40} />,
@@ -77,6 +93,31 @@ export const widgetLibrary = [
     w: 4,
     h: 4,
   },
-
-
+  // New widgets
+  {
+    id: 'rss',
+    component: RssWidget,
+    icon: <FaRss size={40} />,
+    label: 'RSS Feed',
+    w: 4,
+    h: 4,
+    defaultSettings: { feedUrl: 'https://hnrss.org/frontpage' },
+  },
+  {
+    id: 'stocks',
+    component: StocksWidget,
+    icon: <FaChartLine size={40} />,
+    label: 'Stocks & Crypto',
+    w: 4,
+    h: 4,
+    defaultSettings: { symbols: ['AAPL', 'GOOG'], crypto: ['bitcoin', 'ethereum'] },
+  },
+  {
+    id: 'sports',
+    component: SportsScoresWidget,
+    icon: <FaBasketballBall size={40} />,
+    label: "Today's NBA Games",
+    w: 4,
+    h: 4,
+  },
 ];
