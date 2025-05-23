@@ -1,68 +1,80 @@
 import React, { useEffect, useState } from 'react';
-import { FaGoogle, FaYahoo, FaMicrosoft, FaPlus, FaEnvelope } from 'react-icons/fa';
+import { FaGoogle, FaYahoo, FaMicrosoft, FaEnvelope, FaPlus } from 'react-icons/fa';
 import '../styles/globals.css';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://product-portal-backend-xo2c.onrender.com';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://product-portal-backend-xo2c.onrender.com';
 
 const EmailPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [accounts, setAccounts] = useState([]);
 
+  // Handle OAuth popup response using postMessage
+  useEffect(() => {
+    const handler = (event) => {
+      if (event.data?.type === 'email_connected') {
+        setShowModal(false);
+        fetchAccounts();
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  // Fetch accounts with credentials (sends cookies/session)
   const fetchAccounts = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/email/accounts`, { credentials: 'include' });
-      const data = await res.json();
-      setAccounts(data);
+      const res = await fetch(`${API_BASE_URL}/api/email/accounts`, {
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAccounts(data);
+      } else {
+        setAccounts([]);
+      }
     } catch (err) {
-      console.error('Failed to fetch email accounts:', err);
+      setAccounts([]);
     }
   };
 
-  // Open popup for OAuth login (only Google supported right now)
+  // Open OAuth popup and handle window closing
   const openOAuthPopup = (provider) => {
     const width = 500;
     const height = 600;
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
-
     let loginUrl = '';
     switch (provider) {
       case 'google':
         loginUrl = `${API_BASE_URL}/auth/google/email-connect`;
         break;
       case 'yahoo':
+        alert('Yahoo login coming soon.');
+        return;
       case 'hotmail':
+        alert('Hotmail login coming soon.');
+        return;
       case 'manual':
-        alert(`${provider[0].toUpperCase() + provider.slice(1)} login coming soon.`);
+        alert('Manual setup not yet implemented.');
         return;
       default:
         return;
     }
-
-    // Open popup window for OAuth
     const popup = window.open(
       loginUrl,
       'OAuthLogin',
       `width=${width},height=${height},top=${top},left=${left}`
     );
-
-    // Poll for when the popup closes, then refresh accounts
-    const timer = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(timer);
-        fetchAccounts();
-        setShowModal(false);
-      }
-    }, 500);
   };
 
   useEffect(() => {
     fetchAccounts();
   }, []);
 
-  // Mail folders sidebar
+  // Folder sidebar
   const FolderList = () => (
-    <div className="w-full p-4 space-y-3 bg-[#f0f0f6] text-sm">
+    <div className="w-full p-4 space-y-3 bg-[#f0f0f6] text-sm min-h-screen">
       <div className="font-bold text-purple-700">📥 Inbox</div>
       <div className="text-gray-700">📤 Sent</div>
       <div className="text-gray-700">📝 Drafts</div>
@@ -77,10 +89,16 @@ const EmailPage = () => {
     </div>
   );
 
-  // Account provider popup modal
+  // Popup modal for account provider selection
   const AccountPopup = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      onClick={() => setShowModal(false)}
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-semibold mb-4">Select Email Provider</h2>
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -143,5 +161,3 @@ const EmailPage = () => {
 };
 
 export default EmailPage;
-
-
