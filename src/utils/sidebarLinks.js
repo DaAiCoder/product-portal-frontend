@@ -7,7 +7,7 @@ export const sidebarSections = [
     label: 'Productivity',
     icon: <FaLayerGroup />,
     items: [
-      { id: 'email', label: 'Email', icon: <FaEnvelope />, to: '/emailpage' },
+      { id: 'email', label: 'Email', icon: <FaEnvelope />, to: '/email' },
       { id: 'calendar', label: 'Calendar', icon: <FaCalendarAlt />, to: '/calendar' },
       { id: 'notes', label: 'Notes', icon: <FaStickyNote />, to: '/notes' },
       { id: 'reminders', label: 'Reminders', icon: <FaBell />, to: '/reminders' },
@@ -42,7 +42,7 @@ export const sidebarSections = [
     label: 'News',
     icon: <FaRss />,
     items: [
-      { id: 'rss', label: 'RSS Feeds', icon: <FaRss />, to: '/rss' },
+      { id: 'rss', label: 'RSS Feeds', icon: <FaRss />, to: '/feeds' },
       { id: 'trending', label: 'Trending', icon: <FaFire />, to: '/trending' },
     ],
   },
