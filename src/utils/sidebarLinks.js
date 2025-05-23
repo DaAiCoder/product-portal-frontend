@@ -1,5 +1,22 @@
 // src/utils/sidebarLinks.js
-import { FaEnvelope, FaCalendarAlt, FaStickyNote, FaBell, FaLayerGroup, FaInstagram, FaTwitter, FaFacebook, FaRedditAlien, FaFolderOpen, FaComments, FaRss, FaFire, FaYoutube, FaMusic, FaPodcast } from 'react-icons/fa';
+import {
+  FaEnvelope,
+  FaCalendarAlt,
+  FaStickyNote,
+  FaBell,
+  FaLayerGroup,
+  FaInstagram,
+  FaTwitter,
+  FaFacebook,
+  FaRedditAlien,
+  FaFolderOpen,
+  FaComments,
+  FaRss,
+  FaFire,
+  FaYoutube,
+  FaMusic,
+  FaPodcast,
+} from 'react-icons/fa';
 
 export const sidebarSections = [
   {
@@ -42,7 +59,7 @@ export const sidebarSections = [
     label: 'News',
     icon: <FaRss />,
     items: [
-      { id: 'rss', label: 'RSS Feeds', icon: <FaRss />, to: '/feeds' },
+      { id: 'rss', label: 'RSS Feeds', icon: <FaRss />, to: '/rss' },
       { id: 'trending', label: 'Trending', icon: <FaFire />, to: '/trending' },
     ],
   },
@@ -57,3 +74,4 @@ export const sidebarSections = [
     ],
   },
 ];
+
