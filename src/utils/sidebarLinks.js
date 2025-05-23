@@ -59,8 +59,8 @@ export const sidebarSections = [
     label: 'News',
     icon: <FaRss />,
     items: [
-      { id: 'rss',      label: 'RSS Feeds',      icon: <FaRss />,  to: '/rss' },
-      { id: 'trending', label: 'Trending',       icon: <FaFire />, to: '/trending' },
+      { id: 'rss',      label: 'RSS Feeds',       icon: <FaRss />,  to: '/rss' },
+      { id: 'trending', label: 'Trending Topics', icon: <FaFire />, to: '/trending' },
     ],
   },
   {
@@ -68,9 +68,10 @@ export const sidebarSections = [
     label: 'Video & Media',
     icon: <FaYoutube />,
     items: [
-      { id: 'youtube',  label: 'YouTube',    icon: <FaYoutube/>, to: '/youtube' },
-      { id: 'music',    label: 'Music',      icon: <FaMusic/>,   to: '/music' },
-      { id: 'podcasts', label: 'Podcasts',   icon: <FaPodcast/>, to: '/podcasts' },
+      { id: 'youtube',  label: 'YouTube Feeds',   icon: <FaYoutube/>, to: '/youtube' },
+      { id: 'music',    label: 'Music Discovery', icon: <FaMusic />,   to: '/music' },
+      { id: 'podcasts', label: 'Podcasts',        icon: <FaPodcast/>, to: '/podcasts' },
     ],
   },
 ];
+
