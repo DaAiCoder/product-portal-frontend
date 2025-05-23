@@ -15,9 +15,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
-import FeedsPage from './pages/feeds';
+import FeedsPage from './pages/feeds';            // ← feeds.js for News
 import Email from './pages/emailpage';
-import Calendar from './pages/Calendar';
+import Calendar from './pages/calendar';
 import Notes from './pages/notes';
 import Files from './pages/files';
 import Clock from './pages/clock';
@@ -32,7 +32,6 @@ import InstagramFeed from './pages/instagram';
 import TwitterFeed from './pages/twitter';
 import FacebookFeed from './pages/facebook';
 import RedditFeed from './pages/reddit';
-import RSSSubscriptions from './pages/feeds';
 import TrendingTopics from './pages/trending';
 import YouTubeFeeds from './pages/youtube';
 import MusicDiscovery from './pages/music';
@@ -77,7 +76,7 @@ function App() {
               }
             />
 
-            {/* Legacy Feeds (if still used) */}
+            {/* News (replaces old /rss) */}
             <Route
               path="/feeds"
               element={
@@ -189,15 +188,7 @@ function App() {
               }
             />
 
-            {/* News */}
-            <Route
-              path="/feeds"
-              element={
-                <ProtectedRoute>
-                  <RSSSubscriptions />
-                </ProtectedRoute>
-              }
-            />
+            {/* News sub-page: Trending */}
             <Route
               path="/trending"
               element={
@@ -261,7 +252,7 @@ function App() {
               }
             />
 
-            {/* Catch-all redirect */}
+            {/* Catch-all: redirect unknowns */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

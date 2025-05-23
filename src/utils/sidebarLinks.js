@@ -1,4 +1,5 @@
-// src/utils/sidebarLinks.js
+// src/utils/sidebar Links.js
+
 import {
   FaEnvelope,
   FaCalendarAlt,
