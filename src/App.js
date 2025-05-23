@@ -1,4 +1,4 @@
-// File: src/App .js
+// File: src/ App .js
 
 import React from 'react';
 import {
