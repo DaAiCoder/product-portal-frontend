@@ -1,6 +1,11 @@
 // File: src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate
+} from 'react-router-dom';
 
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
@@ -19,9 +24,21 @@ import Clock from './pages/clock';
 import Profile from './pages/Profile';
 import WidgetDirectory from './pages/WidgetDirectory';
 import ThemeEditor from './components/ThemeEditor';
-import ChatPage from './pages/chat'; // ✅ New line
 
-export default function App() {
+import ChatPage from './pages/chat';
+import Reminders from './pages/reminders';
+import UnifiedFeeds from './pages/unified';
+import InstagramFeed from './pages/instagram';
+import TwitterFeed from './pages/twitter';
+import FacebookFeed from './pages/facebook';
+import RedditFeed from './pages/reddit';
+import RSSSubscriptions from './pages/feeds';
+import TrendingTopics from './pages/trending';
+import YouTubeFeeds from './pages/youtube';
+import MusicDiscovery from './pages/music';
+import PodcastRecommendations from './pages/podcasts';
+
+function App() {
   return (
     <ThemeProvider>
       <Router>
@@ -40,7 +57,7 @@ export default function App() {
               }
             />
 
-            {/* Protected Routes */}
+            {/* Home */}
             <Route
               path="/"
               element={
@@ -49,6 +66,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Dashboard */}
             <Route
               path="/dashboard"
               element={
@@ -57,6 +76,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Legacy Feeds (if still used) */}
             <Route
               path="/feeds"
               element={
@@ -65,6 +86,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Productivity */}
             <Route
               path="/email"
               element={
@@ -106,6 +129,58 @@ export default function App() {
               }
             />
             <Route
+              path="/reminders"
+              element={
+                <ProtectedRoute>
+                  <Reminders />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Social Feeds */}
+            <Route
+              path="/unified"
+              element={
+                <ProtectedRoute>
+                  <UnifiedFeeds />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/instagram"
+              element={
+                <ProtectedRoute>
+                  <InstagramFeed />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/twitter"
+              element={
+                <ProtectedRoute>
+                  <TwitterFeed />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/facebook"
+              element={
+                <ProtectedRoute>
+                  <FacebookFeed />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reddit"
+              element={
+                <ProtectedRoute>
+                  <RedditFeed />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Chat */}
+            <Route
               path="/chat"
               element={
                 <ProtectedRoute>
@@ -113,6 +188,52 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* News */}
+            <Route
+              path="/feeds"
+              element={
+                <ProtectedRoute>
+                  <RSSSubscriptions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trending"
+              element={
+                <ProtectedRoute>
+                  <TrendingTopics />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Video & Media */}
+            <Route
+              path="/youtube"
+              element={
+                <ProtectedRoute>
+                  <YouTubeFeeds />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/music"
+              element={
+                <ProtectedRoute>
+                  <MusicDiscovery />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/podcasts"
+              element={
+                <ProtectedRoute>
+                  <PodcastRecommendations />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Profile & Widgets */}
             <Route
               path="/profile"
               element={
@@ -122,15 +243,17 @@ export default function App() {
               }
             />
             <Route
-              path="/widgets"
+              path="/widget-library"
               element={
                 <ProtectedRoute>
                   <WidgetDirectory />
                 </ProtectedRoute>
               }
             />
+
+            {/* Theme Editor */}
             <Route
-              path="/theme"
+              path="/theme-editor"
               element={
                 <ProtectedRoute>
                   <ThemeEditor />
@@ -146,3 +269,5 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
+export default App;
