@@ -1,4 +1,4 @@
-=import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaGoogle, FaYahoo, FaMicrosoft, FaPlus, FaEnvelope } from 'react-icons/fa';
 import '../styles/globals.css';
 
@@ -8,34 +8,17 @@ const EmailPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [accounts, setAccounts] = useState([]);
 
-  // 1. Fetch accounts
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccounts = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/email/accounts`, { credentials: 'include' });
       const data = await res.json();
       setAccounts(data);
     } catch (err) {
-      setAccounts([]);
       console.error('Failed to fetch email accounts:', err);
     }
-  }, []);
+  };
 
-  // 2. Listen for popup callback
-  useEffect(() => {
-    fetchAccounts();
-
-    // Listen for popup postMessage
-    function handleMessage(e) {
-      if (e.data === 'refreshEmailAccounts') {
-        fetchAccounts();
-        setShowModal(false);
-      }
-    }
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [fetchAccounts]);
-
-  // 3. Open popup & watch for window close (fallback for postMessage)
+  // Open popup for OAuth login (only Google supported right now)
   const openOAuthPopup = (provider) => {
     const width = 500;
     const height = 600;
@@ -48,32 +31,36 @@ const EmailPage = () => {
         loginUrl = `${API_BASE_URL}/auth/google/email-connect`;
         break;
       case 'yahoo':
-        alert('Yahoo login coming soon.');
-        return;
       case 'hotmail':
-        alert('Hotmail login coming soon.');
-        return;
       case 'manual':
-        alert('Manual setup not yet implemented.');
+        alert(`${provider[0].toUpperCase() + provider.slice(1)} login coming soon.`);
         return;
       default:
         return;
     }
 
-    // Open popup
-    const popup = window.open(loginUrl, 'OAuthLogin', `width=${width},height=${height},top=${top},left=${left}`);
+    // Open popup window for OAuth
+    const popup = window.open(
+      loginUrl,
+      'OAuthLogin',
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
 
-    // Fallback: If popup closes, try to refresh anyway (in case postMessage is blocked)
+    // Poll for when the popup closes, then refresh accounts
     const timer = setInterval(() => {
-      if (popup && popup.closed) {
+      if (popup.closed) {
+        clearInterval(timer);
         fetchAccounts();
         setShowModal(false);
-        clearInterval(timer);
       }
-    }, 900);
+    }, 500);
   };
 
-  // 4. Modern folder sidebar
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  // Mail folders sidebar
   const FolderList = () => (
     <div className="w-full p-4 space-y-3 bg-[#f0f0f6] text-sm">
       <div className="font-bold text-purple-700">📥 Inbox</div>
@@ -82,7 +69,6 @@ const EmailPage = () => {
       <div className="text-gray-700">🗑️ Trash</div>
       <div className="text-gray-700">📂 Spam</div>
       <button
-        type="button"
         onClick={() => setShowModal(true)}
         className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
       >
@@ -91,35 +77,31 @@ const EmailPage = () => {
     </div>
   );
 
-  // 5. Account modal
+  // Account provider popup modal
   const AccountPopup = () => (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-lg font-semibold mb-4">Select Email Provider</h2>
         <div className="grid grid-cols-2 gap-4">
           <button
-            type="button"
             onClick={() => openOAuthPopup('google')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
           >
             <FaGoogle className="text-red-500" /> Gmail
           </button>
           <button
-            type="button"
             onClick={() => openOAuthPopup('yahoo')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
           >
             <FaYahoo className="text-purple-600" /> Yahoo
           </button>
           <button
-            type="button"
             onClick={() => openOAuthPopup('hotmail')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
           >
             <FaMicrosoft className="text-blue-600" /> Hotmail
           </button>
           <button
-            type="button"
             onClick={() => openOAuthPopup('manual')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
           >
@@ -127,7 +109,6 @@ const EmailPage = () => {
           </button>
         </div>
         <button
-          type="button"
           className="mt-6 w-full text-center text-blue-600 hover:text-blue-800 text-sm"
           onClick={() => setShowModal(false)}
         >
@@ -137,7 +118,6 @@ const EmailPage = () => {
     </div>
   );
 
-  // 6. Main layout
   return (
     <div className="flex h-screen bg-[#fff] text-gray-800">
       <div className="w-64 border-r shadow-sm">
@@ -163,4 +143,5 @@ const EmailPage = () => {
 };
 
 export default EmailPage;
+
 
