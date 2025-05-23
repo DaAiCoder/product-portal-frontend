@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { FaGoogle, FaYahoo, FaMicrosoft, FaPlus, FaEnvelope } from 'react-icons/fa';
-import '../styles/globals.css';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://product-portal-backend-xo2c.onrender.com';
 
@@ -8,72 +7,60 @@ const EmailPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [accounts, setAccounts] = useState([]);
 
-  // Fetch email accounts
+  // Fetch email accounts with JWT
   const fetchAccounts = async () => {
+    const jwt = localStorage.getItem('jwt');
+    if (!jwt) return setAccounts([]);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/email/accounts`, { credentials: 'include' });
-      const data = await res.json();
-      setAccounts(data);
+      const res = await fetch(`${API_BASE_URL}/api/email/accounts`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAccounts(data);
+      } else {
+        setAccounts([]);
+      }
     } catch (err) {
       setAccounts([]);
-      console.error('Failed to fetch email accounts:', err);
     }
   };
 
-  // Open OAuth popup
+  // OAuth popup
   const openOAuthPopup = (provider) => {
-    const width = 500;
-    const height = 600;
+    if (provider !== 'google') {
+      alert(`${provider} login coming soon.`);
+      return;
+    }
+    const width = 500, height = 600;
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
-
-    let loginUrl = '';
-    switch (provider) {
-      case 'google':
-        loginUrl = `${API_BASE_URL}/auth/google/email-connect`;
-        break;
-      case 'yahoo':
-        alert('Yahoo login coming soon.');
-        return;
-      case 'hotmail':
-        alert('Hotmail/Outlook login coming soon.');
-        return;
-      case 'manual':
-        alert('Manual setup not yet implemented.');
-        return;
-      default:
-        return;
-    }
-
-    window.open(
-      loginUrl,
-      'OAuthLogin',
-      `width=${width},height=${height},top=${top},left=${left}`
-    );
+    const loginUrl = `${API_BASE_URL}/auth/google/email-connect`;
+    window.open(loginUrl, 'OAuthLogin', `width=${width},height=${height},top=${top},left=${left}`);
   };
 
-  // Add listener for OAuth popup postMessage
+  // Listen for JWT after OAuth popup
   useEffect(() => {
     fetchAccounts();
-
     function handleMessage(event) {
-      if (event.data === 'oauth-success') {
+      if (event.data?.type === "oauth-success" && event.data.token) {
+        localStorage.setItem('jwt', event.data.token);
         setShowModal(false);
         fetchAccounts();
       }
     }
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-    // eslint-disable-next-line
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
+  // Sidebar folders
   const FolderList = () => (
-    <div className="w-full p-4 space-y-3 bg-[#f0f0f6] text-sm min-h-[320px]">
-      <div className="font-bold text-purple-700 cursor-pointer">📥 Inbox</div>
-      <div className="text-gray-700 cursor-pointer">📤 Sent</div>
-      <div className="text-gray-700 cursor-pointer">📝 Drafts</div>
-      <div className="text-gray-700 cursor-pointer">🗑️ Trash</div>
-      <div className="text-gray-700 cursor-pointer">📂 Spam</div>
+    <div className="w-full p-4 space-y-3 bg-[#f0f0f6] text-sm">
+      <div className="font-bold text-purple-700">📥 Inbox</div>
+      <div className="text-gray-700">📤 Sent</div>
+      <div className="text-gray-700">📝 Drafts</div>
+      <div className="text-gray-700">🗑️ Trash</div>
+      <div className="text-gray-700">📂 Spam</div>
       <button
         onClick={() => setShowModal(true)}
         className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
@@ -83,15 +70,10 @@ const EmailPage = () => {
     </div>
   );
 
+  // Popup modal for provider select
   const AccountPopup = () => (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-      onClick={() => setShowModal(false)}
-    >
-      <div
-        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
         <h2 className="text-lg font-semibold mb-4">Select Email Provider</h2>
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -103,18 +85,21 @@ const EmailPage = () => {
           <button
             onClick={() => openOAuthPopup('yahoo')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
+            disabled
           >
             <FaYahoo className="text-purple-600" /> Yahoo
           </button>
           <button
             onClick={() => openOAuthPopup('hotmail')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
+            disabled
           >
             <FaMicrosoft className="text-blue-600" /> Hotmail
           </button>
           <button
             onClick={() => openOAuthPopup('manual')}
             className="flex items-center gap-2 p-3 border rounded hover:bg-gray-100"
+            disabled
           >
             <FaEnvelope /> Other
           </button>
@@ -129,6 +114,7 @@ const EmailPage = () => {
     </div>
   );
 
+  // Main render
   return (
     <div className="flex h-screen bg-[#fff] text-gray-800">
       <div className="w-64 border-r shadow-sm">
@@ -136,7 +122,7 @@ const EmailPage = () => {
       </div>
       <div className="flex-1 p-6 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Connected Accounts</h2>
-        {!Array.isArray(accounts) || accounts.length === 0 ? (
+        {(!Array.isArray(accounts) || accounts.length === 0) ? (
           <p className="text-gray-500">No email accounts connected.</p>
         ) : (
           <ul className="list-disc pl-5 space-y-1">
@@ -154,4 +140,5 @@ const EmailPage = () => {
 };
 
 export default EmailPage;
+
 
