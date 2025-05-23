@@ -26,6 +26,7 @@ import {
   FaTwitter,
   FaFacebook,
   FaRedditAlien,
+  FaPlus,
 } from 'react-icons/fa';
 
 // Keys for persistence
@@ -48,6 +49,12 @@ const ALL_SECTIONS = {
       { id: 'files',     to: '/files',     icon: <FaFolderOpen/>,  label: 'Files' },
       { id: 'clock',     to: '/clock',     icon: <FaClock/>,       label: 'Clock' },
     ],
+  },
+  widgets: {
+    id: 'widgets',
+    label: 'Widget Library',
+    icon: <FaPlus />,
+    to: '/widgets',
   },
   social: {
     id: 'social',
@@ -114,7 +121,7 @@ export default function Sidebar() {
       : ALL_SECTIONS.social.defaultItems;
   });
 
-  const isSectionActive = sec => {
+  const isSectionActive = (sec) => {
     if (sec.subKey === PROD_KEY) return prodItems.some(i => location.pathname.startsWith(i.to));
     if (sec.subKey === SOC_KEY)  return socItems.some(i => location.pathname.startsWith(i.to));
     if (sec.defaultItems)        return sec.defaultItems.some(i => location.pathname.startsWith(i.to));
@@ -124,6 +131,7 @@ export default function Sidebar() {
 
   const onDragEnd = ({ source, destination, draggableId, type }) => {
     if (!destination) return;
+    // Reorder sections
     if (type === 'SECTION') {
       const items = Array.from(sectionOrder);
       items.splice(source.index, 1);
@@ -132,6 +140,7 @@ export default function Sidebar() {
       localStorage.setItem(SECTION_KEY, JSON.stringify(items));
       return;
     }
+    // Reorder productivity items
     if (source.droppableId === PROD_KEY && destination.droppableId === PROD_KEY) {
       const items = Array.from(prodItems);
       const [m] = items.splice(source.index, 1);
@@ -139,6 +148,7 @@ export default function Sidebar() {
       setProdItems(items);
       localStorage.setItem(PROD_KEY, JSON.stringify(items.map(i => i.id)));
     }
+    // Reorder social items
     if (source.droppableId === SOC_KEY && destination.droppableId === SOC_KEY) {
       const items = Array.from(socItems);
       const [m] = items.splice(source.index, 1);
@@ -150,10 +160,12 @@ export default function Sidebar() {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <nav className={`
-        fixed top-0 left-0 h-full bg-white shadow-lg flex flex-col py-4
-        transition-all duration-300 z-30 ${collapsed ? 'w-16' : 'w-64'}
-      `}>
+      <nav
+        className={\`
+          fixed top-0 left-0 h-full bg-white shadow-lg flex flex-col py-4
+          transition-all duration-300 z-30 \${collapsed ? 'w-16' : 'w-64'}
+        \`}
+      >
         {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(c => !c)}
@@ -162,9 +174,9 @@ export default function Sidebar() {
           <FaBars size={20} />
         </button>
 
-        {/* Draggable Sections */}
+        {/* Sections */}
         <Droppable droppableId="sections" type="SECTION">
-          {provided => (
+          {(provided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
@@ -177,7 +189,7 @@ export default function Sidebar() {
 
                 return (
                   <Draggable key={sec.id} draggableId={sec.id} index={idx}>
-                    {dragProv => (
+                    {(dragProv) => (
                       <div
                         ref={dragProv.innerRef}
                         {...dragProv.draggableProps}
@@ -186,13 +198,14 @@ export default function Sidebar() {
                         {/* Section Header */}
                         <button
                           onClick={() => setOpenSections(os => ({
-                            ...os, [secId]: !os[secId]
+                            ...os,
+                            [secId]: !os[secId],
                           }))}
-                          className={`
+                          className={\`
                             flex items-center w-full px-4 py-2 rounded
-                            ${active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'}
+                            \${active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'}
                             hover:bg-gray-100 transition-colors
-                          `}
+                          \`}
                           {...dragProv.dragHandleProps}
                         >
                           {sec.icon}
@@ -202,94 +215,48 @@ export default function Sidebar() {
                           )}
                         </button>
 
-                        {/* Sub-menu for Productivity */}
-                        {sec.subKey === PROD_KEY && !collapsed && isOpen && (
-                          <Droppable droppableId={PROD_KEY} type="ITEM">
-                            {prov2 => (
+                        {/* Submenu */}
+                        {!collapsed && sec.defaultItems && isOpen && (
+                          <Droppable droppableId={sec.subKey} type="ITEM">
+                            {(subProv) => (
                               <div
-                                ref={prov2.innerRef}
-                                {...prov2.droppableProps}
-                                className="ml-8 mt-1 space-y-1"
+                                ref={subProv.innerRef}
+                                {...subProv.droppableProps}
+                                className="ml-8"
                               >
-                                {prodItems.map((item, i) => (
+                                {(sec.defaultItems === ALL_SECTIONS.productivity.defaultItems
+                                  ? prodItems
+                                  : sec.defaultItems === ALL_SECTIONS.social.defaultItems
+                                  ? socItems
+                                  : sec.defaultItems
+                                ).map((item, i) => (
                                   <Draggable key={item.id} draggableId={item.id} index={i}>
-                                    {itemProv => (
-                                      <NavLink
-                                        to={item.to}
+                                    {(itemProv) => (
+                                      <div
                                         ref={itemProv.innerRef}
                                         {...itemProv.draggableProps}
                                         {...itemProv.dragHandleProps}
-                                        className={({ isActive }) => `
-                                          flex items-center px-4 py-2 rounded
-                                          ${isActive ? 'bg-blue-200 text-white' : 'text-gray-700'}
-                                          hover:bg-gray-100 transition-colors
-                                        `}
+                                        className="my-1"
                                       >
-                                        {item.icon}
-                                        <span className="ml-3">{item.label}</span>
-                                      </NavLink>
+                                        <NavLink
+                                          to={item.to}
+                                          className={({ isActive }) =>
+                                            \`flex items-center px-4 py-2 rounded transition-colors \${isActive
+                                              ? 'bg-gray-300 text-gray-900'
+                                              : 'text-gray-600 hover:bg-gray-100'}\`
+                                          }
+                                        >
+                                          {item.icon}
+                                          <span className="ml-3">{item.label}</span>
+                                        </NavLink>
+                                      </div>
                                     )}
                                   </Draggable>
                                 ))}
-                                {prov2.placeholder}
+                                {subProv.placeholder}
                               </div>
                             )}
                           </Droppable>
-                        )}
-
-                        {/* Sub-menu for Social Feeds */}
-                        {sec.subKey === SOC_KEY && !collapsed && isOpen && (
-                          <Droppable droppableId={SOC_KEY} type="ITEM">
-                            {prov2 => (
-                              <div
-                                ref={prov2.innerRef}
-                                {...prov2.droppableProps}
-                                className="ml-8 mt-1 space-y-1"
-                              >
-                                {socItems.map((item, i) => (
-                                  <Draggable key={item.id} draggableId={item.id} index={i}>
-                                    {itemProv => (
-                                      <NavLink
-                                        to={item.to}
-                                        ref={itemProv.innerRef}
-                                        {...itemProv.draggableProps}
-                                        {...itemProv.dragHandleProps}
-                                        className={({ isActive }) => `
-                                          flex items-center px-4 py-2 rounded
-                                          ${isActive ? 'bg-green-200 text-white' : 'text-gray-700'}
-                                          hover:bg-gray-100 transition-colors
-                                        `}
-                                      >
-                                        {item.icon}
-                                        <span className="ml-3">{item.label}</span>
-                                      </NavLink>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {prov2.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-                        )}
-
-                        {/* Sub-menu for News & Media */}
-                        {sec.defaultItems && sec.subKey == null && !collapsed && isOpen && (
-                          <div className="ml-8 mt-1 space-y-1">
-                            {sec.defaultItems.map(i => (
-                              <NavLink
-                                key={i.id}
-                                to={i.to}
-                                className={({ isActive }) => `
-                                  flex items-center px-4 py-2 rounded
-                                  ${isActive ? 'bg-gray-200 text-gray-900' : 'text-gray-700'}
-                                  hover:bg-gray-100 transition-colors
-                                `}
-                              >
-                                {i.icon}
-                                <span className="ml-3">{i.label}</span>
-                              </NavLink>
-                            ))}
-                          </div>
                         )}
                       </div>
                     )}
@@ -304,5 +271,3 @@ export default function Sidebar() {
     </DragDropContext>
   );
 }
-
-
