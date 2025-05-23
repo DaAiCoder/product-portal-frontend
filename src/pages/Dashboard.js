@@ -1,4 +1,5 @@
 // src/pages/Dashboard.js
+
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
 import WidgetWrapper from '../components/WidgetWrapper';
@@ -11,43 +12,46 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 export default function Dashboard() {
+  // 1) Build a default layout from your widgetLibrary
   const defaultLayout = widgetLibrary.map((w, i) => ({
     i: w.id,
-    x: (i * w.defaultW) % 12,
-    y: Math.floor((i * w.defaultW) / 12) * w.defaultH,
-    w: w.defaultW,
-    h: w.defaultH,
+    x: (i * w.w) % 12,
+    y: Math.floor((i * w.w) / 12) * w.h,
+    w: w.w,
+    h: w.h,
   }));
 
-  const savedLayout = JSON.parse(localStorage.getItem('dashboardLayout'));
+  // 2) Try to load any saved layout; otherwise fall back to default
+  const saved = localStorage.getItem('dashboardLayout');
+  const savedLayout = saved ? JSON.parse(saved) : null;
   const validLayout = Array.isArray(savedLayout)
     ? savedLayout.filter((l) => widgetLibrary.some((w) => w.id === l.i))
     : null;
 
-  const [layout, setLayout] = useState(() =>
-    validLayout?.length ? validLayout : defaultLayout
+  const [layout, setLayout] = useState(validLayout?.length ? validLayout : defaultLayout);
+  const [titles, setTitles] = useState(() =>
+    JSON.parse(localStorage.getItem('widgetTitles') || '{}')
   );
-  const [titles, setTitles] = useState(
-    () => JSON.parse(localStorage.getItem('widgetTitles')) || {}
+  const [favorites, setFavs] = useState(() =>
+    JSON.parse(localStorage.getItem('widgetFavs') || '{}')
   );
-  const [favorites, setFavs] = useState(
-    () => JSON.parse(localStorage.getItem('widgetFavs')) || {}
-  );
-  const [hidden, setHidden] = useState(
-    () => JSON.parse(localStorage.getItem('widgetHidden')) || []
+  const [hidden, setHidden] = useState(() =>
+    JSON.parse(localStorage.getItem('widgetHidden') || '[]')
   );
 
-  // Persist changes
+  // Persist to localStorage on changes
   useEffect(() => localStorage.setItem('dashboardLayout', JSON.stringify(layout)), [layout]);
   useEffect(() => localStorage.setItem('widgetTitles', JSON.stringify(titles)), [titles]);
   useEffect(() => localStorage.setItem('widgetFavs', JSON.stringify(favorites)), [favorites]);
   useEffect(() => localStorage.setItem('widgetHidden', JSON.stringify(hidden)), [hidden]);
 
+  // Handlers
   const onLayoutChange = (newLayout) => setLayout(newLayout);
   const handleRename = (id, newTitle) => setTitles((t) => ({ ...t, [id]: newTitle }));
   const handleFav = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
   const handleHide = (id) => setHidden((h) => Array.from(new Set([...h, id])));
 
+  // Settings panel state
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsWidgetId, setSettingsWidgetId] = useState(null);
   const handleOpenSettings = (id) => {
@@ -55,23 +59,23 @@ export default function Dashboard() {
     setSettingsOpen(true);
   };
 
-  // ◀️ UNHIDE WIDGETS by filtering out any hidden IDs
-  const visibleWidgets = widgetLibrary.filter(({ id }) => !hidden.includes(id));
-
+  // Filter out hidden widgets
+  const visibleWidgets = widgetLibrary.filter((w) => !hidden.includes(w.id));
   const pinnedWidgets = visibleWidgets.filter((w) => favorites[w.id]);
   const otherWidgets = visibleWidgets.filter((w) => !favorites[w.id]);
 
-  const renderWidgets = (widgets) =>
-    widgets.map(({ id, defaultTitle, Component }) => {
-      const widgetLayout = layout.find((l) => l.i === id);
-      if (!widgetLayout) return null;
+  // Render helper
+  const renderWidgets = (list) =>
+    list.map(({ id, title, component: Component }) => {
+      const cfg = layout.find((l) => l.i === id);
+      if (!cfg) return null;
       return (
-        <div key={id} data-grid={widgetLayout}>
+        <div key={id} data-grid={cfg}>
           <WidgetWrapper
             id={id}
-            title={titles[id] || defaultTitle}
+            title={titles[id] || title}
             loading={false}
-            favorite={Boolean(favorites[id])}
+            favorite={!!favorites[id]}
             onRename={handleRename}
             onToggleFavorite={handleFav}
             onHide={handleHide}
@@ -106,9 +110,9 @@ export default function Dashboard() {
         widgetId={settingsWidgetId}
       />
 
-      {/* Green “+” button → Widget Library */}
+      {/* Green “+” button to open your widget library */}
       <Link
-        to="/widgets"  {/* swap this if your library route is different */}
+        to="/widgets"
         className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
       >
         <FaPlus size={24} />
