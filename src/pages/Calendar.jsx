@@ -1,93 +1,101 @@
-// File: src/pages/CalendarPage.jsx
+// src/pages/Calendar.jsx
 import React, { useState } from 'react';
 import {
-  FaChevronLeft,
-  FaChevronRight
-} from 'react-icons/fa';
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  subMonths,
+  addMonths,
+} from 'date-fns';
 
-export default function CalendarPage() {
-  const [current, setCurrent] = useState(new Date());
+export default function Calendar() {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  const monthNames = [
-    'January','February','March','April','May','June',
-    'July','August','September','October','November','December'
-  ];
-  const daysOfWeek = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const monthStart   = startOfMonth(currentMonth);
+  const monthEnd     = endOfMonth(monthStart);
+  const startDate    = startOfWeek(monthStart);
+  const endDate      = endOfWeek(monthEnd);
 
-  const year = current.getFullYear();
-  const month = current.getMonth();
-  const today = new Date();
+  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  // first day index (0=Sun)
-  const firstDay = new Date(year, month, 1).getDay();
-  // number of days in this month
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const renderHeader = () => (
+    <div className="flex justify-between items-center mb-4">
+      <button
+        onClick={prevMonth}
+        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        &lt;
+      </button>
+      <h2 className="text-xl font-semibold">
+        {format(currentMonth, 'MMMM yyyy')}
+      </h2>
+      <button
+        onClick={nextMonth}
+        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        &gt;
+      </button>
+    </div>
+  );
 
-  // build an array of 42 cells (6 weeks)
-  const cells = [];
-  for (let i = 0; i < firstDay; i++) {
-    cells.push(null);
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push(d);
-  }
-  while (cells.length % 7 !== 0) {
-    cells.push(null);
-  }
+  const renderDays = () => {
+    const days = [];
+    const dateFormat = 'EEEEEE';
+    const start = startOfWeek(monthStart);
 
-  const prevMonth = () => {
-    setCurrent(new Date(year, month - 1, 1));
+    for (let i = 0; i < 7; i++) {
+      days.push(
+        <div key={i} className="text-center font-medium text-gray-700">
+          {format(addDays(start, i), dateFormat)}
+        </div>
+      );
+    }
+
+    return <div className="grid grid-cols-7 mb-2">{days}</div>;
   };
-  const nextMonth = () => {
-    setCurrent(new Date(year, month + 1, 1));
+
+  const renderCells = () => {
+    const rows = [];
+    let days = [];
+    let day  = startDate;
+    const dateFormat = 'd';
+
+    while (day <= endDate) {
+      for (let i = 0; i < 7; i++) {
+        const isCurrentMonth = day.getMonth() === monthStart.getMonth();
+        days.push(
+          <div
+            key={day}
+            className={`h-20 border p-1 ${
+              isCurrentMonth ? 'bg-white' : 'bg-gray-100 text-gray-400'
+            }`}
+          >
+            <span className="text-sm">{format(day, dateFormat)}</span>
+            {/* Placeholder for events */}
+            <div className="mt-1 text-xs text-blue-500">
+              {/* e.g. Event 1 */}
+            </div>
+          </div>
+        );
+        day = addDays(day, 1);
+      }
+      rows.push(<div key={day} className="grid grid-cols-7">{days}</div>);
+      days = [];
+    }
+    return <div>{rows}</div>;
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="p-2 hover:bg-gray-200 rounded">
-          <FaChevronLeft />
-        </button>
-        <h2 className="text-xl font-semibold">
-          {monthNames[month]} {year}
-        </h2>
-        <button onClick={nextMonth} className="p-2 hover:bg-gray-200 rounded">
-          <FaChevronRight />
-        </button>
-      </div>
-
-      {/* Weekday labels */}
-      <div className="grid grid-cols-7 text-center font-medium text-gray-600 mb-1">
-        {daysOfWeek.map((d) => (
-          <div key={d}>{d}</div>
-        ))}
-      </div>
-
-      {/* Days grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map((day, idx) => {
-          const isToday =
-            day === today.getDate() &&
-            month === today.getMonth() &&
-            year === today.getFullYear();
-
-          return (
-            <div
-              key={idx}
-              className={`
-                h-10 flex items-center justify-center 
-                rounded 
-                ${day ? 'cursor-pointer' : ''}
-                ${isToday 
-                  ? 'bg-blue-500 text-white' 
-                  : 'hover:bg-blue-100'}
-              `}
-            >
-              {day || ''}
-            </div>
-          );
-        })}
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Calendar</h1>
+      <div className="bg-white shadow rounded p-4">
+        {renderHeader()}
+        {renderDays()}
+        {renderCells()}
       </div>
     </div>
   );
