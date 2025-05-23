@@ -1,3 +1,4 @@
+// src/pages/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
 import WidgetWrapper from '../components/WidgetWrapper';
@@ -23,17 +24,20 @@ export default function Dashboard() {
     ? savedLayout.filter((l) => widgetLibrary.some((w) => w.id === l.i))
     : null;
 
-  const [layout, setLayout] = useState(() => validLayout?.length ? validLayout : defaultLayout);
-  const [titles, setTitles] = useState(() =>
-    JSON.parse(localStorage.getItem('widgetTitles')) || {}
+  const [layout, setLayout] = useState(() =>
+    validLayout?.length ? validLayout : defaultLayout
   );
-  const [favorites, setFavs] = useState(() =>
-    JSON.parse(localStorage.getItem('widgetFavs')) || {}
+  const [titles, setTitles] = useState(
+    () => JSON.parse(localStorage.getItem('widgetTitles')) || {}
   );
-  const [hidden, setHidden] = useState(() =>
-    JSON.parse(localStorage.getItem('widgetHidden')) || []
+  const [favorites, setFavs] = useState(
+    () => JSON.parse(localStorage.getItem('widgetFavs')) || {}
+  );
+  const [hidden, setHidden] = useState(
+    () => JSON.parse(localStorage.getItem('widgetHidden')) || []
   );
 
+  // Persist changes
   useEffect(() => localStorage.setItem('dashboardLayout', JSON.stringify(layout)), [layout]);
   useEffect(() => localStorage.setItem('widgetTitles', JSON.stringify(titles)), [titles]);
   useEffect(() => localStorage.setItem('widgetFavs', JSON.stringify(favorites)), [favorites]);
@@ -51,23 +55,16 @@ export default function Dashboard() {
     setSettingsOpen(true);
   };
 
-  const visibleWidgets = []; // Temporarily disable all widgets
+  // ◀️ UNHIDE WIDGETS by filtering out any hidden IDs
+  const visibleWidgets = widgetLibrary.filter(({ id }) => !hidden.includes(id));
+
   const pinnedWidgets = visibleWidgets.filter((w) => favorites[w.id]);
   const otherWidgets = visibleWidgets.filter((w) => !favorites[w.id]);
 
   const renderWidgets = (widgets) =>
     widgets.map(({ id, defaultTitle, Component }) => {
-      if (typeof Component !== 'function') {
-        console.warn(`❌ Skipping widget "${id}" — invalid or missing component`);
-        return null;
-      }
-
       const widgetLayout = layout.find((l) => l.i === id);
-      if (!widgetLayout) {
-        console.warn(`⚠️ Missing layout for widget "${id}"`);
-        return null;
-      }
-
+      if (!widgetLayout) return null;
       return (
         <div key={id} data-grid={widgetLayout}>
           <WidgetWrapper
@@ -109,8 +106,9 @@ export default function Dashboard() {
         widgetId={settingsWidgetId}
       />
 
+      {/* Green “+” button → Widget Library */}
       <Link
-        to="/widgets"
+        to="/widgets"  {/* swap this if your library route is different */}
         className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
       >
         <FaPlus size={24} />
