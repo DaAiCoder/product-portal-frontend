@@ -93,24 +93,28 @@ const EmailPage = () => {
         <div className="grid grid-cols-2 gap-4 mb-3">
           <button
             onClick={() => openOAuthPopup('google')}
+            type="button"
             className="flex items-center justify-center gap-2 p-3 border rounded-lg shadow-sm hover:bg-gray-100 text-red-500"
           >
             <FaGoogle /> Gmail
           </button>
           <button
             onClick={() => openOAuthPopup('yahoo')}
+            type="button"
             className="flex items-center justify-center gap-2 p-3 border rounded-lg shadow-sm hover:bg-gray-100 text-purple-600"
           >
             <FaYahoo /> Yahoo
           </button>
           <button
             onClick={() => openOAuthPopup('hotmail')}
+            type="button"
             className="flex items-center justify-center gap-2 p-3 border rounded-lg shadow-sm hover:bg-gray-100 text-blue-600"
           >
             <FaMicrosoft /> Outlook/Hotmail
           </button>
           <button
             onClick={() => openOAuthPopup('manual')}
+            type="button"
             className="flex items-center justify-center gap-2 p-3 border rounded-lg shadow-sm hover:bg-gray-100 text-gray-600"
           >
             <FaEnvelope /> Other/Manual
@@ -119,6 +123,7 @@ const EmailPage = () => {
         <button
           className="mt-6 w-full text-center text-blue-600 hover:text-blue-800 text-sm"
           onClick={() => setShowModal(false)}
+          type="button"
         >
           Cancel
         </button>
