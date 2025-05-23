@@ -1,74 +1,59 @@
-// File: src/utils/sidebarLinks.js
-import {
-  FaEnvelope,
-  FaCalendarAlt,
-  FaStickyNote,
-  FaFolderOpen,
-  FaClock,
-  FaFacebook,
-  FaInstagram,
-  FaTwitter,
-  FaRss,
-  FaComments,
-  FaCubes,
-} from 'react-icons/fa';
-
-import { widgetLibrary } from './widgetLibrary';
-
-const widgetIcons = {
-  datetime: '📅',
-  stopwatch: '⏱️',
-  quote: '💬',
-  weather: '☁️',
-  aisummary: '🧠',
-  chat: '💬',
-  calculator: '🧮',
-  worldclock: '🌍',
-};
+// src/utils/sidebarLinks.js
+import { FaEnvelope, FaCalendarAlt, FaStickyNote, FaBell, FaLayerGroup, FaInstagram, FaTwitter, FaFacebook, FaRedditAlien, FaFolderOpen, FaComments, FaRss, FaFire, FaYoutube, FaMusic, FaPodcast } from 'react-icons/fa';
 
 export const sidebarSections = [
   {
     id: 'productivity',
     label: 'Productivity',
-    color: 'blue',
-    icon: null,
+    icon: <FaLayerGroup />,
     items: [
-      { id: 'email', to: '/email', icon: <FaEnvelope />, label: 'Email' }, // ✅ Links to emailpage.js route
-      { id: 'calendar', to: '/calendar', icon: <FaCalendarAlt />, label: 'Calendar' },
-      { id: 'notes', to: '/notes', icon: <FaStickyNote />, label: 'Notes' },
-      { id: 'files', to: '/files', icon: <FaFolderOpen />, label: 'Files' },
-      { id: 'clock', to: '/clock', icon: <FaClock />, label: 'Clock' },
+      { id: 'email', label: 'Email', icon: <FaEnvelope />, to: '/emailpage' },
+      { id: 'calendar', label: 'Calendar', icon: <FaCalendarAlt />, to: '/calendar' },
+      { id: 'notes', label: 'Notes', icon: <FaStickyNote />, to: '/notes' },
+      { id: 'reminders', label: 'Reminders', icon: <FaBell />, to: '/reminders' },
     ],
   },
   {
-    id: 'social',
+    id: 'social-feeds',
     label: 'Social Feeds',
-    color: 'green',
-    icon: null,
+    icon: <FaLayerGroup />,
     items: [
-      { id: 'facebook', to: '/social/facebook', icon: <FaFacebook />, label: 'Facebook' },
-      { id: 'instagram', to: '/social/instagram', icon: <FaInstagram />, label: 'Instagram' },
-      { id: 'twitter', to: '/social/twitter', icon: <FaTwitter />, label: 'Twitter (X)' },
-      { id: 'rss', to: '/social/rss', icon: <FaRss />, label: 'RSS Feeds' },
+      { id: 'unified', label: 'Unified Feed', icon: <FaLayerGroup />, to: '/unified' },
+      { id: 'instagram', label: 'Instagram', icon: <FaInstagram />, to: '/instagram' },
+      { id: 'twitter', label: 'Twitter/X', icon: <FaTwitter />, to: '/twitter' },
+      { id: 'facebook', label: 'Facebook', icon: <FaFacebook />, to: '/facebook' },
+      { id: 'reddit', label: 'Reddit', icon: <FaRedditAlien />, to: '/reddit' },
     ],
+  },
+  {
+    id: 'file-manager',
+    label: 'File Manager',
+    icon: <FaFolderOpen />,
+    to: '/files',
   },
   {
     id: 'chat',
     label: 'Chat',
-    color: 'purple',
     icon: <FaComments />,
     to: '/chat',
   },
   {
-    id: 'widgets',
-    label: 'Widgets',
-    color: 'gray',
-    icon: <FaCubes />,
-    items: widgetLibrary.map((w) => ({
-      id: w.id,
-      to: `/widgets/${w.id}`,
-      icon: widgetIcons[w.id] || '🧩',
-      label: w.defaultTitle,
-    })),
+    id: 'news',
+    label: 'News',
+    icon: <FaRss />,
+    items: [
+      { id: 'rss', label: 'RSS Feeds', icon: <FaRss />, to: '/rss' },
+      { id: 'trending', label: 'Trending', icon: <FaFire />, to: '/trending' },
+    ],
+  },
+  {
+    id: 'video-media',
+    label: 'Video & Media',
+    icon: <FaYoutube />,
+    items: [
+      { id: 'youtube', label: 'YouTube', icon: <FaYoutube />, to: '/youtube' },
+      { id: 'music', label: 'Music', icon: <FaMusic />, to: '/music' },
+      { id: 'podcasts', label: 'Podcasts', icon: <FaPodcast />, to: '/podcasts' },
+    ],
   },
 ];
