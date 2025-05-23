@@ -18,7 +18,7 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import FeedsPage from './pages/feeds';            // ← feeds.js for News
 import Email from './pages/emailpage';
-import Calendar from './pages/calendar';
+import Calendar from './pages/Calendar';
 import Notes from './pages/notes';
 import Files from './pages/files';
 import Clock from './pages/clock';
