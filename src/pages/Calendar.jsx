@@ -10,33 +10,28 @@ import {
   subMonths,
   addMonths,
 } from 'date-fns';
+import { FaRobot } from 'react-icons/fa';
+import AiPromptModal from '../components/AiPromptModal';
 
 export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [aiOpen, setAiOpen] = useState(false);
 
-  const monthStart   = startOfMonth(currentMonth);
-  const monthEnd     = endOfMonth(monthStart);
-  const startDate    = startOfWeek(monthStart);
-  const endDate      = endOfWeek(monthEnd);
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd   = endOfMonth(monthStart);
+  const startDate  = startOfWeek(monthStart);
+  const endDate    = endOfWeek(monthEnd);
 
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   const renderHeader = () => (
     <div className="flex justify-between items-center mb-4">
-      <button
-        onClick={prevMonth}
-        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-      >
+      <button onClick={prevMonth} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
         &lt;
       </button>
-      <h2 className="text-xl font-semibold">
-        {format(currentMonth, 'MMMM yyyy')}
-      </h2>
-      <button
-        onClick={nextMonth}
-        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-      >
+      <h2 className="text-xl font-semibold">{format(currentMonth, 'MMMM yyyy')}</h2>
+      <button onClick={nextMonth} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
         &gt;
       </button>
     </div>
@@ -76,9 +71,7 @@ export default function Calendar() {
           >
             <span className="text-sm">{format(day, dateFormat)}</span>
             {/* Placeholder for events */}
-            <div className="mt-1 text-xs text-blue-500">
-              {/* e.g. Event 1 */}
-            </div>
+            <div className="mt-1 text-xs text-blue-500"></div>
           </div>
         );
         day = addDays(day, 1);
@@ -91,7 +84,25 @@ export default function Calendar() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Calendar</h1>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">Calendar</h1>
+        <button
+          onClick={() => setAiOpen(true)}
+          className="flex items-center space-x-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+        >
+          <FaRobot /><span>AI</span>
+        </button>
+      </div>
+
+      <AiPromptModal
+        isOpen={aiOpen}
+        onClose={() => setAiOpen(false)}
+        defaultPrompt="Generate an agenda for next week’s events."
+        context={{}}
+      />
+
+      {/* Calendar */}
       <div className="bg-white shadow rounded p-4">
         {renderHeader()}
         {renderDays()}

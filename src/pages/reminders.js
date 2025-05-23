@@ -1,30 +1,28 @@
 // src/pages/reminders.js
 import React, { useState } from 'react';
+import { FaRobot } from 'react-icons/fa';
+import AiPromptModal from '../components/AiPromptModal';
 
 export default function Reminders() {
   const [reminders, setReminders] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [datetime, setDatetime] = useState('');
+  const [showForm, setShowForm]   = useState(false);
+  const [title, setTitle]         = useState('');
+  const [datetime, setDatetime]   = useState('');
+  const [aiOpen, setAiOpen]       = useState(false);
 
   const handleAddClick = () => setShowForm(true);
-
-  const handleCancel = () => {
+  const handleCancel   = () => {
     setShowForm(false);
     setTitle('');
     setDatetime('');
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit   = e => {
     e.preventDefault();
     if (!title || !datetime) return;
-    setReminders([
-      ...reminders,
-      { id: Date.now(), title, datetime }
-    ]);
+    setReminders([...reminders, { id: Date.now(), title, datetime }]);
+    setShowForm(false);
     setTitle('');
     setDatetime('');
-    setShowForm(false);
   };
 
   return (
@@ -33,25 +31,30 @@ export default function Reminders() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Reminders</h1>
         <button
-          onClick={handleAddClick}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={() => setAiOpen(true)}
+          className="flex items-center space-x-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
         >
-          Add Reminder
+          <FaRobot /><span>AI</span>
         </button>
       </div>
 
+      <AiPromptModal
+        isOpen={aiOpen}
+        onClose={() => setAiOpen(false)}
+        defaultPrompt="Suggest smart reminders based on my upcoming tasks."
+        context={{ reminders }}
+      />
+
       {/* Form */}
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white shadow-md rounded p-6 mb-6 max-w-md"
-        >
+        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 mb-6 max-w-md">
+          {/* ...existing form fields... */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Title</label>
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={e => setTitle(e.target.value)}
               className="w-full border-gray-300 border rounded p-2"
               placeholder="Reminder title"
               required
@@ -62,7 +65,7 @@ export default function Reminders() {
             <input
               type="datetime-local"
               value={datetime}
-              onChange={(e) => setDatetime(e.target.value)}
+              onChange={e => setDatetime(e.target.value)}
               className="w-full border-gray-300 border rounded p-2"
               required
             />
@@ -85,10 +88,10 @@ export default function Reminders() {
         </form>
       )}
 
-      {/* Reminders List */}
+      {/* List */}
       {reminders.length > 0 ? (
         <div className="space-y-4">
-          {reminders.map((rem) => (
+          {reminders.map(rem => (
             <div
               key={rem.id}
               className="border border-gray-200 rounded p-4 hover:shadow-lg transition-shadow"
@@ -106,6 +109,5 @@ export default function Reminders() {
         <p className="text-gray-500">No reminders yet. Click “Add Reminder” to get started.</p>
       )}
     </div>
-);
+  );
 }
-
