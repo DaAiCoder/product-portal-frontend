@@ -1,4 +1,4 @@
-// src/pages/Dashboard.js
+// File: src/pages/Dashboard.js
 
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
@@ -12,7 +12,6 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 export default function Dashboard() {
-  // Build default grid layout from your widget library
   const defaultLayout = widgetLibrary.map((w, i) => ({
     i: w.id,
     x: (i * w.w) % 12,
@@ -21,12 +20,10 @@ export default function Dashboard() {
     h: w.h,
   }));
 
-  // Load saved layout (if valid), else fallback to default
   const saved = localStorage.getItem('dashboardLayout');
   const parsed = saved ? JSON.parse(saved) : null;
   const validSaved =
-    Array.isArray(parsed) &&
-    parsed.every((l) => widgetLibrary.some((w) => w.id === l.i))
+    Array.isArray(parsed) && parsed.every((l) => widgetLibrary.some((w) => w.id === l.i))
       ? parsed
       : null;
 
@@ -41,7 +38,6 @@ export default function Dashboard() {
     JSON.parse(localStorage.getItem('widgetHidden') || '[]')
   );
 
-  // Persist on change
   useEffect(() => {
     localStorage.setItem('dashboardLayout', JSON.stringify(layout));
   }, [layout]);
@@ -55,7 +51,6 @@ export default function Dashboard() {
     localStorage.setItem('widgetHidden', JSON.stringify(hidden));
   }, [hidden]);
 
-  // Handlers
   const onLayoutChange = (newLayout) => setLayout(newLayout);
   const handleRename = (id, newTitle) =>
     setTitles((t) => ({ ...t, [id]: newTitle }));
@@ -63,7 +58,6 @@ export default function Dashboard() {
   const handleHide = (id) =>
     setHidden((h) => Array.from(new Set([...h, id])));
 
-  // Settings panel state
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsWidgetId, setSettingsWidgetId] = useState(null);
   const handleOpenSettings = (id) => {
@@ -71,18 +65,16 @@ export default function Dashboard() {
     setSettingsOpen(true);
   };
 
-  // Only show widgets not in the hidden list
   const visibleWidgets = widgetLibrary.filter((w) => !hidden.includes(w.id));
   const pinnedWidgets = visibleWidgets.filter((w) => favorites[w.id]);
   const otherWidgets = visibleWidgets.filter((w) => !favorites[w.id]);
 
-  // Render helper
   const renderWidgets = (list) =>
     list.map(({ id, label, component: Component }) => {
       const cfg = layout.find((l) => l.i === id);
       if (!cfg) return null;
       if (typeof Component !== 'function') {
-        console.warn(`Widget "${id}" has no valid component.`);
+        console.warn(\`Widget "\${id}" has no valid component.\`);
         return null;
       }
       return (
@@ -126,10 +118,10 @@ export default function Dashboard() {
         widgetId={settingsWidgetId}
       />
 
-      {/* Green “+” button linking to the widget library */}
+      {/* Green “+” button moved to top-right */}
       <Link
         to="/widget-library"
-        className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
+        className="fixed top-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
       >
         <FaPlus size={24} />
       </Link>
