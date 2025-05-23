@@ -1,112 +1,112 @@
-// src/pages/Calendar.jsx
-import React, { useState } from 'react';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  addDays,
-  subMonths,
-  addMonths,
-} from 'date-fns';
-import { FaRobot } from 'react-icons/fa';
-import AiPromptModal from '../components/AiPromptModal';
+// File: src/pages/Calendar.jsx
 
-export default function Calendar() {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [aiOpen, setAiOpen] = useState(false);
+import React, { useState, useEffect } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { v4 as uuidv4 } from 'uuid';
+import CategoryManager from '../components/CategoryManager';
 
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd   = endOfMonth(monthStart);
-  const startDate  = startOfWeek(monthStart);
-  const endDate    = endOfWeek(monthEnd);
+export default function CalendarPage() {
+  const [events, setEvents] = useState([]);
+  const [holidays, setHolidays] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  // Load user events
+  useEffect(() => {
+    const saved = localStorage.getItem('calendarEvents');
+    if (saved) setEvents(JSON.parse(saved));
+  }, []);
 
-  const renderHeader = () => (
-    <div className="flex justify-between items-center mb-4">
-      <button onClick={prevMonth} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
-        &lt;
-      </button>
-      <h2 className="text-xl font-semibold">{format(currentMonth, 'MMMM yyyy')}</h2>
-      <button onClick={nextMonth} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
-        &gt;
-      </button>
-    </div>
-  );
+  // Persist user events
+  useEffect(() => {
+    localStorage.setItem('calendarEvents', JSON.stringify(events));
+  }, [events]);
 
-  const renderDays = () => {
-    const days = [];
-    const dateFormat = 'EEEEEE';
-    const start = startOfWeek(monthStart);
+  // Fetch US public holidays for current year
+  useEffect(() => {
+    const year = new Date().getFullYear();
+    fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/US`)
+      .then((res) => res.json())
+      .then((data) =>
+        setHolidays(
+          data.map((h) => ({
+            id: h.date,
+            title: h.localName,
+            start: h.date,
+            allDay: true,
+            color: '#ff495c',
+          }))
+        )
+      )
+      .catch(console.error);
+  }, []);
 
-    for (let i = 0; i < 7; i++) {
-      days.push(
-        <div key={i} className="text-center font-medium text-gray-700">
-          {format(addDays(start, i), dateFormat)}
-        </div>
+  // Build map of category name to color
+  const categoryColors = categories.reduce((map, c) => {
+    map[c.name] = c.color;
+    return map;
+  }, {});
+
+  const handleDateClick = (info) => {
+    const title = prompt('Event title:');
+    if (!title) return;
+    if (categories.length) {
+      const cat = prompt(
+        'Category name (' + categories.map((c) => c.name).join(', ') + '):'
       );
+      const color = categoryColors[cat] || '#3788d8';
+      const newEvent = {
+        id: uuidv4(),
+        title,
+        start: info.dateStr,
+        color,
+      };
+      setEvents((prev) => [...prev, newEvent]);
+    } else {
+      // no categories defined yet
+      const newEvent = {
+        id: uuidv4(),
+        title,
+        start: info.dateStr,
+        color: '#3788d8',
+      };
+      setEvents((prev) => [...prev, newEvent]);
     }
-
-    return <div className="grid grid-cols-7 mb-2">{days}</div>;
-  };
-
-  const renderCells = () => {
-    const rows = [];
-    let days = [];
-    let day  = startDate;
-    const dateFormat = 'd';
-
-    while (day <= endDate) {
-      for (let i = 0; i < 7; i++) {
-        const isCurrentMonth = day.getMonth() === monthStart.getMonth();
-        days.push(
-          <div
-            key={day}
-            className={`h-20 border p-1 ${
-              isCurrentMonth ? 'bg-white' : 'bg-gray-100 text-gray-400'
-            }`}
-          >
-            <span className="text-sm">{format(day, dateFormat)}</span>
-            {/* Placeholder for events */}
-            <div className="mt-1 text-xs text-blue-500"></div>
-          </div>
-        );
-        day = addDays(day, 1);
-      }
-      rows.push(<div key={day} className="grid grid-cols-7">{days}</div>);
-      days = [];
-    }
-    return <div>{rows}</div>;
   };
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">Calendar</h1>
-        <button
-          onClick={() => setAiOpen(true)}
-          className="flex items-center space-x-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-        >
-          <FaRobot /><span>AI</span>
-        </button>
+    <div className="flex p-6 space-x-4">
+      <div className="w-64">
+        <CategoryManager onCategoriesChange={setCategories} />
       </div>
-
-      <AiPromptModal
-        isOpen={aiOpen}
-        onClose={() => setAiOpen(false)}
-        defaultPrompt="Generate an agenda for next week’s events."
-        context={{}}
-      />
-
-      {/* Calendar */}
-      <div className="bg-white shadow rounded p-4">
-        {renderHeader()}
-        {renderDays()}
-        {renderCells()}
+      <div className="flex-1">
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          }}
+          events={[...holidays, ...events]}
+          dateClick={handleDateClick}
+          editable={true}
+          selectable={true}
+          eventClick={(info) => {
+            if (
+              window.confirm(
+                `Delete event '${info.event.title}'?`
+              )
+            ) {
+              setEvents((prev) =>
+                prev.filter((e) => e.id !== info.event.id)
+              );
+            }
+          }}
+          height="auto"
+        />
       </div>
     </div>
   );
