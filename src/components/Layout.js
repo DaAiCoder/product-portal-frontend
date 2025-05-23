@@ -1,4 +1,4 @@
-// File: src/components/Layout.js
+// src/components/Layout.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -15,13 +15,14 @@ import {
 } from 'react-icons/fa';
 
 export default function Layout({ children }) {
-  const [theme, setTheme] = useState('light');
-  const [bgIndex, setBgIndex] = useState(0);
+  const [theme, setTheme]       = useState('light');
+  const [bgIndex, setBgIndex]   = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(
     () => JSON.parse(localStorage.getItem('focusMode')) || false
   );
-  const [query, setQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const isAuthenticated = Boolean(localStorage.getItem('authToken'));
   const navigate = useNavigate();
   const menuRef = useRef();
@@ -33,7 +34,7 @@ export default function Layout({ children }) {
     'https://source.unsplash.com/1600x900/?beach',
   ];
 
-  // Load & persist theme
+  // Theme persistence :contentReference[oaicite:0]{index=0}
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored) setTheme(stored);
@@ -45,18 +46,18 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Rotate background every 10s
+  // Background rotate every 10s :contentReference[oaicite:1]{index=1}
   useEffect(() => {
     const iv = setInterval(() => setBgIndex(i => (i + 1) % bgImages.length), 10000);
     return () => clearInterval(iv);
   }, []);
 
-  // Persist focus mode
+  // Focus mode persistence :contentReference[oaicite:2]{index=2}
   useEffect(() => {
     localStorage.setItem('focusMode', JSON.stringify(focusMode));
   }, [focusMode]);
 
-  // Close profile menu when clicking outside
+  // Close profile menu on outside click :contentReference[oaicite:3]{index=3}
   useEffect(() => {
     const handler = e => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -76,6 +77,15 @@ export default function Layout({ children }) {
     window.location.reload();
   };
 
+  // Generic search suggestions
+  const suggestions = [
+    'Email','Calendar','Notes','Files','Chat','Unified','Instagram',
+    'Twitter','Facebook','Reddit','Feeds','Trending','YouTube','Music','Podcasts','Reminders'
+  ];
+  const filtered = suggestions.filter(item =>
+    item.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className={`
       min-h-screen flex flex-col 
@@ -89,30 +99,45 @@ export default function Layout({ children }) {
       `}>
         <div className="max-w-7xl mx-auto py-4 px-6 flex items-center">
           {/* Logo */}
-          <h1 className="flex-none text-2xl font-bold text-gray-800 dark:text-gray-200">
+          <h1
+            className="flex-none text-2xl font-bold text-gray-800 dark:text-gray-200 cursor-pointer"
+            onClick={() => navigate('/')}
+          >
             Product Portal
           </h1>
 
-          {/* AI Prompt Box */}
-          <div className="flex-grow px-4">
+          {/* ===== Generic Search Box ===== */}
+          <div className="relative flex-grow px-4">
             <input
               type="text"
-              placeholder="Ask anything"
+              placeholder="Search…"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  console.log('Ask:', query);
-                  // TODO: wire up AI handler
-                }
-              }}
             />
+            {showSuggestions && filtered.length > 0 && (
+              <ul className="absolute mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto z-50">
+                {filtered.map((item, idx) => (
+                  <li
+                    key={idx}
+                    onMouseDown={() => {
+                      navigate(`/${item.toLowerCase()}`);
+                      setSearchTerm('');
+                      setShowSuggestions(false);
+                    }}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Right nav */}
           <nav className="flex-none flex items-center space-x-4">
-            {/* Focus Mode */}
             <button
               onClick={toggleFocus}
               className="flex items-center space-x-1 px-3 py-1 bg-yellow-400 text-white rounded"
@@ -123,23 +148,19 @@ export default function Layout({ children }) {
 
             {!focusMode && (
               <>
-                {/* Home */}
                 <Link
                   to="/"
                   className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  <FaHome />
-                  <span>Home</span>
+                  <FaHome /><span>Home</span>
                 </Link>
 
-                {/* Login / Profile */}
                 {!isAuthenticated ? (
                   <Link
                     to="/login"
                     className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   >
-                    <FaSignInAlt />
-                    <span>Login</span>
+                    <FaSignInAlt /><span>Login</span>
                   </Link>
                 ) : (
                   <div className="relative" ref={menuRef}>
@@ -155,25 +176,22 @@ export default function Layout({ children }) {
                       <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
                         <Link
                           to="/profile"
-                          className="flex items-center space-x-1 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="flex items-center space-x-1 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                           onClick={() => setMenuOpen(false)}
                         >
-                          <FaUser />
-                          <span>Profile</span>
+                          <FaUser /><span>Profile</span>
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="flex items-center space-x-1 w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="flex items-center space-x-1 w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          <FaSignInAlt />
-                          <span>Logout</span>
+                          <FaSignInAlt /><span>Logout</span>
                         </button>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Theme toggle */}
                 <button
                   onClick={toggleTheme}
                   className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"

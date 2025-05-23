@@ -1,13 +1,14 @@
 // src/components/HelpWidget.jsx
 import React, { useState } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
+import AiChat from './AiChat';
 
 export default function HelpWidget() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Floating help button */}
+      {/* Floating Help Button */}  
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg z-50"
@@ -16,7 +17,7 @@ export default function HelpWidget() {
         <FaQuestionCircle size={24} />
       </button>
 
-      {/* Full-screen FAQ/Chat modal */}
+      {/* AI Chat Modal */}  
       {open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg w-96 p-4 relative">
@@ -27,9 +28,7 @@ export default function HelpWidget() {
             >
               ×
             </button>
-            <div className="h-80">
-              {/* TODO: Embed your FAQ or AI chat box here */}
-            </div>
+            <AiChat />
           </div>
         </div>
       )}
