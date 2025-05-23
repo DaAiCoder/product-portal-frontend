@@ -34,7 +34,7 @@ const SECTION_KEY = 'sidebarSectionOrder';
 const PROD_KEY    = 'sidebarProdOrder';
 const SOC_KEY     = 'sidebarSocialOrder';
 
-// All section definitions (removed the Widget Library section)
+// All section definitions (Widget Library entry removed)
 const ALL_SECTIONS = {
   productivity: {
     id: 'productivity',
@@ -42,12 +42,12 @@ const ALL_SECTIONS = {
     icon: <FaThLarge />,
     subKey: PROD_KEY,
     defaultItems: [
-      { id: 'email',     to: '/email',     icon: <FaEnvelope/>,    label: 'Email' },
-      { id: 'calendar',  to: '/calendar',  icon: <FaCalendarAlt/>, label: 'Calendar' },
-      { id: 'notes',     to: '/notes',     icon: <FaStickyNote/>,  label: 'Notes' },
-      { id: 'reminders', to: '/reminders', icon: <FaBell/>,         label: 'Reminders' },
-      { id: 'files',     to: '/files',     icon: <FaFolderOpen/>,  label: 'Files' },
-      { id: 'clock',     to: '/clock',     icon: <FaClock/>,        label: 'Clock' },
+      { id: 'email',     to: '/email',     icon: <FaEnvelope />,    label: 'Email' },
+      { id: 'calendar',  to: '/calendar',  icon: <FaCalendarAlt />, label: 'Calendar' },
+      { id: 'notes',     to: '/notes',     icon: <FaStickyNote />,  label: 'Notes' },
+      { id: 'reminders', to: '/reminders', icon: <FaBell />,         label: 'Reminders' },
+      { id: 'files',     to: '/files',     icon: <FaFolderOpen />,  label: 'Files' },
+      { id: 'clock',     to: '/clock',     icon: <FaClock />,        label: 'Clock' },
     ],
   },
   social: {
@@ -56,11 +56,11 @@ const ALL_SECTIONS = {
     icon: <FaShareAlt />,
     subKey: SOC_KEY,
     defaultItems: [
-      { id: 'unified',   to: '/unified',   icon: <FaThLarge/>,     label: 'Unified Feed' },
-      { id: 'instagram', to: '/instagram', icon: <FaInstagram/>,   label: 'Instagram' },
-      { id: 'twitter',   to: '/twitter',   icon: <FaTwitter/>,     label: 'Twitter/X' },
-      { id: 'facebook',  to: '/facebook',  icon: <FaFacebook/>,    label: 'Facebook' },
-      { id: 'reddit',    to: '/reddit',    icon: <FaRedditAlien/>, label: 'Reddit' },
+      { id: 'unified',   to: '/unified',   icon: <FaThLarge />,     label: 'Unified Feed' },
+      { id: 'instagram', to: '/instagram', icon: <FaInstagram />,   label: 'Instagram' },
+      { id: 'twitter',   to: '/twitter',   icon: <FaTwitter />,     label: 'Twitter/X' },
+      { id: 'facebook',  to: '/facebook',  icon: <FaFacebook />,    label: 'Facebook' },
+      { id: 'reddit',    to: '/reddit',    icon: <FaRedditAlien />, label: 'Reddit' },
     ],
   },
   chat: {
@@ -74,8 +74,8 @@ const ALL_SECTIONS = {
     label: 'News',
     icon: <FaRss />,
     defaultItems: [
-      { id: 'feeds',    to: '/feeds',    icon: <FaRss/>,  label: 'RSS Subscriptions' },
-      { id: 'trending', to: '/trending', icon: <FaFire/>, label: 'Trending Topics' },
+      { id: 'feeds',    to: '/feeds',    icon: <FaRss />,  label: 'RSS Subscriptions' },
+      { id: 'trending', to: '/trending', icon: <FaFire />, label: 'Trending Topics' },
     ],
   },
   media: {
@@ -83,9 +83,9 @@ const ALL_SECTIONS = {
     label: 'Video & Media',
     icon: <FaYoutube />,
     defaultItems: [
-      { id: 'youtube',  to: '/youtube',  icon: <FaYoutube/>, label: 'YouTube Feeds' },
-      { id: 'music',    to: '/music',    icon: <FaMusic/>,   label: 'Music Discovery' },
-      { id: 'podcasts', to: '/podcasts', icon: <FaPodcast/>, label: 'Podcasts' },
+      { id: 'youtube',  to: '/youtube',  icon: <FaYoutube />, label: 'YouTube Feeds' },
+      { id: 'music',    to: '/music',    icon: <FaMusic />,   label: 'Music Discovery' },
+      { id: 'podcasts', to: '/podcasts', icon: <FaPodcast />, label: 'Podcasts' },
     ],
   },
 };
@@ -152,11 +152,11 @@ export default function Sidebar() {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <nav
-        className={\`
-          fixed top-0 left-0 h-full bg-white shadow-lg flex flex-col py-4
-          transition-all duration-300 z-30 \${collapsed ? 'w-16' : 'w-64'}
-        \`}
+        className={`fixed top-0 left-0 h-full bg-white shadow-lg flex flex-col py-4 transition-all duration-300 z-30 ${
+          collapsed ? 'w-16' : 'w-64'
+        }`}
       >
+        {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="p-2 mx-2 rounded hover:bg-gray-100 transition-colors"
@@ -164,13 +164,10 @@ export default function Sidebar() {
           <FaBars size={20} />
         </button>
 
+        {/* Sections */}
         <Droppable droppableId="sections" type="SECTION">
           {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="flex-1 overflow-y-auto"
-            >
+            <div ref={provided.innerRef} {...provided.droppableProps} className="flex-1 overflow-y-auto">
               {sectionOrder.map((secId, idx) => {
                 const sec = ALL_SECTIONS[secId];
                 const active = isSectionActive(sec);
@@ -179,20 +176,15 @@ export default function Sidebar() {
                 return (
                   <Draggable key={sec.id} draggableId={sec.id} index={idx}>
                     {(dragProv) => (
-                      <div
-                        ref={dragProv.innerRef}
-                        {...dragProv.draggableProps}
-                        className="mb-4"
-                      >
+                      <div ref={dragProv.innerRef} {...dragProv.draggableProps} className="mb-4">
+                        {/* Section Header */}
                         <button
                           onClick={() =>
                             setOpenSections((os) => ({ ...os, [secId]: !os[secId] }))
                           }
-                          className={\`
-                            flex items-center w-full px-4 py-2 rounded
-                            \${active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'}
-                            hover:bg-gray-100 transition-colors
-                          \`}
+                          className={`flex items-center w-full px-4 py-2 rounded ${
+                            active ? 'bg-gray-200 text-gray-900' : 'text-gray-600'
+                          } hover:bg-gray-100 transition-colors`}
                           {...dragProv.dragHandleProps}
                         >
                           {sec.icon}
@@ -202,16 +194,12 @@ export default function Sidebar() {
                           )}
                         </button>
 
+                        {/* Submenu */}
                         {!collapsed && sec.defaultItems && isOpen && (
                           <Droppable droppableId={sec.subKey} type="ITEM">
                             {(subProv) => (
-                              <div
-                                ref={subProv.innerRef}
-                                {...subProv.droppableProps}
-                                className="ml-8"
-                              >
-                                {(sec.defaultItems ===
-                                ALL_SECTIONS.productivity.defaultItems
+                              <div ref={subProv.innerRef} {...subProv.droppableProps} className="ml-8">
+                                {(sec.defaultItems === ALL_SECTIONS.productivity.defaultItems
                                   ? prodItems
                                   : sec.defaultItems === ALL_SECTIONS.social.defaultItems
                                   ? socItems
@@ -228,11 +216,11 @@ export default function Sidebar() {
                                         <NavLink
                                           to={item.to}
                                           className={({ isActive }) =>
-                                            \`flex items-center px-4 py-2 rounded transition-colors \${
+                                            `flex items-center px-4 py-2 rounded transition-colors ${
                                               isActive
                                                 ? 'bg-gray-300 text-gray-900'
                                                 : 'text-gray-600 hover:bg-gray-100'
-                                            }\`
+                                            }`
                                           }
                                         >
                                           {item.icon}
@@ -258,5 +246,5 @@ export default function Sidebar() {
         </Droppable>
       </nav>
     </DragDropContext>
-);
+  );
 }
