@@ -1,9 +1,12 @@
 // src/components/AiChat.jsx
+
 import React, { useState } from 'react';
 import { Configuration, OpenAIApi } from 'openai';
 
-export default function AiChat() {
-  const [messages, setMessages] = useState([]);
+export default function AiChat({ initialPrompt = '', context = {} }) {
+  const [messages, setMessages] = useState(
+    initialPrompt ? [{ role: 'system', content: initialPrompt }] : []
+  );
   const [input, setInput]     = useState('');
   const [loading, setLoading] = useState(false);
 
