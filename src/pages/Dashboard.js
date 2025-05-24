@@ -12,7 +12,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 export default function Dashboard() {
-  // Build a default layout from widgetLibrary
+  // Build the default layout from widgetLibrary
   const defaultLayout = widgetLibrary.map((w, i) => ({
     i: w.id,
     x: (i * w.w) % 12,
@@ -21,15 +21,21 @@ export default function Dashboard() {
     h: w.h,
   }));
 
-  // Try to load a saved layout, else use default
-  const saved = localStorage.getItem('dashboardLayout');
-  const parsed = saved ? JSON.parse(saved) : null;
-  const validSaved =
-    Array.isArray(parsed) && parsed.every((l) => widgetLibrary.some((w) => w.id === l.i))
-      ? parsed
-      : null;
+  // Load saved layout (if any) and merge with defaults
+  const savedRaw = localStorage.getItem('dashboardLayout');
+  let savedLayout = [];
+  try {
+    savedLayout = savedRaw ? JSON.parse(savedRaw) : [];
+  } catch {
+    savedLayout = [];
+  }
 
-  const [layout, setLayout] = useState(validSaved || defaultLayout);
+  const mergedLayout = defaultLayout.map((def) => {
+    const match = savedLayout.find((s) => s.i === def.i);
+    return match || def;
+  });
+
+  const [layout, setLayout] = useState(mergedLayout);
   const [titles, setTitles] = useState(() =>
     JSON.parse(localStorage.getItem('widgetTitles') || '{}')
   );
@@ -126,7 +132,7 @@ export default function Dashboard() {
         widgetId={settingsWidgetId}
       />
 
-      {/* Green "+" button now at top-right */}
+      {/* Green "+" button at top-right */}
       <Link
         to="/widget-library"
         className="fixed top-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
