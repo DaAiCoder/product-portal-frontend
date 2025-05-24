@@ -3,23 +3,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch } from 'react-icons/fa';
-import { handleCommand } from '../utils/intentHandler';
 
 export default function CommandBar() {
   const prompts = [
-    'Remind me to call Bob at 4 PM',
-    "Show me tomorrow's events",
-    "Tell me last year's Super Bowl score",
+    'Tell me about the Manson murders?',
+    'Who won Super Bowl 50?',
     'Search notes for "project plan"',
+    'Show me tomorrow’s events',
     'Add event: Team sync on June 5 at 10 AM',
     'Create note: Grocery list',
-    'What’s the weather in Boston tomorrow?',
-    'Go to Email page',
     'Set a daily reminder at 9 AM',
     'Find file named "budget.xlsx"',
+    'What’s the weather in Boston tomorrow?',
+    'Go to Email page',
   ];
   const [idx, setIdx] = useState(0);
-  const inputRef = useRef(null);
+  const inputRef = useRef();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,25 +28,41 @@ export default function CommandBar() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const cmd = e.target.elements.command.value.trim();
-    if (!cmd) return;
-    handleCommand(cmd, navigate);
+    const text = e.target.elements.command.value.trim();
+    if (!text) return;
+    navigate(`/search?query=${encodeURIComponent(text)}`);
     e.target.reset();
-    inputRef.current?.focus();
+    inputRef.current?.blur();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center w-full max-w-lg mx-auto">
+    <form onSubmit={handleSubmit} className="flex items-center w-full">
       <input
         ref={inputRef}
         name="command"
         type="text"
         placeholder={prompts[idx]}
-        className="flex-1 px-3 py-2 border border-gray-300 rounded-l focus:outline-none"
+        className="
+          flex-1
+          rounded-full
+          bg-gray-100 dark:bg-gray-800
+          border border-transparent
+          focus:border-blue-600 focus:shadow-md
+          px-6 py-3
+          placeholder-gray-600 placeholder-opacity-75
+          transition-all duration-200
+        "
       />
       <button
         type="submit"
-        className="px-3 bg-gray-200 border border-l-0 border-gray-300 rounded-r hover:bg-gray-300"
+        className="
+          -ml-10
+          p-2
+          text-white
+          bg-blue-600 hover:bg-blue-700
+          rounded-full
+          focus:outline-none
+        "
       >
         <FaSearch />
       </button>
