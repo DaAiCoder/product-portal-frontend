@@ -1,51 +1,50 @@
-// File: src/components/CategoryManager.jsx
-
 // src/components/CategoryManager.jsx
 
 import React, { useState, useEffect } from 'react';
 import { TwitterPicker } from 'react-color';
 
-const API = '/api/calendar/categories';
+const STORAGE_KEY = 'calendarCategories';
 
 export default function CategoryManager({ onCategoriesChange }) {
   const [categories, setCategories] = useState([]);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState('#90cdf4');
 
+  // Load saved categories
   useEffect(() => {
-    fetch(API)
-      .then((res) => res.json())
-      .then((data) => {
-        setCategories(data);
-        onCategoriesChange(data);
-      });
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setCategories(parsed);
+      onCategoriesChange(parsed);
+    }
   }, []);
 
-  const addCategory = async () => {
+  // Persist & notify parent
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
+    onCategoriesChange(categories);
+  }, [categories, onCategoriesChange]);
+
+  const addCategory = () => {
     if (!newName.trim()) return;
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newName.trim(), color: newColor }),
-    });
-    const cat = await res.json();
-    setCategories((c) => [...c, cat]);
-    onCategoriesChange([...categories, cat]);
+    setCategories([
+      ...categories,
+      { id: Date.now().toString(), name: newName.trim(), color: newColor },
+    ]);
     setNewName('');
   };
 
-  const removeCategory = async (id) => {
-    await fetch(`${API}/${id}`, { method: 'DELETE' });
-    const updated = categories.filter((c) => c.id !== id);
-    setCategories(updated);
-    onCategoriesChange(updated);
-  };
+  const removeCategory = (id) =>
+    setCategories(categories.filter((c) => c.id !== id));
 
   return (
     <div className="p-4 border rounded bg-white dark:bg-gray-800">
       <h3 className="text-lg font-semibold mb-2">Manage Categories</h3>
+
       <div className="flex mb-2">
         <input
+          type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Category name"
@@ -58,14 +57,19 @@ export default function CategoryManager({ onCategoriesChange }) {
           Add
         </button>
       </div>
+
       <TwitterPicker
         triangle="hide"
         colors={[
-          '#90cdf4','#f6ad55','#fc8181','#9ae6b4','#faf089',
-          '#d6bcfa','#f5c2fc','#feb2b2','#bee3f8','#c6f6d5'
+          '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
+          '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50',
+          '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800',
+          '#ff5722', '#795548', '#607d8b', '#000000', '#ffffff',
+          '#90cdf4', '#f6ad55', '#fc8181', '#9ae6b4', '#faf089',
         ]}
         onChangeComplete={(c) => setNewColor(c.hex)}
       />
+
       <ul className="mt-4 space-y-1">
         {categories.map((c) => (
           <li key={c.id} className="flex items-center justify-between">
