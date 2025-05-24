@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+// Attach modal to root
 Modal.setAppElement('#root');
 
 export default function EventModal({
@@ -23,6 +24,7 @@ export default function EventModal({
   );
   const [category, setCategory] = useState(initialEvent.category || '');
 
+  // Reset when modal opens
   useEffect(() => {
     setTitle(initialEvent.title || '');
     setStart(initialEvent.start ? new Date(initialEvent.start) : new Date());
@@ -47,49 +49,55 @@ export default function EventModal({
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       contentLabel="Event Editor"
-      className="max-w-md mx-auto mt-20 bg-white p-6 rounded shadow-lg outline-none"
-      overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center"
+      // Overlay sits above calendar
+      overlayClassName="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-start justify-center"
+      // Content is fully opaque, elevated
+      className="relative z-60 max-w-md w-full mt-16 bg-white p-6 rounded shadow-xl outline-none"
     >
-      <h2 className="text-xl mb-4">
-        {initialEvent.id ? 'Edit Event' : 'New Event'}
-      </h2>
-      <div className="space-y-3">
+      <h2 className="text-xl mb-4 font-semibold">{
+        initialEvent.id ? 'Edit Event' : 'New Event'
+      }</h2>
+
+      <div className="space-y-4">
         <div>
-          <label className="block mb-1">Title</label>
+          <label className="block mb-1 font-medium">Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full border p-2 rounded"
+            className="w-full bg-white text-gray-900 border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:border-blue-300"
           />
         </div>
+
         <div>
-          <label className="block mb-1">Start</label>
+          <label className="block mb-1 font-medium">Start</label>
           <DatePicker
             selected={start}
             onChange={(date) => setStart(date)}
             showTimeSelect
             dateFormat="Pp"
-            className="w-full border p-2 rounded"
+            className="w-full bg-white text-gray-900 border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:border-blue-300"
           />
         </div>
+
         <div>
-          <label className="block mb-1">End</label>
+          <label className="block mb-1 font-medium">End</label>
           <DatePicker
             selected={end}
             onChange={(date) => setEnd(date)}
             showTimeSelect
             dateFormat="Pp"
-            className="w-full border p-2 rounded"
+            className="w-full bg-white text-gray-900 border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:border-blue-300"
           />
         </div>
+
         {categories.length > 0 && (
           <div>
-            <label className="block mb-1">Category</label>
+            <label className="block mb-1 font-medium">Category</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border p-2 rounded"
+              className="w-full bg-white text-gray-900 border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:border-blue-300"
             >
               <option value="">None</option>
               {categories.map((c) => (
@@ -101,11 +109,18 @@ export default function EventModal({
           </div>
         )}
       </div>
+
       <div className="mt-6 flex justify-end space-x-2">
-        <button onClick={onRequestClose} className="px-4 py-2 border rounded">
+        <button
+          onClick={onRequestClose}
+          className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+        >
           Cancel
         </button>
-        <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded">
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
           Save
         </button>
       </div>
