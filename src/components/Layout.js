@@ -1,8 +1,11 @@
 // src/components/Layout.js
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import HelpWidget from './HelpWidget';
+import CommandBar from './CommandBar';
+import { handleCommand } from '../utils/intentHandler';
 import {
   FaHome,
   FaSignInAlt,
@@ -15,88 +18,47 @@ import {
 } from 'react-icons/fa';
 
 export default function Layout({ children }) {
-  const [theme, setTheme]       = useState('light');
-  const [bgIndex, setBgIndex]   = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(
     () => JSON.parse(localStorage.getItem('focusMode')) || false
   );
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const isAuthenticated = Boolean(localStorage.getItem('authToken'));
   const navigate = useNavigate();
-  const menuRef = useRef();
+  const menuRef = useRef(null);
 
-  const bgImages = [
-    'https://source.unsplash.com/1600x900/?nature,water',
-    'https://source.unsplash.com/1600x900/?forest',
-    'https://source.unsplash.com/1600x900/?mountain',
-    'https://source.unsplash.com/1600x900/?beach',
-  ];
-
-  // Theme persistence :contentReference[oaicite:0]{index=0}
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored) setTheme(stored);
-    else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
-      setTheme('dark');
-  }, []);
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  // Background rotate every 10s :contentReference[oaicite:1]{index=1}
-  useEffect(() => {
-    const iv = setInterval(() => setBgIndex(i => (i + 1) % bgImages.length), 10000);
-    return () => clearInterval(iv);
+    function onClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
-  // Focus mode persistence :contentReference[oaicite:2]{index=2}
+  // Persist focus mode
   useEffect(() => {
     localStorage.setItem('focusMode', JSON.stringify(focusMode));
   }, [focusMode]);
 
-  // Close profile menu on outside click :contentReference[oaicite:3]{index=3}
-  useEffect(() => {
-    const handler = e => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const toggleTheme  = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
-  const toggleMenu   = () => setMenuOpen(o => !o);
-  const toggleFocus  = () => setFocusMode(f => !f);
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    navigate('/login');
-    window.location.reload();
-  };
-
-  // Generic search suggestions
-  const suggestions = [
-    'Email','Calendar','Notes','Files','Chat','Unified','Instagram',
-    'Twitter','Facebook','Reddit','Feeds','Trending','YouTube','Music','Podcasts','Reminders'
-  ];
-  const filtered = suggestions.filter(item =>
-    item.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const toggleFocus = () => setFocusMode((f) => !f);
+  const toggleMenu  = () => setMenuOpen((m) => !m);
 
   return (
-    <div className={`
-      min-h-screen flex flex-col 
-      bg-gray-50 dark:bg-gray-900 
-      ${focusMode ? 'overflow-hidden' : ''}
-    `}>
+    <div
+      className={`
+        min-h-screen flex flex-col 
+        bg-gray-50 dark:bg-gray-900 
+        ${focusMode ? 'overflow-hidden' : ''}
+      `}
+    >
       {/* Top header */}
-      <header className={`
-        bg-white dark:bg-gray-800 shadow 
-        ${focusMode ? 'fixed w-full z-20' : ''}
-      `}>
+      <header
+        className={`
+          bg-white dark:bg-gray-800 shadow 
+          ${focusMode ? 'fixed w-full z-20' : ''}
+        `}
+      >
         <div className="max-w-7xl mx-auto py-4 px-6 flex items-center">
           {/* Logo */}
           <h1
@@ -106,34 +68,9 @@ export default function Layout({ children }) {
             Product Portal
           </h1>
 
-          {/* ===== Generic Search Box ===== */}
-          <div className="relative flex-grow px-4">
-            <input
-              type="text"
-              placeholder="Search…"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            {showSuggestions && filtered.length > 0 && (
-              <ul className="absolute mt-1 w-full bg-white border rounded shadow max-h-60 overflow-y-auto z-50">
-                {filtered.map((item, idx) => (
-                  <li
-                    key={idx}
-                    onMouseDown={() => {
-                      navigate(`/${item.toLowerCase()}`);
-                      setSearchTerm('');
-                      setShowSuggestions(false);
-                    }}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            )}
+          {/* Command Bar (replaces generic search) */}
+          <div className="flex-grow px-4">
+            <CommandBar onExecute={(text) => handleCommand(text, navigate)} />
           </div>
 
           {/* Right nav */}
@@ -146,61 +83,47 @@ export default function Layout({ children }) {
               <span>{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
             </button>
 
-            {!focusMode && (
-              <>
-                <Link
-                  to="/"
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <FaHome /><span>Home</span>
+            <button
+              onClick={toggleMenu}
+              className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              aria-label="User Menu"
+            >
+              <FaUser />
+            </button>
+
+            {menuOpen && (
+              <div
+                ref={menuRef}
+                className="absolute right-6 mt-2 w-48 bg-white dark:bg-gray-800 border rounded shadow-lg z-30"
+              >
+                <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <FaUser className="inline mr-2"/> Profile
                 </Link>
-
-                {!isAuthenticated ? (
-                  <Link
-                    to="/login"
-                    className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    <FaSignInAlt /><span>Login</span>
-                  </Link>
-                ) : (
-                  <div className="relative" ref={menuRef}>
-                    <button
-                      onClick={toggleMenu}
-                      className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                      aria-haspopup="true"
-                      aria-expanded={menuOpen}
-                    >
-                      <FaUser />
-                    </button>
-                    {menuOpen && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded">
-                        <Link
-                          to="/profile"
-                          className="flex items-center space-x-1 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <FaUser /><span>Profile</span>
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center space-x-1 w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          <FaSignInAlt /><span>Logout</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                  aria-label="Toggle Theme"
+                  onClick={() => {
+                    localStorage.removeItem('authToken');
+                    navigate('/login');
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  {theme === 'dark' ? <FaSun /> : <FaMoon />}
+                  <FaSignInAlt className="inline mr-2"/> Logout
                 </button>
-              </>
+              </div>
             )}
+
+            <button
+              onClick={() => {
+                const newTheme = document.documentElement.classList.contains('dark')
+                  ? 'light'
+                  : 'dark';
+                document.documentElement.classList.toggle('dark');
+                setFocusMode((f) => f); // just to trigger re-render
+              }}
+              className="p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              aria-label="Toggle Theme"
+            >
+              {document.documentElement.classList.contains('dark') ? <FaSun /> : <FaMoon />}
+            </button>
           </nav>
         </div>
       </header>
@@ -209,34 +132,28 @@ export default function Layout({ children }) {
       <div className="flex pt-16 flex-1">
         <Sidebar />
 
-        <main className={`
-          flex-1 relative overflow-hidden 
-          ${focusMode ? 'p-0' : 'p-6'} 
-          pl-16
-        `}>
-          {!focusMode ? (
-            <>
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-                style={{ backgroundImage: `url(${bgImages[bgIndex]})` }}
-              />
-              <div className="relative z-10 p-6">{children}</div>
-            </>
-          ) : (
-            <div className="relative z-10">{children}</div>
+        <main
+          className={`
+            flex-1 relative overflow-hidden 
+            ${focusMode ? 'p-0' : 'p-6'} 
+            pl-16
+          `}
+        >
+          {children}
+
+          {/* Floating Add button */}
+          {!focusMode && (
+            <Link
+              to="/widget-library"
+              className="fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-40"
+            >
+              <FaPlus size={24} />
+            </Link>
           )}
+
+          <HelpWidget />
         </main>
       </div>
-
-      {/* Help widget & Quick-Add FAB */}
-      <HelpWidget />
-      <Link
-        to="/widgets"
-        className="fixed bottom-4 left-4 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
-        aria-label="Add Widget"
-      >
-        <FaPlus size={24} />
-      </Link>
 
       {/* Footer */}
       {!focusMode && (
