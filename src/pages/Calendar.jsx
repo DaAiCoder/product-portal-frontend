@@ -1,4 +1,9 @@
-// File: src/pages/Calendar.jsx
+// src/pages/Calendar.jsx
+
+// FullCalendar styles
+import '@fullcalendar/common/main.css';
+import '@fullcalendar/daygrid/main.css';
+import '@fullcalendar/timegrid/main.css';
 
 import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
@@ -6,17 +11,23 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { v4 as uuidv4 } from 'uuid';
+
 import CategoryManager from '../components/CategoryManager';
+import EventModal from '../components/EventModal';
 
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [holidays, setHolidays] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState(null);
 
   // Load user events
   useEffect(() => {
     const saved = localStorage.getItem('calendarEvents');
-    if (saved) setEvents(JSON.parse(saved));
+    if (saved) {
+      setEvents(JSON.parse(saved));
+    }
   }, []);
 
   // Persist user events
@@ -29,7 +40,7 @@ export default function CalendarPage() {
     const year = new Date().getFullYear();
     fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/US`)
       .then((res) => res.json())
-      .then((data) =>
+      .then((data) => {
         setHolidays(
           data.map((h) => ({
             id: h.date,
@@ -38,42 +49,44 @@ export default function CalendarPage() {
             allDay: true,
             color: '#ff495c',
           }))
-        )
-      )
+        );
+      })
       .catch(console.error);
   }, []);
 
-  // Build map of category name to color
+  // Build map: category name -> color
   const categoryColors = categories.reduce((map, c) => {
     map[c.name] = c.color;
     return map;
   }, {});
 
+  // Open modal to create new event
   const handleDateClick = (info) => {
-    const title = prompt('Event title:');
-    if (!title) return;
-    if (categories.length) {
-      const cat = prompt(
-        'Category name (' + categories.map((c) => c.name).join(', ') + '):'
-      );
-      const color = categoryColors[cat] || '#3788d8';
-      const newEvent = {
-        id: uuidv4(),
-        title,
-        start: info.dateStr,
-        color,
-      };
-      setEvents((prev) => [...prev, newEvent]);
-    } else {
-      // no categories defined yet
-      const newEvent = {
-        id: uuidv4(),
-        title,
-        start: info.dateStr,
-        color: '#3788d8',
-      };
-      setEvents((prev) => [...prev, newEvent]);
-    }
+    setCurrentEvent({
+      id: null,
+      title: '',
+      start: info.dateStr,
+      end: info.dateStr,
+      category: '',
+    });
+    setModalOpen(true);
+  };
+
+  // Open modal to edit existing event
+  const handleEventClick = (info) => {
+    const e = info.event;
+    const catName =
+      Object.keys(categoryColors).find(
+        (name) => categoryColors[name] === e.backgroundColor
+      ) || '';
+    setCurrentEvent({
+      id: e.id,
+      title: e.title,
+      start: e.startStr,
+      end: e.endStr || e.startStr,
+      category: catName,
+    });
+    setModalOpen(true);
   };
 
   return (
@@ -90,22 +103,37 @@ export default function CalendarPage() {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
-          events={[...holidays, ...events]}
+          events={[
+            ...holidays,
+            ...events.map((e) => ({
+              ...e,
+              color: categoryColors[e.category] || e.color || '#3788d8',
+            })),
+          ]}
           dateClick={handleDateClick}
+          eventClick={handleEventClick}
           editable={true}
           selectable={true}
-          eventClick={(info) => {
-            if (
-              window.confirm(
-                `Delete event '${info.event.title}'?`
-              )
-            ) {
-              setEvents((prev) =>
-                prev.filter((e) => e.id !== info.event.id)
-              );
-            }
-          }}
           height="auto"
+        />
+        <EventModal
+          isOpen={modalOpen}
+          onRequestClose={() => setModalOpen(false)}
+          onSubmit={(evt) => {
+            setEvents((prev) => {
+              const filtered = prev.filter((e) => e.id !== evt.id);
+              return [
+                ...filtered,
+                {
+                  ...evt,
+                  id: evt.id || uuidv4(),
+                  color: categoryColors[evt.category] || '#3788d8',
+                },
+              ];
+            });
+          }}
+          categories={categories}
+          initialEvent={currentEvent || {}}
         />
       </div>
     </div>
