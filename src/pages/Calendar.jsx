@@ -1,11 +1,5 @@
 // src/pages/Calendar.jsx
 
-// FullCalendar core styles
-import '@fullcalendar/common/main.css';
-// Plugin styles from dist folders
-import '@fullcalendar/daygrid/dist/main.css';
-import '@fullcalendar/timegrid/dist/main.css';
-
 import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
