@@ -21,49 +21,71 @@ export default function SearchPage() {
     setSummary('');
     setSource(null);
 
-    // 1) Try Wikipedia summary
-    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`)
-      .then((res) => res.ok ? res.json() : Promise.reject('No Wikipedia page'))
-      .then((data) => {
-        if (data.extract) {
-          setSummary(data.extract);
-          setSource({ name: 'Wikipedia', url: data.content_urls.desktop.page });
-        } else {
-          return Promise.reject('No extract');
+    (async () => {
+      try {
+        // 1) Wikipedia search to get the best-matching title
+        const searchRes = await fetch(
+          `https://en.wikipedia.org/w/api.php?` +
+          `action=query&list=search&srsearch=${encodeURIComponent(query)}` +
+          `&format=json&origin=*`
+        );
+        const searchJson = await searchRes.json();
+        const hits = searchJson.query?.search;
+        if (hits && hits.length > 0) {
+          const title = hits[0].title;
+          // 2) Fetch the summary for that title
+          const summaryRes = await fetch(
+            `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
+          );
+          const summaryJson = await summaryRes.json();
+          if (summaryJson.extract) {
+            setSummary(summaryJson.extract);
+            setSource({
+              name: 'Wikipedia',
+              url: summaryJson.content_urls.desktop.page,
+            });
+            return;
+          }
         }
-      })
-      // 2) Fallback to DuckDuckGo
-      .catch(() =>
-        fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`)
-          .then((res) => res.json())
-          .then((ddg) => {
-            let text = ddg.AbstractText;
-            let url  = ddg.AbstractURL;
-            if (!text && Array.isArray(ddg.RelatedTopics) && ddg.RelatedTopics.length) {
-              const first = ddg.RelatedTopics[0];
-              text = first.Text;
-              url  = first.FirstURL;
-            }
-            if (text) {
-              setSummary(text);
-              setSource({ name: 'DuckDuckGo', url });
-            } else {
-              setSummary('No summary found for that query.');
-            }
-          })
-      )
-      .catch((e) => {
+
+        // 3) Fallback to DuckDuckGo Instant Answer
+        const ddgRes = await fetch(
+          `https://api.duckduckgo.com/?` +
+          `q=${encodeURIComponent(query)}` +
+          `&format=json&no_html=1`
+        );
+        const ddgJson = await ddgRes.json();
+        let text = ddgJson.AbstractText;
+        let url  = ddgJson.AbstractURL;
+        if (!text && Array.isArray(ddgJson.RelatedTopics) && ddgJson.RelatedTopics.length) {
+          const first = ddgJson.RelatedTopics[0];
+          text = first.Text;
+          url  = first.FirstURL;
+        }
+        if (text) {
+          setSummary(text);
+          setSource({ name: 'DuckDuckGo', url });
+          return;
+        }
+
+        // 4) No result
+        setSummary('No summary found for that query.');
+      } catch (e) {
         console.error('Search error', e);
-        setError('Failed to fetch data.');
-      })
-      .finally(() => setLoading(false));
+        setError('Failed to fetch data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [query]);
 
   if (!query) {
     return (
       <div className="p-6">
         <p>Please enter a search query.</p>
-        <Link to="/" className="text-blue-600 hover:underline">Go back</Link>
+        <Link to="/" className="text-blue-600 hover:underline">
+          Go back
+        </Link>
       </div>
     );
   }
@@ -85,7 +107,7 @@ export default function SearchPage() {
             <a
               href={source.url}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
             >
               Source: {source.name}
