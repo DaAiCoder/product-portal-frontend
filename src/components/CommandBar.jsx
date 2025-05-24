@@ -1,11 +1,11 @@
-// src/components/CommandBar.jsx
+// File: src/components/CommandBar.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch } from 'react-icons/fa';
+import { handleCommand } from '../utils/intentHandler';
 
-export default function CommandBar({ onExecute }) {
-  // 10 rotating example prompts
+export default function CommandBar() {
   const prompts = [
     'Remind me to call Bob at 4 PM',
     "Show me tomorrow's events",
@@ -18,31 +18,21 @@ export default function CommandBar({ onExecute }) {
     'Set a daily reminder at 9 AM',
     'Find file named "budget.xlsx"',
   ];
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [idx, setIdx] = useState(0);
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Cycle placeholder every 5 seconds
   useEffect(() => {
-    const timer = setInterval(() => {
-      setPlaceholderIndex((i) => (i + 1) % prompts.length);
-    }, 5000);
+    const timer = setInterval(() => setIdx((i) => (i + 1) % prompts.length), 5000);
     return () => clearInterval(timer);
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const text = e.target.elements.command.value.trim();
-    if (!text) return;
-    // Trigger execution (navigation, search, QA, or task automation)
-    if (typeof onExecute === 'function') {
-      onExecute(text);
-    } else {
-      console.log('Command entered:', text);
-    }
-    // Clear input
+    const cmd = e.target.elements.command.value.trim();
+    if (!cmd) return;
+    handleCommand(cmd, navigate);
     e.target.reset();
-    // Return focus for next command
     inputRef.current?.focus();
   };
 
@@ -52,7 +42,7 @@ export default function CommandBar({ onExecute }) {
         ref={inputRef}
         name="command"
         type="text"
-        placeholder={prompts[placeholderIndex]}
+        placeholder={prompts[idx]}
         className="flex-1 px-3 py-2 border border-gray-300 rounded-l focus:outline-none"
       />
       <button
