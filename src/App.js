@@ -1,4 +1,4 @@
-// File: src/ App .js
+// src/App.js
 
 import React from 'react';
 import {
@@ -16,7 +16,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
-import FeedsPage from './pages/feeds';            // ← feeds.js for News
+import FeedsPage from './pages/feeds';
 import Email from './pages/emailpage';
 import Calendar from './pages/Calendar';
 import Notes from './pages/notes';
@@ -37,6 +37,9 @@ import TrendingTopics from './pages/trending';
 import YouTubeFeeds from './pages/youtube';
 import MusicDiscovery from './pages/music';
 import PodcastRecommendations from './pages/podcasts';
+
+// **NEW**: import the Search results page
+import SearchPage from './pages/Search';
 
 function App() {
   return (
@@ -77,7 +80,17 @@ function App() {
               }
             />
 
-            {/* News (replaces old /rss) */}
+            {/* Search (hybrid retrieval results) */}
+            <Route
+              path="/search"
+              element={
+                <ProtectedRoute>
+                  <SearchPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* News */}
             <Route
               path="/feeds"
               element={
@@ -189,7 +202,7 @@ function App() {
               }
             />
 
-            {/* News sub-page: Trending */}
+            {/* Trending */}
             <Route
               path="/trending"
               element={
