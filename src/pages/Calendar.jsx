@@ -1,10 +1,12 @@
-// File: src/pages/Calendar.jsx
+// src/pages/Calendar.jsx
 
 import React, { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import rrulePlugin from '@fullcalendar/rrule';
+import { RRule } from 'rrule';
 import { v4 as uuidv4 } from 'uuid';
 
 import CategoryManager from '../components/CategoryManager';
@@ -19,23 +21,21 @@ export default function CalendarPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
 
-  // Load user events
+  // --- Load / persist user events ---
   useEffect(() => {
     const saved = localStorage.getItem('calendarEvents');
     if (saved) setEvents(JSON.parse(saved));
   }, []);
-
-  // Persist user events
   useEffect(() => {
     localStorage.setItem('calendarEvents', JSON.stringify(events));
   }, [events]);
 
-  // Fetch US public holidays
+  // --- Fetch US public holidays ---
   useEffect(() => {
     const year = new Date().getFullYear();
     fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/US`)
       .then((res) => res.json())
-      .then((data) =>
+      .then((data) => {
         setHolidays(
           data.map((h) => ({
             id: h.date,
@@ -44,12 +44,16 @@ export default function CalendarPage() {
             allDay: true,
             color: '#ff495c',
           }))
-        )
-      )
+        );
+      })
       .catch(console.error);
   }, []);
 
-  // Reinitialize visibleCategories whenever categories change
+  // --- Load / persist categories & init visible map ---
+  useEffect(() => {
+    const saved = localStorage.getItem('calendarCategories');
+    if (saved) setCategories(JSON.parse(saved));
+  }, []);
   useEffect(() => {
     const map = {};
     categories.forEach((c) => {
@@ -58,18 +62,14 @@ export default function CalendarPage() {
     setVisibleCategories(map);
   }, [categories]);
 
-  // Map category names to their colors
-  const categoryColors = categories.reduce((m, c) => {
-    m[c.name] = c.color;
-    return m;
-  }, {});
+  // Map string -> RRule freq constant
+  const freqMap = {
+    DAILY: RRule.DAILY,
+    WEEKLY: RRule.WEEKLY,
+    MONTHLY: RRule.MONTHLY,
+  };
 
-  // Filter events by category (holidays always show)
-  const filteredEvents = events.filter((e) =>
-    e.category ? visibleCategories[e.category] : true
-  );
-
-  // Handlers
+  // --- Handlers ---
   const handleDateClick = (info) => {
     setCurrentEvent({
       id: null,
@@ -77,39 +77,99 @@ export default function CalendarPage() {
       start: info.dateStr,
       end: info.dateStr,
       category: '',
+      repeat: '',        // NEW FIELD
+      repeatUntil: '',   // NEW FIELD
     });
     setModalOpen(true);
   };
 
   const handleEventClick = (info) => {
     const e = info.event;
+    // find category name by color
     const catName =
-      Object.keys(categoryColors).find(
-        (name) => categoryColors[name] === e.backgroundColor
-      ) || '';
+      categories.find((c) => c.color === e.backgroundColor)?.name || '';
     setCurrentEvent({
       id: e.id,
       title: e.title,
       start: e.startStr,
       end: e.endStr || e.startStr,
       category: catName,
+      repeat: info.event.extendedProps.repeat || '',
+      repeatUntil: info.event.extendedProps.repeatUntil || '',
     });
     setModalOpen(true);
   };
 
   const handleEventChange = (info) => {
-    const { id, startStr, endStr } = info.event;
+    // drop or resize
     setEvents((prev) =>
       prev.map((e) =>
-        e.id === id
-          ? { ...e, start: startStr, end: endStr || startStr }
+        e.id === info.event.id
+          ? { ...e, start: info.event.startStr, end: info.event.endStr || info.event.startStr }
           : e
       )
     );
   };
 
+  const handleEventSubmit = (evt) => {
+    setEvents((prev) => {
+      const others = prev.filter((e) => e.id !== evt.id);
+      return [
+        ...others,
+        {
+          ...evt,
+          id: evt.id || uuidv4(),
+          color: categories.find((c) => c.name === evt.category)?.color || '#3788d8',
+        },
+      ];
+    });
+    setModalOpen(false);
+  };
+
+  // Build FC-compatible events, converting repeats into rrule
+  const buildCalendarEvents = () => {
+    const list = [
+      ...holidays,
+      ...events
+        .filter((e) => !e.category || visibleCategories[e.category])
+        .map((e) => {
+          if (e.repeat) {
+            // recurring event
+            const rule = {
+              freq: freqMap[e.repeat],
+              dtstart: new Date(e.start),
+            };
+            if (e.repeatUntil) rule.until = new Date(e.repeatUntil);
+            return {
+              id: e.id,
+              title: e.title,
+              rrule: rule,
+              // optionally include duration if you want timed repeats:
+              duration:
+                new Date(e.end).getTime() - new Date(e.start).getTime() || undefined,
+              color: e.color,
+              extendedProps: {
+                repeat: e.repeat,
+                repeatUntil: e.repeatUntil,
+              },
+            };
+          } else {
+            return {
+              id: e.id,
+              title: e.title,
+              start: e.start,
+              end: e.end,
+              color: e.color,
+            };
+          }
+        }),
+    ];
+    return list;
+  };
+
   return (
     <div className="flex p-6 space-x-4">
+      {/* Sidebar: Category Manager + Legend */}
       <div className="w-64 space-y-4">
         <CategoryManager onCategoriesChange={setCategories} />
         {categories.length > 0 && (
@@ -117,54 +177,45 @@ export default function CalendarPage() {
             categories={categories}
             visibleCategories={visibleCategories}
             onToggleCategory={(name) =>
-              setVisibleCategories((prev) => ({
-                ...prev,
-                [name]: !prev[name],
-              }))
+              setVisibleCategories((prev) => ({ ...prev, [name]: !prev[name] }))
             }
           />
         )}
       </div>
+
+      {/* Calendar */}
       <div className="flex-1">
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            rrulePlugin,
+          ]}
           initialView="dayGridMonth"
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
-          events={[...holidays, ...filteredEvents.map((e) => ({
-            ...e,
-            color: categoryColors[e.category] || e.color || '#3788d8',
-          }))]}
+          events={buildCalendarEvents()}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
-          editable={true}
-          selectable={true}
           eventDrop={handleEventChange}
           eventResize={handleEventChange}
+          editable={true}
+          selectable={true}
           height="auto"
         />
+
+        {/* Modal for create/edit */}
         <EventModal
           isOpen={modalOpen}
           onRequestClose={() => setModalOpen(false)}
-          onSubmit={(evt) => {
-            setEvents((prev) => {
-              // remove old if exists
-              const others = prev.filter((e) => e.id !== evt.id);
-              return [
-                ...others,
-                {
-                  ...evt,
-                  id: evt.id || uuidv4(),
-                  color:
-                    categoryColors[evt.category] ||
-                    evt.color ||
-                    '#3788d8',
-                },
-              ];
-            });
+          onSubmit={handleEventSubmit}
+          onDelete={(evt) => {
+            setEvents((prev) => prev.filter((e) => e.id !== evt.id));
+            setModalOpen(false);
           }}
           categories={categories}
           initialEvent={currentEvent || {}}
