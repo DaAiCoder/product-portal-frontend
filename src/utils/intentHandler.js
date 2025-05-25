@@ -1,6 +1,6 @@
-// src/utils/ t intentHandler.js
+// File: src/utils/intentHandler.js
 
-import chrono from 'chrono-node';
+import { create as parseDate } from 'sugar-date';
 
 import {
   getUnreadEmails,
@@ -52,6 +52,20 @@ import {
   getTimeInZone,
 } from '../pages/api/timeAPI';
 
+import {
+  startTimer,
+  stopTimer,
+  listTimers,
+  clearTimers,
+} from '../pages/api/timerAPI';
+
+import {
+  startStopwatch,
+  stopStopwatch,
+  resetStopwatch,
+  lapStopwatch,
+  getStopwatchTime,
+} from '../pages/api/stopwatchAPI';
 
 import { calculate } from '../pages/api/calculatorAPI';
 
@@ -134,20 +148,18 @@ export default async function handleIntent(t) {
   }
 
   // ─── Reminders ────────────────────────────────────────────────────────────
-  // Natural-language fallback: “remind me to <task> <date-time>”
+  // NLP fallback via sugar-date: “remind me to <task> <date-time>”
   if (/^remind me to\s+/i.test(t)) {
-    const results = chrono.parse(t);
-    if (results.length > 0) {
-      const { text: phrase, start } = results[0];
-      const datetime = start.date().toISOString();
-      const task = t.replace(phrase, '').replace(/^remind me to\s*/i, '').trim();
-      await createReminder({ text: task, datetime });
+    const cmd = t.replace(/^remind me to\s*/i, '').trim();
+    const dt = parseDate(cmd);
+    if (dt instanceof Date && !isNaN(dt)) {
+      await createReminder({ text: cmd, datetime: dt.toISOString() });
       return;
     }
   }
   if ((m = t.match(/^remind me to (.+?) (in|after) (\d+)\s*(minutes|hours)$/i))) {
     const [, task,, num, unit] = m;
-    const minutes = unit.startsWith('hour') ? +num * 60 : +num;
+    const minutes = unit.toLowerCase().startsWith('hour') ? +num * 60 : +num;
     await createReminder({ text: task, offsetMinutes: minutes });
     return;
   }
@@ -161,7 +173,7 @@ export default async function handleIntent(t) {
   }
   if (/^snooze reminder (.+?) by (\d+)\s*(minutes|hours)$/i.test(t)) {
     const [, id, num, unit] = t.match(/snooze reminder (.+?) by (\d+)\s*(minutes|hours)/i);
-    const minutes = unit.startsWith('hour') ? +num * 60 : +num;
+    const minutes = unit.toLowerCase().startsWith('hour') ? +num * 60 : +num;
     await snoozeReminder(id, { minutes });
     return;
   }
@@ -271,9 +283,9 @@ export default async function handleIntent(t) {
   // ─── Timer ───────────────────────────────────────────────────────────────
   if ((m = t.match(/^start a timer for (\d+)\s*(seconds|minutes|hours)$/i))) {
     const [, num, unit] = m;
-    const secs = unit.startsWith('hour')
+    const secs = unit.toLowerCase().startsWith('hour')
       ? +num * 3600
-      : unit.startsWith('minute')
+      : unit.toLowerCase().startsWith('minute')
       ? +num * 60
       : +num;
     await startTimer(secs);
@@ -333,7 +345,7 @@ export default async function handleIntent(t) {
   // ─── Music ───────────────────────────────────────────────────────────────
   if ((m = t.match(/^play track (.+)$/i))) {
     const tracks = await fetchTracks();
-    const idx = tracks.findIndex(s => s.title === m[1]);  
+    const idx = tracks.findIndex(s => s.title === m[1]);
     if (idx !== -1) uploadMusic(tracks[idx].url);
     return;
   }
