@@ -33,10 +33,12 @@
     "react-scripts": "5.0.1",
     "rrule": "^2.8.1",
     "rss-parser": "^3.13.0",
+    "sugar-date": "^2.0.6",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
+    "null-loader": "^4.0.1",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.4"
   },
