@@ -15,7 +15,7 @@ import {
   resetStopwatch,
   lapStopwatch,
   getStopwatchTime,
-} from '../../api/timeAPI';
+} from '../../pages/api/timeAPI';
 import { FaClock, FaHourglassStart, FaStopwatch, FaPlus, FaTrash } from 'react-icons/fa';
 
 export default function TimeWidget({ config }) {
