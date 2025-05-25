@@ -52,20 +52,6 @@ import {
   getTimeInZone,
 } from '../pages/api/timeAPI';
 
-import {
-  startTimer,
-  stopTimer,
-  listTimers,
-  clearTimers,
-} from '../pages/api/timerAPI';
-
-import {
-  startStopwatch,
-  stopStopwatch,
-  resetStopwatch,
-  lapStopwatch,
-  getStopwatchTime,
-} from '../pages/api/stopwatchAPI';
 
 import { calculate } from '../pages/api/calculatorAPI';
 
