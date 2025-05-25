@@ -1,18 +1,16 @@
-import React from 'react';
+//Product-portal-frontend\src\components\widgets\configs\weather.js
 
-function WeatherWidget() {
-  return (
-    <div className="h-full flex flex-col justify-center items-center">
-      <h3 className="text-xl font-semibold mb-2">7-Day Weather</h3>
-      <p>Loading weather…</p>
-    </div>
-  );
-}
+import { FaCloudSun } from 'react-icons/fa';
+import WeatherWidget from '../WeatherWidget';
 
 export default {
   id: 'weather',
-  defaultTitle: '7-Day Weather',
-  defaultW: 4,
-  defaultH: 4,
-  Component: WeatherWidget,
+  name: 'Weather',
+  icon: FaCloudSun,
+  component: WeatherWidget,
+  defaultConfig: {
+    location: '',          // your default location (e.g., 'New York')
+    units: 'celsius',      // 'celsius' or 'fahrenheit'
+    refreshInterval: 600000, // 10 minutes
+  },
 };
