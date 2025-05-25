@@ -1,4 +1,4 @@
-//Product-portal-frontend\src\api\calculatorAPI.js
+//Product-portal-frontend\ src\api\calculatorAPI.js
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
