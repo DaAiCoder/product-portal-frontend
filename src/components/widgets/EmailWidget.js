@@ -1,30 +1,47 @@
-import React from 'react';
+// File:Product-portal-frontend\src\components\widgets\EmailWidget.js
 
-const EmailWidget = ({ emailAccounts = [], account, onRefresh = () => {} }) => {
-  const emails = emailAccounts.length ? emailAccounts : account ? [account] : [];
+import React, { useEffect, useState } from 'react';
+import { fetchEmails } from '../../api/emailAPI';
+import { FaEnvelope } from 'react-icons/fa';
 
+export default function EmailWidget({ config }) {
+  const { folder = 'inbox', refreshInterval = 300000 } = config;
+  const [emails, setEmails] = useState([]);
+  const [error, setError] = useState(null);
+
+  const loadEmails = async () => {
+    try {
+      const data = await fetchEmails(folder);
+      setEmails(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    loadEmails();
+    const iv = setInterval(loadEmails, refreshInterval);
+    return () => clearInterval(iv);
+  }, [folder, refreshInterval]);
+
+  if (error) return <div className="p-2 text-red-500">Error: {error}</div>;
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded shadow-md">
-      <h2 className="text-lg font-semibold mb-2">📧 Email Accounts</h2>
+    <div className="p-2">
+      <div className="flex items-center mb-2">
+        <FaEnvelope className="mr-1" />
+        <strong>{folder.charAt(0).toUpperCase() + folder.slice(1)}</strong>
+      </div>
       {emails.length === 0 ? (
-        <p className="text-sm text-gray-500">No accounts connected.</p>
+        <div className="text-sm text-gray-500">No messages</div>
       ) : (
-        <ul className="space-y-1">
-          {emails.map((email, index) => (
-            <li key={index} className="text-sm text-gray-700 dark:text-gray-300">
-              {email}
+        <ul className="text-sm space-y-1 overflow-y-auto max-h-40">
+          {emails.slice(0, 5).map((email) => (
+            <li key={email.id} className="truncate">
+              <strong>{email.from}</strong>: {email.subject}
             </li>
           ))}
         </ul>
       )}
-      <button
-        onClick={onRefresh}
-        className="mt-3 px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-      >
-        🔄 Refresh Inbox
-      </button>
     </div>
   );
-};
-
-export default EmailWidget;
+}
