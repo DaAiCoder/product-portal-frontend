@@ -1,4 +1,6 @@
-// File: src/utils/intentHandler.js
+// src/utils/intentHandler.js
+
+import chrono from 'chrono-node';
 
 import {
   getUnreadEmails,
@@ -10,7 +12,7 @@ import {
   flagEmails,
   markAllRead,
   deleteEmail,
-} from '../api/emailAPI';
+} from '../pages/api/emailAPI';
 
 import {
   createReminder,
@@ -20,7 +22,7 @@ import {
   createRecurringReminder,
   editReminder,
   deleteReminder,
-} from '../api/reminderAPI';
+} from '../pages/api/remindersAPI';
 
 import {
   listEvents,
@@ -30,7 +32,7 @@ import {
   findFreeSlots,
   inviteToEvent,
   deleteEventSeries,
-} from '../api/calendarAPI';
+} from '../pages/api/calendarAPI';
 
 import {
   getCurrentWeather,
@@ -41,39 +43,21 @@ import {
   setWeatherUnits,
   getUVIndex,
   getSunriseSunset,
-} from '../api/weatherAPI';
+} from '../pages/api/weatherAPI';
 
 import {
-  getTimeInZone,
-  setDefaultTimezone,
-  convertTimezones,
+  listClocks,
   addClock,
   removeClock,
-  listClocks,
-} from '../api/clockAPI';
-
-import {
-  getStockQuote,
-  getStockHighLow,
-  getMarketCap,
-  alertStockThreshold,
-  getTopGainers,
-  getStockHistory,
-  compareStocks,
-} from '../api/stocksAPI';
-
-import {
-  getTodayGames,
-  getGameScore,
-  listUpcomingGames,
-} from '../api/sportsAPI';
+  getTimeInZone,
+} from '../pages/api/clockAPI';
 
 import {
   startTimer,
   stopTimer,
   listTimers,
   clearTimers,
-} from '../api/timerAPI';
+} from '../pages/api/timerAPI';
 
 import {
   startStopwatch,
@@ -81,43 +65,40 @@ import {
   resetStopwatch,
   lapStopwatch,
   getStopwatchTime,
-} from '../api/stopwatchAPI';
+} from '../pages/api/stopwatchAPI';
 
-import { calculate } from '../api/calculatorAPI';
+import { calculate } from '../pages/api/calculatorAPI';
 
-import { getQuote, getQuotesByCategory } from '../api/quotesAPI';
+import { getQuote, getQuotesByCategory } from '../pages/api/quotesAPI';
 
 import {
   uploadMusic,
   fetchTracks,
   getRecommendations,
-} from '../api/musicAPI';
+} from '../pages/api/musicAPI';
 
 import {
   fetchSocialFeed,
   postToSocial,
   listSocialPlatforms,
-} from '../api/socialAPI';
+} from '../pages/api/socialAPI';
 
 import {
   listRSSFeeds,
   getRSSFeed,
   addRSSFeed,
   removeRSSFeed,
-} from '../api/rssAPI';
+} from '../pages/api/rssAPI';
 
-import { translateText } from '../api/translatorAPI';
+import { translateText } from '../pages/api/translatorAPI';
 
 import {
   getCryptoPrice,
   alertCryptoThreshold,
   getCryptoHistory,
-} from '../api/cryptoAPI';
+} from '../pages/api/cryptoAPI';
 
-import { askAI } from '../api/aiAPI';
-
-// Chrono for natural-language parsing
-import chrono from 'chrono-node';
+import { askAI } from '../pages/api/aiAPI';
 
 export default async function handleIntent(t) {
   let m;
@@ -221,10 +202,6 @@ export default async function handleIntent(t) {
     return;
   }
   if ((m = t.match(/^list events on (.+)$/i))) {
-    await listEvents({ date: m[1] });
-    return;
-  }
-  if ((m = t.match(/^show me my schedule for (.+)$/i))) {
     await listEvents({ date: m[1] });
     return;
   }
@@ -343,7 +320,7 @@ export default async function handleIntent(t) {
     return;
   }
   if (/^lap stopwatch$/i.test(t)) {
-    await recordLap();
+    await lapStopwatch();
     return;
   }
   if (/^(what(?:'s| is) )?stopwatch time$/i.test(t)) {
@@ -358,7 +335,7 @@ export default async function handleIntent(t) {
   }
 
   // ─── Quotes ──────────────────────────────────────────────────────────────
-  if (/^give me a quote$/i.test(t) || /^quote of the day$/i.test(t)) {
+  if (/^give me a quote$/i.test(t)) {
     await getQuote();
     return;
   }
@@ -369,26 +346,17 @@ export default async function handleIntent(t) {
 
   // ─── Music ───────────────────────────────────────────────────────────────
   if ((m = t.match(/^play track (.+)$/i))) {
-    await fetchTracks().then(tracks => {
-      const idx = tracks.findIndex(t => t.title === m[1]);
-      if (idx !== -1) playTrack(tracks[idx].url);
-    });
+    const tracks = await fetchTracks();
+    const idx = tracks.findIndex(s => s.title === m[1]);  
+    if (idx !== -1) uploadMusic(tracks[idx].url);
     return;
   }
   if (/^pause music$/i.test(t)) {
     await pauseMusic();
     return;
   }
-  if (/^next track$/i.test(t)) {
-    await nextTrack();
-    return;
-  }
-  if (/^previous track$/i.test(t)) {
-    await prevTrack();
-    return;
-  }
   if (/^recommend me music$/i.test(t)) {
-    await getRecommendations().then(list => list.forEach(item => console.log(item)));
+    await getRecommendations();
     return;
   }
 
@@ -448,6 +416,6 @@ export default async function handleIntent(t) {
     return;
   }
 
-  // ─── Fallback to Portal Search ───────────────────────────────────────────
-  await askAI ? askAI(t) : console.warn('Unknown command');  
+  // ─── Fallback ────────────────────────────────────────────────────────────
+  console.warn('Unknown command:', t);
 }
