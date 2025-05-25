@@ -1,7 +1,7 @@
 //Product-portal-frontend\src\components\widgets\CalculatorWidget.js
 
 import React, { useState } from 'react';
-import { calculate } from '../../api/calculatorAPI';
+import { calculate } from '../../pages/api/calculatorAPI';
 import { FaCalculator } from 'react-icons/fa';
 
 export default function CalculatorWidget({ config }) {
