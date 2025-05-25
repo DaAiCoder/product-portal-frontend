@@ -1,89 +1,453 @@
 // File: src/utils/intentHandler.js
 
-import { RRule } from 'rrule';
+import {
+  getUnreadEmails,
+  searchEmails,
+  composeEmail,
+  replyEmail,
+  forwardEmail,
+  archiveOldEmails,
+  flagEmails,
+  markAllRead,
+  deleteEmail,
+} from '../api/emailAPI';
 
-/**
- * Parses a natural-language command and dispatches the appropriate action.
- * @param {string} text - The user-entered command text.
- * @param {function} navigate - React Router navigate function.
- */
-export async function handleCommand(text, navigate) {
-  const t = text.trim();
+import {
+  createReminder,
+  listReminders,
+  snoozeReminder,
+  cancelReminder,
+  createRecurringReminder,
+  editReminder,
+  deleteReminder,
+} from '../api/reminderAPI';
+
+import {
+  listEvents,
+  createEvent,
+  moveEvent,
+  deleteEvent,
+  findFreeSlots,
+  inviteToEvent,
+  deleteEventSeries,
+} from '../api/calendarAPI';
+
+import {
+  getCurrentWeather,
+  willItRain,
+  getForecast,
+  getHumidity,
+  getHistoricalHigh,
+  setWeatherUnits,
+  getUVIndex,
+  getSunriseSunset,
+} from '../api/weatherAPI';
+
+import {
+  getTimeInZone,
+  setDefaultTimezone,
+  convertTimezones,
+  addClock,
+  removeClock,
+  listClocks,
+} from '../api/clockAPI';
+
+import {
+  getStockQuote,
+  getStockHighLow,
+  getMarketCap,
+  alertStockThreshold,
+  getTopGainers,
+  getStockHistory,
+  compareStocks,
+} from '../api/stocksAPI';
+
+import {
+  getTodayGames,
+  getGameScore,
+  listUpcomingGames,
+} from '../api/sportsAPI';
+
+import {
+  startTimer,
+  stopTimer,
+  listTimers,
+  clearTimers,
+} from '../api/timerAPI';
+
+import {
+  startStopwatch,
+  stopStopwatch,
+  resetStopwatch,
+  lapStopwatch,
+  getStopwatchTime,
+} from '../api/stopwatchAPI';
+
+import { calculate } from '../api/calculatorAPI';
+
+import { getQuote, getQuotesByCategory } from '../api/quotesAPI';
+
+import {
+  uploadMusic,
+  fetchTracks,
+  getRecommendations,
+} from '../api/musicAPI';
+
+import {
+  fetchSocialFeed,
+  postToSocial,
+  listSocialPlatforms,
+} from '../api/socialAPI';
+
+import {
+  listRSSFeeds,
+  getRSSFeed,
+  addRSSFeed,
+  removeRSSFeed,
+} from '../api/rssAPI';
+
+import { translateText } from '../api/translatorAPI';
+
+import {
+  getCryptoPrice,
+  alertCryptoThreshold,
+  getCryptoHistory,
+} from '../api/cryptoAPI';
+
+import { askAI } from '../api/aiAPI';
+
+// Chrono for natural-language parsing
+import chrono from 'chrono-node';
+
+export default async function handleIntent(t) {
   let m;
 
-  // 1) Navigation: "Go to Email page"
-  if ((m = t.match(/^go to (.+)$/i))) {
-    const page = m[1].trim().toLowerCase().replace(/\s+/g, '');
-    navigate(`/${page}`);
+  // ─── AI Assistant ────────────────────────────────────────────────────────
+  if ((m = t.match(/^ask ai to (.+)$/i))) {
+    await askAI(m[1]);
     return;
   }
 
-  // 2) Search Notes: 'Search notes for "project plan"'
-  if ((m = t.match(/^search notes for ["']?(.+?)["']?$/i))) {
-    const q = encodeURIComponent(m[1]);
-    navigate(`/notes?search=${q}`);
+  // ─── Email ───────────────────────────────────────────────────────────────
+  if (/^what(?:'s| is) my unread emails\??$/i.test(t)) {
+    await getUnreadEmails();
+    return;
+  }
+  if ((m = t.match(/^search emails for (.+)$/i))) {
+    await searchEmails(m[1]);
+    return;
+  }
+  if ((m = t.match(/^send email to (.+?) with subject (.+?) and body (.+)$/i))) {
+    await composeEmail({ to: m[1], subject: m[2], body: m[3] });
+    return;
+  }
+  if ((m = t.match(/^reply to email (.+?) with (.+)$/i))) {
+    await replyEmail(m[1], m[2]);
+    return;
+  }
+  if ((m = t.match(/^forward email (.+?) to (.+)$/i))) {
+    await forwardEmail(m[1], m[2]);
+    return;
+  }
+  if ((m = t.match(/^archive emails older than (\d+) days$/i))) {
+    await archiveOldEmails(parseInt(m[1], 10));
+    return;
+  }
+  if ((m = t.match(/^flag emails from (.+)$/i))) {
+    await flagEmails(m[1]);
+    return;
+  }
+  if (/^mark all emails as read$/i.test(t)) {
+    await markAllRead();
+    return;
+  }
+  if ((m = t.match(/^delete email (.+)$/i))) {
+    await deleteEmail(m[1]);
     return;
   }
 
-  // 3) Search Files: 'Find file named "budget.xlsx"'
-  if ((m = t.match(/^find file named ["']?(.+?)["']?$/i))) {
-    const q = encodeURIComponent(m[1]);
-    navigate(`/files?search=${q}`);
+  // ─── Reminders ────────────────────────────────────────────────────────────
+  // Natural-language fallback: “remind me to <task> <date-time>”
+  if (/^remind me to\s+/i.test(t)) {
+    const results = chrono.parse(t);
+    if (results.length > 0) {
+      const { text: phrase, start } = results[0];
+      const datetime = start.date().toISOString();
+      const task = t.replace(phrase, '').replace(/^remind me to\s*/i, '').trim();
+      await createReminder({ text: task, datetime });
+      return;
+    }
+  }
+  if ((m = t.match(/^remind me to (.+?) (in|after) (\d+)\s*(minutes|hours)$/i))) {
+    const [, task,, num, unit] = m;
+    const minutes = unit.startsWith('hour') ? +num * 60 : +num;
+    await createReminder({ text: task, offsetMinutes: minutes });
+    return;
+  }
+  if ((m = t.match(/^set a reminder for (.+?) on (.+) at (.+)$/i))) {
+    await createReminder({ text: m[1], datetime: `${m[2]} ${m[3]}` });
+    return;
+  }
+  if (/^list (all )?reminders$/i.test(t)) {
+    await listReminders();
+    return;
+  }
+  if (/^snooze reminder (.+?) by (\d+)\s*(minutes|hours)$/i.test(t)) {
+    const [, id, num, unit] = t.match(/snooze reminder (.+?) by (\d+)\s*(minutes|hours)/i);
+    const minutes = unit.startsWith('hour') ? +num * 60 : +num;
+    await snoozeReminder(id, { minutes });
+    return;
+  }
+  if ((m = t.match(/^cancel reminder (.+)$/i))) {
+    await cancelReminder(m[1]);
+    return;
+  }
+  if ((m = t.match(/^edit reminder (.+) to (.+)$/i))) {
+    await editReminder(m[1], m[2]);
+    return;
+  }
+  if ((m = t.match(/^delete reminder (.+)$/i))) {
+    await deleteReminder({ id: m[1] });
+    return;
+  }
+  if ((m = t.match(/^set a recurring reminder to (.+?) every (.+)$/i))) {
+    await createRecurringReminder({ text: m[1], interval: m[2] });
     return;
   }
 
-  // 4) Create Note: 'Create note: Grocery list'
-  if ((m = t.match(/^create note:?\s*(.+)$/i))) {
-    const content = m[1].trim();
-    await fetch('/api/notes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
+  // ─── Calendar ────────────────────────────────────────────────────────────
+  if (/^what(?:'s| is) on my calendar today\??$/i.test(t)) {
+    await listEvents({ date: new Date().toISOString().split('T')[0] });
+    return;
+  }
+  if ((m = t.match(/^list events on (.+)$/i))) {
+    await listEvents({ date: m[1] });
+    return;
+  }
+  if ((m = t.match(/^show me my schedule for (.+)$/i))) {
+    await listEvents({ date: m[1] });
+    return;
+  }
+  if ((m = t.match(/^add event:?\s*(.+?)\s+(on|at)\s+(.+)$/i))) {
+    await createEvent({ title: m[1], datetime: m[3] });
+    return;
+  }
+  if ((m = t.match(/^move event (.+?) to (.+)$/i))) {
+    await moveEvent(m[1], m[2]);
+    return;
+  }
+  if ((m = t.match(/^delete event (.+?) on (.+)$/i))) {
+    await deleteEvent({ title: m[1], date: m[2] });
+    return;
+  }
+  if ((m = t.match(/^find free slots on (.+)$/i))) {
+    await findFreeSlots(m[1]);
+    return;
+  }
+  if ((m = t.match(/^invite (.+) to event (.+)$/i))) {
+    await inviteToEvent(m[2], m[1]);
+    return;
+  }
+  if ((m = t.match(/^delete event series (.+)$/i))) {
+    await deleteEventSeries(m[1]);
+    return;
+  }
+
+  // ─── Weather ─────────────────────────────────────────────────────────────
+  if (/^what(?:'s| is) the weather(?: in (.+))?\??$/i.test(t)) {
+    await getCurrentWeather(RegExp.$1 || '');
+    return;
+  }
+  if ((m = t.match(/^will it rain(?: tomorrow)?(?: in (.+))?$/i))) {
+    await willItRain(m[1] || '');
+    return;
+  }
+  if ((m = t.match(/^forecast for (.+)$/i))) {
+    await getForecast(m[1]);
+    return;
+  }
+  if ((m = t.match(/^humidity in (.+)$/i))) {
+    await getHumidity(m[1]);
+    return;
+  }
+  if ((m = t.match(/^historical high on (.+?)(?: in (.+))?$/i))) {
+    await getHistoricalHigh({ date: m[1], location: m[2] });
+    return;
+  }
+  if ((m = t.match(/^set weather units to (celsius|fahrenheit)$/i))) {
+    await setWeatherUnits(m[1]);
+    return;
+  }
+  if ((m = t.match(/^what(?:'s| is) the uv index(?: in (.+))?$/i))) {
+    await getUVIndex(m[1] || '');
+    return;
+  }
+  if ((m = t.match(/^when is (sunrise|sunset)(?: in (.+))?$/i))) {
+    await getSunriseSunset(m[1], m[2] || '');
+    return;
+  }
+
+  // ─── World Clock ─────────────────────────────────────────────────────────
+  if ((m = t.match(/^what(?:'s| is) the time in (.+)$/i))) {
+    await getTimeInZone(m[1]);
+    return;
+  }
+  if ((m = t.match(/^add clock for (.+)$/i))) {
+    await addClock(m[1]);
+    return;
+  }
+  if ((m = t.match(/^remove clock for (.+)$/i))) {
+    await removeClock(m[1]);
+    return;
+  }
+  if (/^list my clocks$/i.test(t)) {
+    await listClocks();
+    return;
+  }
+
+  // ─── Timer ───────────────────────────────────────────────────────────────
+  if ((m = t.match(/^start a timer for (\d+)\s*(seconds|minutes|hours)$/i))) {
+    const [, num, unit] = m;
+    const secs = unit.startsWith('hour')
+      ? +num * 3600
+      : unit.startsWith('minute')
+      ? +num * 60
+      : +num;
+    await startTimer(secs);
+    return;
+  }
+  if (/^stop timer$/i.test(t)) {
+    await stopTimer();
+    return;
+  }
+  if (/^list timers$/i.test(t)) {
+    await listTimers();
+    return;
+  }
+  if (/^clear timers$/i.test(t)) {
+    await clearTimers();
+    return;
+  }
+
+  // ─── Stopwatch ───────────────────────────────────────────────────────────
+  if (/^start stopwatch$/i.test(t)) {
+    await startStopwatch();
+    return;
+  }
+  if (/^stop stopwatch$/i.test(t)) {
+    await stopStopwatch();
+    return;
+  }
+  if (/^reset stopwatch$/i.test(t)) {
+    await resetStopwatch();
+    return;
+  }
+  if (/^lap stopwatch$/i.test(t)) {
+    await recordLap();
+    return;
+  }
+  if (/^(what(?:'s| is) )?stopwatch time$/i.test(t)) {
+    await getStopwatchTime();
+    return;
+  }
+
+  // ─── Calculator ──────────────────────────────────────────────────────────
+  if ((m = t.match(/^calculate (.+)$/i))) {
+    await calculate(m[1]);
+    return;
+  }
+
+  // ─── Quotes ──────────────────────────────────────────────────────────────
+  if (/^give me a quote$/i.test(t) || /^quote of the day$/i.test(t)) {
+    await getQuote();
+    return;
+  }
+  if ((m = t.match(/^give me a quote about (.+)$/i))) {
+    await getQuotesByCategory(m[1]);
+    return;
+  }
+
+  // ─── Music ───────────────────────────────────────────────────────────────
+  if ((m = t.match(/^play track (.+)$/i))) {
+    await fetchTracks().then(tracks => {
+      const idx = tracks.findIndex(t => t.title === m[1]);
+      if (idx !== -1) playTrack(tracks[idx].url);
     });
-    alert('Note created');
+    return;
+  }
+  if (/^pause music$/i.test(t)) {
+    await pauseMusic();
+    return;
+  }
+  if (/^next track$/i.test(t)) {
+    await nextTrack();
+    return;
+  }
+  if (/^previous track$/i.test(t)) {
+    await prevTrack();
+    return;
+  }
+  if (/^recommend me music$/i.test(t)) {
+    await getRecommendations().then(list => list.forEach(item => console.log(item)));
     return;
   }
 
-  // 5) Add Event: 'Add event: Team sync on June 5 at 10 AM'
-  if ((m = t.match(/^add event:?\s*(.+) on (.+) at (.+)$/i))) {
-    const title = m[1].trim();
-    const dateStr = m[2].trim();
-    const timeStr = m[3].trim();
-    const start = new Date(`${dateStr} ${timeStr}`).toISOString();
-    await fetch('/api/calendar/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, start, end: start }),
-    });
-    alert('Event added');
+  // ─── Social ──────────────────────────────────────────────────────────────
+  if ((m = t.match(/^fetch social feed(?: from (.+))?$/i))) {
+    await fetchSocialFeed(m[1] ? [m[1]] : []);
+    return;
+  }
+  if ((m = t.match(/^post to (.+?) (.+)$/i))) {
+    await postToSocial(m[1], m[2]);
+    return;
+  }
+  if (/^list social platforms$/i.test(t)) {
+    await listSocialPlatforms();
     return;
   }
 
-  // 6) Set Reminder: 'Remind me to call Bob at 4 PM'
-  if ((m = t.match(/^remind me to (.+) at (.+)$/i))) {
-    const task = m[1].trim();
-    const timeStr = m[2].trim();
-    await fetch('/api/reminders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task, time: timeStr }),
-    });
-    alert('Reminder set');
+  // ─── RSS / News ─────────────────────────────────────────────────────────
+  if ((m = t.match(/^get rss feed for (.+)$/i))) {
+    await getRSSFeed(m[1]);
+    return;
+  }
+  if (/^list rss feeds$/i.test(t)) {
+    await listRSSFeeds();
+    return;
+  }
+  if ((m = t.match(/^add rss feed (.+)$/i))) {
+    await addRSSFeed(m[1]);
+    return;
+  }
+  if ((m = t.match(/^remove rss feed (.+)$/i))) {
+    await removeRSSFeed(m[1]);
     return;
   }
 
-  // 7) Show Events: 'Show me tomorrow’s events'
-  if (/^show me.+events$/i.test(t)) {
-    navigate('/calendar');
+  // ─── Translator ──────────────────────────────────────────────────────────
+  if ((m = t.match(/^translate (.+) to ([a-z]{2})$/i))) {
+    await translateText(m[1], m[2]);
+    return;
+  }
+  if ((m = t.match(/^translate (.+) from ([a-z]{2}) to ([a-z]{2})$/i))) {
+    await translateText(m[1], m[3], m[2]);
     return;
   }
 
-  // 8) Fallback: Q&A via your chat endpoint
-  const res = await fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: text }),
-  });
-  const { answer } = await res.json();
-  alert(answer || 'Sorry, I could not find an answer.');
+  // ─── Crypto ─────────────────────────────────────────────────────────────
+  if ((m = t.match(/^what(?:'s| is) the price of (.+)$/i))) {
+    await getCryptoPrice(m[1]);
+    return;
+  }
+  if ((m = t.match(/^alert me when (.+) (?:goes above|exceeds) (.+)$/i))) {
+    await alertCryptoThreshold(m[1], { above: m[2] });
+    return;
+  }
+  if ((m = t.match(/^show crypto history for (.+)$/i))) {
+    await getCryptoHistory(m[1]);
+    return;
+  }
+
+  // ─── Fallback to Portal Search ───────────────────────────────────────────
+  await askAI ? askAI(t) : console.warn('Unknown command');  
 }
