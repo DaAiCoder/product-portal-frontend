@@ -17,7 +17,7 @@ import {
 
 
 import quote from '../components/widgets/configs/quote';
-import time from '../components/widgets/configs/time';
+import timer from '../components/widgets/configs/timer';
 import weather from '../components/widgets/configs/weather';
 import aisummary from '../components/widgets/configs/aisummary';
 import chat from '../components/widgets/configs/chat';

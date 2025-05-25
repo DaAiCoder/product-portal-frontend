@@ -57,7 +57,7 @@ import {
   stopTimer,
   listTimers,
   clearTimers,
-} from '../pages/api/timerAPI';
+} from '../pages/api/timeAPI';
 
 import {
   startStopwatch,
