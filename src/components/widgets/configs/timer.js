@@ -1,14 +1,14 @@
-//Product-portal-frontend\src\components\widgets\configs\time.js
+// File: src/components/widgets/configs/timer.js
 
-import { FaClock } from 'react-icons/fa';
+import { FaHourglassStart } from 'react-icons/fa';
 import TimerWidget from '../TimerWidget';
 
 export default {
-  id: 'time',
-  name: 'Time',
-  icon: FaClock,
+  id: 'timer',
+  name: 'Timer',
+  icon: FaHourglassStart,
   component: TimerWidget,
   defaultConfig: {
-    refreshInterval: 60000, // update every minute for clock & stopwatch
+    refreshInterval: 60000, // 1 minute polling
   },
 };
