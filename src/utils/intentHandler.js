@@ -65,7 +65,7 @@ import {
   resetStopwatch,
   lapStopwatch,
   getStopwatchTime,
-} from '../pages/api/stopwatchAPI';
+} from '../pages/api/timeAPI';
 
 import { calculate } from '../pages/api/calculatorAPI';
 
