@@ -22,7 +22,7 @@ import {
   createRecurringReminder,
   editReminder,
   deleteReminder,
-} from '../pages/api/remindersAPI';
+} from '../pages/api/reminderAPI';
 
 import {
   listEvents,
