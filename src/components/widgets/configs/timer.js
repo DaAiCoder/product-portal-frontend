@@ -1,7 +1,7 @@
 //Product-portal-frontend\src\components\widgets\configs\time.js
 
 import { FaClock } from 'react-icons/fa';
-import TimeWidget from '../TimerWidget';
+import TimerWidget from '../TimerWidget';
 
 export default {
   id: 'time',
