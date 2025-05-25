@@ -1,4 +1,4 @@
-//Product-portal-frontend\src\api\weatherAPI.js
+//Product-portal-frontend\ src\api\weatherAPI.js
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 

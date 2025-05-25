@@ -15,14 +15,13 @@ import {
   FaBasketballBall,
 } from 'react-icons/fa';
 
-import datetime from '../components/widgets/configs/datetime';
-import stopwatch from '../components/widgets/configs/stopwatch';
+
 import quote from '../components/widgets/configs/quote';
+import time from '../components/widgets/configs/time';
 import weather from '../components/widgets/configs/weather';
 import aisummary from '../components/widgets/configs/aisummary';
 import chat from '../components/widgets/configs/chat';
 import calculator from '../components/widgets/configs/calculator';
-import worldclock from '../components/widgets/configs/worldclock';
 import notes from '../components/widgets/configs/notes';
 
 import RssWidget from '../components/widgets/RssWidget';
