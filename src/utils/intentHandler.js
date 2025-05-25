@@ -1,6 +1,7 @@
 // src/utils/ t intentHandler.js
 
-import chrono from 'chrono-node';
+import chrono from 'chrono-node/dist/chrono-node.min.js';
+
 
 import {
   getUnreadEmails,
