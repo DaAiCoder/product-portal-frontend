@@ -50,14 +50,14 @@ import {
   addClock,
   removeClock,
   getTimeInZone,
-} from '../pages/api/timeAPI';
+} from '../pages/api/timerAPI';
 
 import {
   startTimer,
   stopTimer,
   listTimers,
   clearTimers,
-} from '../pages/api/timeAPI';
+} from '../pages/api/timerAPI';
 
 import {
   startStopwatch,
@@ -65,7 +65,7 @@ import {
   resetStopwatch,
   lapStopwatch,
   getStopwatchTime,
-} from '../pages/api/timeAPI';
+} from '../pages/api/timerAPI';
 
 import { calculate } from '../pages/api/calculatorAPI';
 
