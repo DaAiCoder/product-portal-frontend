@@ -3,7 +3,7 @@ import {
   getCurrentWeather,
   getForecast,
   getUVIndex,
-} from '../../pages/api/weatherAPI';
+} from '../../utils/weatherClient';
 import { FaCloudSun } from 'react-icons/fa';
 
 export default function WeatherWidget({ config = {} }) {
