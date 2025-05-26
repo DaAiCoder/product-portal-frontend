@@ -50,7 +50,7 @@ import {
   addClock,
   removeClock,
   getTimeInZone,
-} from '../pages/api/worldClockAPI';
+} from '../pages/api/timerAPI';
 
 import {
   startTimer,
