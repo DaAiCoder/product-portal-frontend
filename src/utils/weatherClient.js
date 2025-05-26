@@ -1,4 +1,4 @@
-// src/utils /weatherClient.js
+// src/utils/weatherClient.js
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Get current weather for a city (defaults to New York)
