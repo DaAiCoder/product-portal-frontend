@@ -90,7 +90,7 @@ import {
   getCryptoHistory,
 } from '../pages/api/cryptoAPI';
 
-import { askAI } from '../pages/api/aiAPI';
+import { askAI } from './aiClient';
 
 export async function handleCommand(t) {
   let m;
