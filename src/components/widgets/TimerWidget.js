@@ -1,100 +1,82 @@
-// File: src/components /widgets/TimerWidget.js
+// src/components/widgets/TimerWidget.js
 
 import React, { useEffect, useState } from 'react';
 import {
   listClocks,
   addClock,
   removeClock,
-  getTimeInZone,
   startTimer,
   stopTimer,
   listTimers,
   clearTimers,
-  startStopwatch,
-  stopStopwatch,
-  resetStopwatch,
-  lapStopwatch,
-  getStopwatchTime,
-} from '../../pages/api/timerAPI';
+  getTimerRemaining,
+} from '../../utils/timerClient'; // <-- Updated import!
 import { FaClock, FaHourglassStart, FaStopwatch, FaPlus, FaTrash } from 'react-icons/fa';
 
 export default function TimerWidget({ config = {} }) {
-  // default config, so config.refreshInterval never blows up
   const { refreshInterval = 60000 } = config;
-  const [tab, setTab] = useState('clock'); // 'clock' | 'timer' | 'stopwatch'
-
-  // World Clock state
+  const [tab, setTab] = useState('clock'); // 'clock' | 'timer'
+  // Clocks
   const [clocks, setClocks] = useState([]);
+  const [newCity, setNewCity] = useState('');
   const [newTZ, setNewTZ] = useState('');
-
-  // Timer state
+  // Timers
   const [timers, setTimers] = useState([]);
+  const [timerDuration, setTimerDuration] = useState(1); // minutes
 
-  // Stopwatch state
-  const [swTime, setSwTime] = useState(null);
-  const [swLaps, setSwLaps] = useState([]);
-
-  // Fetch data helpers
+  // Load Clocks
   const loadClocks = async () => {
     try {
-      const list = await listClocks();
-      const withTimes = await Promise.all(
-        list.map(async (c) => {
-          const { datetime } = await getTimeInZone(c.timezone);
-          return { ...c, datetime };
-        })
-      );
-      setClocks(withTimes);
+      const res = await listClocks();
+      setClocks(res.clocks || []);
     } catch (err) {
       console.error('Error loading clocks:', err);
     }
   };
+
+  // Load Timers
   const loadTimers = async () => {
     try {
-      const t = await listTimers();
-      setTimers(t);
+      const res = await listTimers();
+      setTimers(res.timers || []);
     } catch (err) {
       console.error('Error loading timers:', err);
     }
   };
-  const loadStopwatch = async () => {
-    try {
-      const data = await getStopwatchTime();
-      setSwTime(data.time);
-      setSwLaps(data.laps || []);
-    } catch (err) {
-      console.error('Error loading stopwatch:', err);
-    }
-  };
 
-  // Initial load & polling
   useEffect(() => {
     if (tab === 'clock') loadClocks();
     if (tab === 'timer') loadTimers();
-    if (tab === 'stopwatch') loadStopwatch();
 
     const iv = setInterval(() => {
       if (tab === 'clock') loadClocks();
       if (tab === 'timer') loadTimers();
-      if (tab === 'stopwatch') loadStopwatch();
     }, refreshInterval);
 
     return () => clearInterval(iv);
   }, [tab, refreshInterval]);
 
-  // Renderers for each mode
+  // Renderers
   const renderClock = () => (
     <div>
       <div className="flex mb-2">
         <input
           className="flex-1 p-1 border rounded"
-          placeholder="America/New_York"
+          placeholder="City"
+          value={newCity}
+          onChange={(e) => setNewCity(e.target.value)}
+        />
+        <input
+          className="flex-1 p-1 border rounded ml-2"
+          placeholder="Timezone (e.g. America/Los_Angeles)"
           value={newTZ}
           onChange={(e) => setNewTZ(e.target.value)}
         />
         <button
           onClick={async () => {
-            await addClock(newTZ);
+            if (!newCity || !newTZ) return;
+            await addClock(newCity, newTZ);
+            setNewCity('');
             setNewTZ('');
             loadClocks();
           }}
@@ -105,13 +87,13 @@ export default function TimerWidget({ config = {} }) {
       </div>
       <ul className="space-y-1 max-h-32 overflow-y-auto text-sm">
         {clocks.map((c) => (
-          <li key={c.id} className="flex justify-between items-center">
+          <li key={c.city + c.timezone} className="flex justify-between items-center">
             <span>
-              {c.timezone}: {new Date(c.datetime).toLocaleTimeString()}
+              {c.city} ({c.timezone}): {c.local_time}
             </span>
             <button
               onClick={async () => {
-                await removeClock(c.id);
+                await removeClock(c.city);
                 loadClocks();
               }}
             >
@@ -126,21 +108,22 @@ export default function TimerWidget({ config = {} }) {
   const renderTimer = () => (
     <div>
       <div className="flex space-x-1 mb-2">
-        {timers.map((t) => (
-          <div key={t.id} className="p-1 bg-gray-100 rounded text-xs">
-            {t.remaining}s
-          </div>
-        ))}
-      </div>
-      <div className="flex space-x-1">
+        <input
+          type="number"
+          min={1}
+          className="p-1 w-20 border rounded"
+          value={timerDuration}
+          onChange={e => setTimerDuration(Number(e.target.value))}
+        />
+        <span>minutes</span>
         <button
           onClick={async () => {
-            await startTimer(60);
+            await startTimer(timerDuration);
             loadTimers();
           }}
           className="p-1 border rounded"
         >
-          Start 1m
+          Start
         </button>
         <button
           onClick={async () => {
@@ -161,57 +144,13 @@ export default function TimerWidget({ config = {} }) {
           Clear
         </button>
       </div>
-    </div>
-  );
-
-  const renderStopwatch = () => (
-    <div>
-      <div className="text-lg mb-2">{swTime != null ? `${swTime}s` : '0s'}</div>
-      <div className="flex space-x-1 mb-2">
-        <button
-          onClick={async () => {
-            await startStopwatch();
-            loadStopwatch();
-          }}
-          className="p-1 border rounded"
-        >
-          Start
-        </button>
-        <button
-          onClick={async () => {
-            await stopStopwatch();
-            loadStopwatch();
-          }}
-          className="p-1 border rounded"
-        >
-          Stop
-        </button>
-        <button
-          onClick={async () => {
-            await resetStopwatch();
-            loadStopwatch();
-          }}
-          className="p-1 border rounded"
-        >
-          Reset
-        </button>
-        <button
-          onClick={async () => {
-            await lapStopwatch();
-            loadStopwatch();
-          }}
-          className="p-1 border rounded"
-        >
-          Lap
-        </button>
-      </div>
-      <ul className="text-xs space-y-1 max-h-24 overflow-y-auto">
-        {swLaps.map((lap, i) => (
-          <li key={i}>
-            Lap {i + 1}: {lap}s
-          </li>
+      <div className="space-y-1">
+        {timers.map((t) => (
+          <div key={t.id} className="p-1 bg-gray-100 rounded text-xs">
+            Timer: {t.duration} min, ends at {new Date(t.end_time).toLocaleTimeString()}
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 
@@ -230,16 +169,10 @@ export default function TimerWidget({ config = {} }) {
         >
           <FaHourglassStart /> Timer
         </button>
-        <button
-          onClick={() => setTab('stopwatch')}
-          className={tab === 'stopwatch' ? 'font-bold' : 'text-gray-600'}
-        >
-          <FaStopwatch /> Stopwatch
-        </button>
+        {/* Stopwatch removed since backend doesn't support it yet */}
       </div>
       {tab === 'clock' && renderClock()}
       {tab === 'timer' && renderTimer()}
-      {tab === 'stopwatch' && renderStopwatch()}
     </div>
   );
 }
