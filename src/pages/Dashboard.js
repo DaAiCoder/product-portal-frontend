@@ -1,4 +1,4 @@
-// src/pages/Dashboard.js
+// File: src/pages/Dashboard.js
 
 import React, { useState, useEffect } from 'react';
 import GridLayout from 'react-grid-layout';
@@ -62,7 +62,8 @@ export default function Dashboard() {
 
   // Handlers
   const onLayoutChange = (newLayout) => setLayout(newLayout);
-  const handleRename = (id, newTitle) => setTitles((t) => ({ ...t, [id]: newTitle }));
+  const handleRename = (id, newTitle) =>
+    setTitles((t) => ({ ...t, [id]: newTitle }));
   const handleFav = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
   const handleHide = (id) => setHidden((h) => Array.from(new Set([...h, id])));
 
@@ -81,7 +82,7 @@ export default function Dashboard() {
 
   // Render helper
   const renderWidgets = (list) =>
-    list.map(({ id, label, component: Component }) => {
+    list.map(({ id, label, component: Component, defaultSettings = {} }) => {
       const cfg = layout.find((l) => l.i === id);
       if (!cfg) {
         console.warn('Missing layout for widget ' + id);
@@ -104,7 +105,7 @@ export default function Dashboard() {
             showSettings
             onOpenSettings={handleOpenSettings}
           >
-            <Component />
+            <Component config={defaultSettings} />
           </WidgetWrapper>
         </div>
       );
