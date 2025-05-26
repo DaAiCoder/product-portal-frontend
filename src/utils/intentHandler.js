@@ -50,21 +50,13 @@ import {
   addClock,
   removeClock,
   getTimeInZone,
-} from '../pages/api/timerAPI';
+} from '../pages/api/worldClockAPI';
 
 import {
   startTimer,
   stopTimer,
   listTimers,
   clearTimers,
-} from '../pages/api/timerAPI';
-
-import {
-  startStopwatch,
-  stopStopwatch,
-  resetStopwatch,
-  lapStopwatch,
-  getStopwatchTime,
 } from '../pages/api/timerAPI';
 
 import { calculate } from '../pages/api/calculatorAPI';
@@ -100,7 +92,7 @@ import {
 
 import { askAI } from '../pages/api/aiAPI';
 
-export default async function handleIntent(t) {
+export async function handleCommand(t) {
   let m;
 
   // ─── AI Assistant ────────────────────────────────────────────────────────
@@ -148,7 +140,6 @@ export default async function handleIntent(t) {
   }
 
   // ─── Reminders ────────────────────────────────────────────────────────────
-  // NLP fallback via sugar-date: “remind me to <task> <date-time>”
   if (/^remind me to\s+/i.test(t)) {
     const cmd = t.replace(/^remind me to\s*/i, '').trim();
     const dt = parseDate(cmd);
@@ -304,28 +295,6 @@ export default async function handleIntent(t) {
     return;
   }
 
-  // ─── Stopwatch ───────────────────────────────────────────────────────────
-  if (/^start stopwatch$/i.test(t)) {
-    await startStopwatch();
-    return;
-  }
-  if (/^stop stopwatch$/i.test(t)) {
-    await stopStopwatch();
-    return;
-  }
-  if (/^reset stopwatch$/i.test(t)) {
-    await resetStopwatch();
-    return;
-  }
-  if (/^lap stopwatch$/i.test(t)) {
-    await lapStopwatch();
-    return;
-  }
-  if (/^(what(?:'s| is) )?stopwatch time$/i.test(t)) {
-    await getStopwatchTime();
-    return;
-  }
-
   // ─── Calculator ──────────────────────────────────────────────────────────
   if ((m = t.match(/^calculate (.+)$/i))) {
     await calculate(m[1]);
@@ -333,14 +302,8 @@ export default async function handleIntent(t) {
   }
 
   // ─── Quotes ──────────────────────────────────────────────────────────────
-  if (/^give me a quote$/i.test(t)) {
-    await getQuote();
-    return;
-  }
-  if ((m = t.match(/^give me a quote about (.+)$/i))) {
-    await getQuotesByCategory(m[1]);
-    return;
-  }
+  if (/^give me a quote$/i.test(t)) { await getQuote(); return; }
+  if ((m = t.match(/^give me a quote about (.+)$/i))) { await getQuotesByCategory(m[1]); return; }
 
   // ─── Music ───────────────────────────────────────────────────────────────
   if ((m = t.match(/^play track (.+)$/i))) {
@@ -349,71 +312,36 @@ export default async function handleIntent(t) {
     if (idx !== -1) uploadMusic(tracks[idx].url);
     return;
   }
-  if (/^pause music$/i.test(t)) {
-    await pauseMusic();
-    return;
-  }
-  if (/^recommend me music$/i.test(t)) {
-    await getRecommendations();
-    return;
-  }
+  if (/^pause music$/i.test(t)) { await pauseMusic(); return; }
+  if (/^recommend me music$/i.test(t)) { await getRecommendations(); return; }
 
   // ─── Social ──────────────────────────────────────────────────────────────
   if ((m = t.match(/^fetch social feed(?: from (.+))?$/i))) {
     await fetchSocialFeed(m[1] ? [m[1]] : []);
     return;
   }
-  if ((m = t.match(/^post to (.+?) (.+)$/i))) {
-    await postToSocial(m[1], m[2]);
-    return;
-  }
-  if (/^list social platforms$/i.test(t)) {
-    await listSocialPlatforms();
-    return;
-  }
+  if ((m = t.match(/^post to (.+?) (.+)$/i))) { await postToSocial(m[1], m[2]); return; }
+  if (/^list social platforms$/i.test(t)) { await listSocialPlatforms(); return; }
 
   // ─── RSS / News ─────────────────────────────────────────────────────────
-  if ((m = t.match(/^get rss feed for (.+)$/i))) {
-    await getRSSFeed(m[1]);
-    return;
-  }
-  if (/^list rss feeds$/i.test(t)) {
-    await listRSSFeeds();
-    return;
-  }
-  if ((m = t.match(/^add rss feed (.+)$/i))) {
-    await addRSSFeed(m[1]);
-    return;
-  }
-  if ((m = t.match(/^remove rss feed (.+)$/i))) {
-    await removeRSSFeed(m[1]);
-    return;
-  }
+  if ((m = t.match(/^get rss feed for (.+)$/i))) { await getRSSFeed(m[1]); return; }
+  if (/^list rss feeds$/i.test(t)) { await listRSSFeeds(); return; }
+  if ((m = t.match(/^add rss feed (.+)$/i))) { await addRSSFeed(m[1]); return; }
+  if ((m = t.match(/^remove rss feed (.+)$/i))) { await removeRSSFeed(m[1]); return; }
 
   // ─── Translator ──────────────────────────────────────────────────────────
-  if ((m = t.match(/^translate (.+) to ([a-z]{2})$/i))) {
-    await translateText(m[1], m[2]);
-    return;
-  }
-  if ((m = t.match(/^translate (.+) from ([a-z]{2}) to ([a-z]{2})$/i))) {
-    await translateText(m[1], m[3], m[2]);
-    return;
-  }
+  if ((m = t.match(/^translate (.+) to ([a-z]{2})$/i))) { await translateText(m[1], m[2]); return; }
+  if ((m = t.match(/^translate (.+) from ([a-z]{2}) to ([a-z]{2})$/i))) { await translateText(m[1], m[3], m[2]); return; }
 
   // ─── Crypto ─────────────────────────────────────────────────────────────
-  if ((m = t.match(/^what(?:'s| is) the price of (.+)$/i))) {
-    await getCryptoPrice(m[1]);
-    return;
-  }
+  if ((m = t.match(/^what(?:'s| is) the price of (.+)$/i))) { await getCryptoPrice(m[1]); return; }
   if ((m = t.match(/^alert me when (.+) (?:goes above|exceeds) (.+)$/i))) {
-    await alertCryptoThreshold(m[1], { above: m[2] });
-    return;
+    await alertCryptoThreshold(m[1], { above: m[2] }); return;
   }
-  if ((m = t.match(/^show crypto history for (.+)$/i))) {
-    await getCryptoHistory(m[1]);
-    return;
-  }
+  if ((m = t.match(/^show crypto history for (.+)$/i))) { await getCryptoHistory(m[1]); return; }
 
   // ─── Fallback ────────────────────────────────────────────────────────────
   console.warn('Unknown command:', t);
 }
+
+export default handleCommand;
