@@ -111,7 +111,7 @@ import {
 // 🤖 AI Assistant
 import { askAI } from './aiClient';
 
-export async function handleIntent(input) {
+export async function handleCommand(input) {
   const cmd = input.trim();
 
   // — EMAIL INTENTS —
