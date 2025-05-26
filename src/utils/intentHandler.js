@@ -1,347 +1,420 @@
 // File: src/utils/intentHandler.js
 
-import { create as parseDate } from 'sugar-date';
-
+// 📧 Email
 import {
   getUnreadEmails,
   searchEmails,
-  composeEmail,
-  replyEmail,
+  sendEmail,
+  replyToEmail,
   forwardEmail,
   archiveOldEmails,
   flagEmails,
   markAllRead,
   deleteEmail,
-} from '../pages/api/emailAPI';
+  listFlaggedEmails,
+} from './emailClient';
 
+// ⏰ Reminders
 import {
   createReminder,
   listReminders,
   snoozeReminder,
   cancelReminder,
-  createRecurringReminder,
   editReminder,
-  deleteReminder,
-} from '../pages/api/reminderAPI';
+  deleteReminder as deleteReminderById,
+  setRecurringReminder,
+  listTodayReminders,
+} from './reminderClient';
 
+// 📅 Calendar
 import {
-  listEvents,
-  createEvent,
+  getEventsForDate,
+  addEvent,
   moveEvent,
   deleteEvent,
   findFreeSlots,
   inviteToEvent,
-  deleteEventSeries,
-} from '../pages/api/calendarAPI';
+  deleteRecurringEvent,
+  showWeekEvents,
+  getNextEvent,
+} from './calendarClient';
 
+// ☁️ Weather
 import {
-  getCurrentWeather,
+  getWeather,
+  getWeatherByCity,
   willItRain,
-  getForecast,
+  getForecastWeekend,
   getHumidity,
   getHistoricalHigh,
   setWeatherUnits,
   getUVIndex,
-  getSunriseSunset,
-} from '../pages/api/weatherAPI';
+  getSunrise,
+  getSunset,
+} from './weatherClient';
 
+// 🕰 World Clock
 import {
-  listClocks,
+  getTimeInZone,
   addClock,
   removeClock,
-  getTimeInZone,
-} from '../pages/api/timerAPI';
+  listClocks,
+  getTimeDifference,
+} from './clockClient';
 
+// ⏱ Timer
 import {
   startTimer,
   stopTimer,
   listTimers,
   clearTimers,
-} from '../pages/api/timerAPI';
+  getTimerRemaining,
+} from './timerClient';
 
-import { calculate } from '../pages/api/calculatorAPI';
+// ➗ Calculator
+import { calculateExpression } from './calculatorClient';
 
-import { getQuote, getQuotesByCategory } from '../pages/api/quotesAPI';
+// 💬 Quotes
+import { getQuote } from './quotesClient';
 
+// 🎵 Music
 import {
-  uploadMusic,
   fetchTracks,
-  getRecommendations,
-} from '../pages/api/musicAPI';
+  playTrack,
+  uploadMusic,
+  recommendMusic,
+  fetchNewReleases,
+} from './musicClient';
 
-import {
-  fetchSocialFeed,
-  postToSocial,
-  listSocialPlatforms,
-} from '../pages/api/socialAPI';
+// 📣 Social
+import { fetchSocialFeed, postToSocial, listSocialPlatforms } from './socialClient';
 
+// 📰 RSS/News
 import {
   listRSSFeeds,
   getRSSFeed,
   addRSSFeed,
   removeRSSFeed,
-} from '../pages/api/rssAPI';
+  listNewsSources,
+} from './rssClient';
 
-import { translateText } from '../pages/api/translatorAPI';
+// 🌐 Translator
+import { translateText } from './translatorClient';
 
+// 💱 Crypto
 import {
   getCryptoPrice,
-  alertCryptoThreshold,
+  setCryptoAlert,
   getCryptoHistory,
-} from '../pages/api/cryptoAPI';
+} from './cryptoClient';
 
+// 🤖 AI Assistant
 import { askAI } from './aiClient';
 
-export async function handleCommand(t) {
-  let m;
+export async function handleIntent(input) {
+  const cmd = input.trim();
 
-  // ─── AI Assistant ────────────────────────────────────────────────────────
-  if ((m = t.match(/^ask ai to (.+)$/i))) {
-    await askAI(m[1]);
-    return;
+  // — EMAIL INTENTS —
+  if (/^show (?:my )?unread emails$/i.test(cmd)) {
+    return getUnreadEmails();
   }
-
-  // ─── Email ───────────────────────────────────────────────────────────────
-  if (/^what(?:'s| is) my unread emails\??$/i.test(t)) {
-    await getUnreadEmails();
-    return;
+  if (/^search emails? for (.+)$/i.test(cmd)) {
+    const [, query] = cmd.match(/^search emails? for (.+)$/i);
+    return searchEmails(query);
   }
-  if ((m = t.match(/^search emails for (.+)$/i))) {
-    await searchEmails(m[1]);
-    return;
+  if (/^send email to ([^ ]+) with subject (.+) and body (.+)$/i.test(cmd)) {
+    const [, to, subject, body] = cmd.match(
+      /^send email to ([^ ]+) with subject (.+) and body (.+)$/i
+    );
+    return sendEmail(to, subject, body);
   }
-  if ((m = t.match(/^send email to (.+?) with subject (.+?) and body (.+)$/i))) {
-    await composeEmail({ to: m[1], subject: m[2], body: m[3] });
-    return;
+  if (/^reply to email (\d+) with (.+)$/i.test(cmd)) {
+    const [, id, body] = cmd.match(/^reply to email (\d+) with (.+)$/i);
+    return replyToEmail(id, body);
   }
-  if ((m = t.match(/^reply to email (.+?) with (.+)$/i))) {
-    await replyEmail(m[1], m[2]);
-    return;
+  if (/^forward email (\d+) to ([^ ]+)$/i.test(cmd)) {
+    const [, id, to] = cmd.match(/^forward email (\d+) to ([^ ]+)$/i);
+    return forwardEmail(id, to);
   }
-  if ((m = t.match(/^forward email (.+?) to (.+)$/i))) {
-    await forwardEmail(m[1], m[2]);
-    return;
+  if (/^archive emails older than (\d+) days$/i.test(cmd)) {
+    const [, days] = cmd.match(/^archive emails older than (\d+) days$/i);
+    return archiveOldEmails(Number(days));
   }
-  if ((m = t.match(/^archive emails older than (\d+) days$/i))) {
-    await archiveOldEmails(parseInt(m[1], 10));
-    return;
+  if (/^flag emails? from ([^ ]+)$/i.test(cmd)) {
+    const [, from] = cmd.match(/^flag emails? from ([^ ]+)$/i);
+    return flagEmails(from);
   }
-  if ((m = t.match(/^flag emails from (.+)$/i))) {
-    await flagEmails(m[1]);
-    return;
+  if (/^mark all emails as read$/i.test(cmd)) {
+    return markAllRead();
   }
-  if (/^mark all emails as read$/i.test(t)) {
-    await markAllRead();
-    return;
+  if (/^delete email (\d+)$/i.test(cmd)) {
+    const [, id] = cmd.match(/^delete email (\d+)$/i);
+    return deleteEmail(id);
   }
-  if ((m = t.match(/^delete email (.+)$/i))) {
-    await deleteEmail(m[1]);
-    return;
+  if (/^list (?:my )?flagged emails$/i.test(cmd)) {
+    return listFlaggedEmails();
   }
 
-  // ─── Reminders ────────────────────────────────────────────────────────────
-  if (/^remind me to\s+/i.test(t)) {
-    const cmd = t.replace(/^remind me to\s*/i, '').trim();
-    const dt = parseDate(cmd);
-    if (dt instanceof Date && !isNaN(dt)) {
-      await createReminder({ text: cmd, datetime: dt.toISOString() });
-      return;
-    }
+  // — REMINDER INTENTS —
+  if (/^remind me to (.+) tomorrow at ([\d: ]+(?:am|pm)?)$/i.test(cmd)) {
+    const [, text, time] = cmd.match(/^remind me to (.+) tomorrow at ([\d: ]+(?:am|pm)?)$/i);
+    return createReminder(text, { date: 'tomorrow', time });
   }
-  if ((m = t.match(/^remind me to (.+?) (in|after) (\d+)\s*(minutes|hours)$/i))) {
-    const [, task,, num, unit] = m;
-    const minutes = unit.toLowerCase().startsWith('hour') ? +num * 60 : +num;
-    await createReminder({ text: task, offsetMinutes: minutes });
-    return;
+  if (/^remind me to (.+) in (\d+) hours$/i.test(cmd)) {
+    const [, text, hours] = cmd.match(/^remind me to (.+) in (\d+) hours$/i);
+    return createReminder(text, { hours: Number(hours) });
   }
-  if ((m = t.match(/^set a reminder for (.+?) on (.+) at (.+)$/i))) {
-    await createReminder({ text: m[1], datetime: `${m[2]} ${m[3]}` });
-    return;
+  if (/^set a reminder for (.+) on (.+) at ([\d: ]+(?:am|pm)?)$/i.test(cmd)) {
+    const [, text, date, time] = cmd.match(
+      /^set a reminder for (.+) on (.+) at ([\d: ]+(?:am|pm)?)$/i
+    );
+    return createReminder(text, { date, time });
   }
-  if (/^list (all )?reminders$/i.test(t)) {
-    await listReminders();
-    return;
+  if (/^list all (?:my )?reminders$/i.test(cmd)) {
+    return listReminders();
   }
-  if (/^snooze reminder (.+?) by (\d+)\s*(minutes|hours)$/i.test(t)) {
-    const [, id, num, unit] = t.match(/snooze reminder (.+?) by (\d+)\s*(minutes|hours)/i);
-    const minutes = unit.toLowerCase().startsWith('hour') ? +num * 60 : +num;
-    await snoozeReminder(id, { minutes });
-    return;
+  if (/^snooze reminder (\d+) by (\d+) minutes$/i.test(cmd)) {
+    const [, id, mins] = cmd.match(/^snooze reminder (\d+) by (\d+) minutes$/i);
+    return snoozeReminder(id, Number(mins));
   }
-  if ((m = t.match(/^cancel reminder (.+)$/i))) {
-    await cancelReminder(m[1]);
-    return;
+  if (/^cancel reminder (\d+)$/i.test(cmd)) {
+    const [, id] = cmd.match(/^cancel reminder (\d+)$/i);
+    return cancelReminder(id);
   }
-  if ((m = t.match(/^edit reminder (.+) to (.+)$/i))) {
-    await editReminder(m[1], m[2]);
-    return;
+  if (/^edit reminder (\d+) to (.+)$/i.test(cmd)) {
+    const [, id, newText] = cmd.match(/^edit reminder (\d+) to (.+)$/i);
+    return editReminder(id, newText);
   }
-  if ((m = t.match(/^delete reminder (.+)$/i))) {
-    await deleteReminder({ id: m[1] });
-    return;
+  if (/^delete reminder (\d+)$/i.test(cmd)) {
+    const [, id] = cmd.match(/^delete reminder (\d+)$/i);
+    return deleteReminderById(id);
   }
-  if ((m = t.match(/^set a recurring reminder to (.+?) every (.+)$/i))) {
-    await createRecurringReminder({ text: m[1], interval: m[2] });
-    return;
+  if (/^set a recurring reminder to (.+) every (.+)$/i.test(cmd)) {
+    const [, text, freq] = cmd.match(/^set a recurring reminder to (.+) every (.+)$/i);
+    return setRecurringReminder(text, freq);
+  }
+  if (/^show reminders for today$/i.test(cmd)) {
+    return listTodayReminders();
   }
 
-  // ─── Calendar ────────────────────────────────────────────────────────────
-  if (/^what(?:'s| is) on my calendar today\??$/i.test(t)) {
-    await listEvents({ date: new Date().toISOString().split('T')[0] });
-    return;
+  // — CALENDAR INTENTS —
+  if (/^what'?s on my calendar today\??$/i.test(cmd)) {
+    return getEventsForDate('today');
   }
-  if ((m = t.match(/^list events on (.+)$/i))) {
-    await listEvents({ date: m[1] });
-    return;
+  if (/^list events on (.+)$/i.test(cmd)) {
+    const [, date] = cmd.match(/^list events on (.+)$/i);
+    return getEventsForDate(date);
   }
-  if ((m = t.match(/^add event:?\s*(.+?)\s+(on|at)\s+(.+)$/i))) {
-    await createEvent({ title: m[1], datetime: m[3] });
-    return;
+  if (/^add event (.+) on (.+) at ([\d: ]+(?:am|pm)?)$/i.test(cmd)) {
+    const [, title, date, time] = cmd.match(
+      /^add event (.+) on (.+) at ([\d: ]+(?:am|pm)?)$/i
+    );
+    return addEvent({ title, date, time });
   }
-  if ((m = t.match(/^move event (.+?) to (.+)$/i))) {
-    await moveEvent(m[1], m[2]);
-    return;
+  if (/^move event (.+) to (.+) at ([\d: ]+(?:am|pm)?)$/i.test(cmd)) {
+    const [, title, date, time] = cmd.match(
+      /^move event (.+) to (.+) at ([\d: ]+(?:am|pm)?)$/i
+    );
+    return moveEvent(title, { date, time });
   }
-  if ((m = t.match(/^delete event (.+?) on (.+)$/i))) {
-    await deleteEvent({ title: m[1], date: m[2] });
-    return;
+  if (/^delete event (.+)$/i.test(cmd)) {
+    const [, title] = cmd.match(/^delete event (.+)$/i);
+    return deleteEvent(title);
   }
-  if ((m = t.match(/^find free slots on (.+)$/i))) {
-    await findFreeSlots(m[1]);
-    return;
+  if (/^find free slots on (.+)$/i.test(cmd)) {
+    const [, date] = cmd.match(/^find free slots on (.+)$/i);
+    return findFreeSlots(date);
   }
-  if ((m = t.match(/^invite (.+) to event (.+)$/i))) {
-    await inviteToEvent(m[2], m[1]);
-    return;
+  if (/^invite ([^ ]+) to event (.+)$/i.test(cmd)) {
+    const [, email, title] = cmd.match(/^invite ([^ ]+) to event (.+)$/i);
+    return inviteToEvent(title, email);
   }
-  if ((m = t.match(/^delete event series (.+)$/i))) {
-    await deleteEventSeries(m[1]);
-    return;
+  if (/^delete event series (.+)$/i.test(cmd)) {
+    const [, title] = cmd.match(/^delete event series (.+)$/i);
+    return deleteRecurringEvent(title);
   }
-
-  // ─── Weather ─────────────────────────────────────────────────────────────
-  if (/^what(?:'s| is) the weather(?: in (.+))?\??$/i.test(t)) {
-    await getCurrentWeather(RegExp.$1 || '');
-    return;
+  if (/^show me this week'?s events$/i.test(cmd)) {
+    return showWeekEvents();
   }
-  if ((m = t.match(/^will it rain(?: tomorrow)?(?: in (.+))?$/i))) {
-    await willItRain(m[1] || '');
-    return;
-  }
-  if ((m = t.match(/^forecast for (.+)$/i))) {
-    await getForecast(m[1]);
-    return;
-  }
-  if ((m = t.match(/^humidity in (.+)$/i))) {
-    await getHumidity(m[1]);
-    return;
-  }
-  if ((m = t.match(/^historical high on (.+?)(?: in (.+))?$/i))) {
-    await getHistoricalHigh({ date: m[1], location: m[2] });
-    return;
-  }
-  if ((m = t.match(/^set weather units to (celsius|fahrenheit)$/i))) {
-    await setWeatherUnits(m[1]);
-    return;
-  }
-  if ((m = t.match(/^what(?:'s| is) the uv index(?: in (.+))?$/i))) {
-    await getUVIndex(m[1] || '');
-    return;
-  }
-  if ((m = t.match(/^when is (sunrise|sunset)(?: in (.+))?$/i))) {
-    await getSunriseSunset(m[1], m[2] || '');
-    return;
+  if (/^what'?s my next event\??$/i.test(cmd)) {
+    return getNextEvent();
   }
 
-  // ─── World Clock ─────────────────────────────────────────────────────────
-  if ((m = t.match(/^what(?:'s| is) the time in (.+)$/i))) {
-    await getTimeInZone(m[1]);
-    return;
+  // — WEATHER INTENTS —
+  if (/^what'?s the weather\??$/i.test(cmd)) {
+    return getWeather();
   }
-  if ((m = t.match(/^add clock for (.+)$/i))) {
-    await addClock(m[1]);
-    return;
+  if (/^what'?s the weather in (.+)\??$/i.test(cmd)) {
+    const [, city] = cmd.match(/^what'?s the weather in (.+)\??$/i);
+    return getWeatherByCity(city);
   }
-  if ((m = t.match(/^remove clock for (.+)$/i))) {
-    await removeClock(m[1]);
-    return;
+  if (/^will it rain tomorrow in (.+)\??$/i.test(cmd)) {
+    const [, city] = cmd.match(/^will it rain tomorrow in (.+)\??$/i);
+    return willItRain(city);
   }
-  if (/^list my clocks$/i.test(t)) {
-    await listClocks();
-    return;
+  if (/^forecast for (.+) this weekend$/i.test(cmd)) {
+    const [, city] = cmd.match(/^forecast for (.+) this weekend$/i);
+    return getForecastWeekend(city);
   }
-
-  // ─── Timer ───────────────────────────────────────────────────────────────
-  if ((m = t.match(/^start a timer for (\d+)\s*(seconds|minutes|hours)$/i))) {
-    const [, num, unit] = m;
-    const secs = unit.toLowerCase().startsWith('hour')
-      ? +num * 3600
-      : unit.toLowerCase().startsWith('minute')
-      ? +num * 60
-      : +num;
-    await startTimer(secs);
-    return;
+  if (/^what'?s the humidity in (.+)\??$/i.test(cmd)) {
+    const [, city] = cmd.match(/^what'?s the humidity in (.+)\??$/i);
+    return getHumidity(city);
   }
-  if (/^stop timer$/i.test(t)) {
-    await stopTimer();
-    return;
+  if (/^historical high on (.+) in (.+)$/i.test(cmd)) {
+    const [, date, city] = cmd.match(/^historical high on (.+) in (.+)$/i);
+    return getHistoricalHigh(date, city);
   }
-  if (/^list timers$/i.test(t)) {
-    await listTimers();
-    return;
+  if (/^set weather units to (celsius|fahrenheit)$/i.test(cmd)) {
+    const [, unit] = cmd.match(/^set weather units to (celsius|fahrenheit)$/i);
+    return setWeatherUnits(unit);
   }
-  if (/^clear timers$/i.test(t)) {
-    await clearTimers();
-    return;
+  if (/^what'?s the uv index in (.+)\??$/i.test(cmd)) {
+    const [, city] = cmd.match(/^what'?s the uv index in (.+)\??$/i);
+    return getUVIndex(city);
   }
-
-  // ─── Calculator ──────────────────────────────────────────────────────────
-  if ((m = t.match(/^calculate (.+)$/i))) {
-    await calculate(m[1]);
-    return;
+  if (/^when is sunrise in (.+) tomorrow\??$/i.test(cmd)) {
+    const [, city] = cmd.match(/^when is sunrise in (.+) tomorrow\??$/i);
+    return getSunrise(city);
+  }
+  if (/^when is sunset in (.+)\??$/i.test(cmd)) {
+    const [, city] = cmd.match(/^when is sunset in (.+)\??$/i);
+    return getSunset(city);
   }
 
-  // ─── Quotes ──────────────────────────────────────────────────────────────
-  if (/^give me a quote$/i.test(t)) { await getQuote(); return; }
-  if ((m = t.match(/^give me a quote about (.+)$/i))) { await getQuotesByCategory(m[1]); return; }
-
-  // ─── Music ───────────────────────────────────────────────────────────────
-  if ((m = t.match(/^play track (.+)$/i))) {
-    const tracks = await fetchTracks();
-    const idx = tracks.findIndex(s => s.title === m[1]);
-    if (idx !== -1) uploadMusic(tracks[idx].url);
-    return;
+  // — WORLD CLOCK INTENTS —
+  if (/^what('?s| is) the time in (.+)\??$/i.test(cmd)) {
+    const [, , zone] = cmd.match(/^what('?s| is) the time in (.+)\??$/i);
+    return getTimeInZone(zone);
   }
-  if (/^pause music$/i.test(t)) { await pauseMusic(); return; }
-  if (/^recommend me music$/i.test(t)) { await getRecommendations(); return; }
-
-  // ─── Social ──────────────────────────────────────────────────────────────
-  if ((m = t.match(/^fetch social feed(?: from (.+))?$/i))) {
-    await fetchSocialFeed(m[1] ? [m[1]] : []);
-    return;
+  if (/^add clock for (.+)$/i.test(cmd)) {
+    const [, zone] = cmd.match(/^add clock for (.+)$/i);
+    return addClock(zone);
   }
-  if ((m = t.match(/^post to (.+?) (.+)$/i))) { await postToSocial(m[1], m[2]); return; }
-  if (/^list social platforms$/i.test(t)) { await listSocialPlatforms(); return; }
-
-  // ─── RSS / News ─────────────────────────────────────────────────────────
-  if ((m = t.match(/^get rss feed for (.+)$/i))) { await getRSSFeed(m[1]); return; }
-  if (/^list rss feeds$/i.test(t)) { await listRSSFeeds(); return; }
-  if ((m = t.match(/^add rss feed (.+)$/i))) { await addRSSFeed(m[1]); return; }
-  if ((m = t.match(/^remove rss feed (.+)$/i))) { await removeRSSFeed(m[1]); return; }
-
-  // ─── Translator ──────────────────────────────────────────────────────────
-  if ((m = t.match(/^translate (.+) to ([a-z]{2})$/i))) { await translateText(m[1], m[2]); return; }
-  if ((m = t.match(/^translate (.+) from ([a-z]{2}) to ([a-z]{2})$/i))) { await translateText(m[1], m[3], m[2]); return; }
-
-  // ─── Crypto ─────────────────────────────────────────────────────────────
-  if ((m = t.match(/^what(?:'s| is) the price of (.+)$/i))) { await getCryptoPrice(m[1]); return; }
-  if ((m = t.match(/^alert me when (.+) (?:goes above|exceeds) (.+)$/i))) {
-    await alertCryptoThreshold(m[1], { above: m[2] }); return;
+  if (/^remove clock for (.+)$/i.test(cmd)) {
+    const [, zone] = cmd.match(/^remove clock for (.+)$/i);
+    return removeClock(zone);
   }
-  if ((m = t.match(/^show crypto history for (.+)$/i))) { await getCryptoHistory(m[1]); return; }
+  if (/^list (?:my )?clocks$/i.test(cmd)) {
+    return listClocks();
+  }
+  if (/^what time is it in gmt\+?([-\d]+)\??$/i.test(cmd)) {
+    const [, offset] = cmd.match(/^what time is it in gmt\+?([-\d]+)\??$/i);
+    return getTimeInZone(`GMT+${offset}`);
+  }
+  if (/^show time difference between (.+) and (.+)$/i.test(cmd)) {
+    const [, a, b] = cmd.match(/^show time difference between (.+) and (.+)$/i);
+    return getTimeDifference(a, b);
+  }
 
-  // ─── Fallback ────────────────────────────────────────────────────────────
-  console.warn('Unknown command:', t);
+  // — TIMER INTENTS —
+  if (/^start a timer for (\d+) (seconds|minutes|hours)$/i.test(cmd)) {
+    const [, num, unit] = cmd.match(/^start a timer for (\d+) (seconds|minutes|hours)$/i);
+    return startTimer(Number(num), unit);
+  }
+  if (/^stop timer$/i.test(cmd)) {
+    return stopTimer();
+  }
+  if (/^list timers$/i.test(cmd)) {
+    return listTimers();
+  }
+  if (/^clear timers$/i.test(cmd)) {
+    return clearTimers();
+  }
+  if (/^(?:how much time is left on the timer\??|what'?s left on the timer\??)$/i.test(cmd)) {
+    return getTimerRemaining();
+  }
+
+  // — CALCULATOR INTENTS —
+  if (/^calculate (.+)$/i.test(cmd)) {
+    const [, expr] = cmd.match(/^calculate (.+)$/i);
+    return calculateExpression(expr);
+  }
+
+  // — QUOTES INTENTS —
+  if (/^give me a quote(?: about (.+))?$/i.test(cmd)) {
+    const match = cmd.match(/^give me a quote(?: about (.+))?$/i);
+    return getQuote(match[1]);
+  }
+
+  // — MUSIC INTENTS —
+  if (/^fetch my tracks$/i.test(cmd)) {
+    return fetchTracks();
+  }
+  if (/^play track (.+)$/i.test(cmd)) {
+    const [, title] = cmd.match(/^play track (.+)$/i);
+    return playTrack(title);
+  }
+  if (/^upload music (.+)$/i.test(cmd)) {
+    const [, url] = cmd.match(/^upload music (.+)$/i);
+    return uploadMusic(url);
+  }
+  if (/^recommend me (?:jazz )?music$/i.test(cmd)) {
+    return recommendMusic(cmd);
+  }
+  if (/^fetch new releases$/i.test(cmd)) {
+    return fetchNewReleases();
+  }
+
+  // — SOCIAL INTENTS —
+  if (/^fetch social feed(?: from (.+))?$/i.test(cmd)) {
+    const [, platforms] = cmd.match(/^fetch social feed(?: from (.+))?$/i);
+    return fetchSocialFeed(platforms ? platforms.split(/, ?| and /) : []);
+  }
+  if (/^post to (.+) (.+)$/i.test(cmd)) {
+    const [, platform, msg] = cmd.match(/^post to (.+) (.+)$/i);
+    return postToSocial(platform, msg);
+  }
+  if (/^list social platforms$/i.test(cmd)) {
+    return listSocialPlatforms();
+  }
+
+  // — RSS/NEWS INTENTS —
+  if (/^list rss feeds$/i.test(cmd)) {
+    return listRSSFeeds();
+  }
+  if (/^get rss feed for (.+)$/i.test(cmd)) {
+    const [, source] = cmd.match(/^get rss feed for (.+)$/i);
+    return getRSSFeed(source);
+  }
+  if (/^add rss feed (.+)$/i.test(cmd)) {
+    const [, url] = cmd.match(/^add rss feed (.+)$/i);
+    return addRSSFeed(url);
+  }
+  if (/^remove rss feed (.+)$/i.test(cmd)) {
+    const [, source] = cmd.match(/^remove rss feed (.+)$/i);
+    return removeRSSFeed(source);
+  }
+  if (/^list my news sources$/i.test(cmd)) {
+    return listNewsSources();
+  }
+
+  // — TRANSLATOR INTENTS —
+  if (/^translate (.+) to ([a-z]{2})$/i.test(cmd)) {
+    const [, text, to] = cmd.match(/^translate (.+) to ([a-z]{2})$/i);
+    return translateText(text, to);
+  }
+
+  // — CRYPTO INTENTS —
+  if (/^what'?s the price of (.+)$/i.test(cmd)) {
+    const [, coin] = cmd.match(/^what'?s the price of (.+)$/i);
+    return getCryptoPrice(coin);
+  }
+  if (/^alert me when (.+) (?:goes above|exceeds) ([\d.]+)$/i.test(cmd)) {
+    const [, coin, threshold] = cmd.match(
+      /^alert me when (.+) (?:goes above|exceeds) ([\d.]+)$/i
+    );
+    return setCryptoAlert(coin, Number(threshold));
+  }
+  if (/^show crypto history for (.+)$/i.test(cmd)) {
+    const [, coin] = cmd.match(/^show crypto history for (.+)$/i);
+    return getCryptoHistory(coin);
+  }
+
+  // — AI ASSISTANT INTENTS —
+  if (/^ask ai to (.+)$/i.test(cmd)) {
+    const [, prompt] = cmd.match(/^ask ai to (.+)$/i);
+    return askAI(prompt);
+  }
+
+  throw new Error(`Unrecognized command: "${input}"`);
 }
-
-export default handleCommand;

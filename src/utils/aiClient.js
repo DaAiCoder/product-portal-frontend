@@ -1,9 +1,6 @@
 // src/utils/aiClient.js
 
-/**
- * Sends a prompt to your /api/aiAPI endpoint and returns the response.
- * @param {string} prompt
- */
+/** POST /api/aiAPI { prompt } */
 export async function askAI(prompt) {
   const res = await fetch('/api/aiAPI', {
     method: 'POST',
