@@ -1,78 +1,77 @@
 // src/utils/weatherClient.js
-const BASE = '/api/weatherAPI';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-/** GET /api/weatherAPI */
-export async function getWeather() {
-  const res = await fetch(BASE);
+// Get current weather for a city (defaults to New York)
+export async function getCurrentWeather(location = 'New York', units = 'imperial') {
+  const query = `?location=${encodeURIComponent(location)}&units=${encodeURIComponent(units)}`;
+  const res = await fetch(`${BASE_URL}/weather/current${query}`);
   if (!res.ok) throw new Error(`Error getting weather (${res.status})`);
   return res.json();
 }
 
-/** GET /api/weatherAPI?city=... */
-export async function getWeatherByCity(city) {
-  const res = await fetch(`${BASE}?city=${encodeURIComponent(city)}`);
-  if (!res.ok) throw new Error(`Error getting weather for ${city} (${res.status})`);
+// Get multi-day forecast for a city
+export async function getForecast(location = 'New York', units = 'imperial') {
+  const query = `?location=${encodeURIComponent(location)}&units=${encodeURIComponent(units)}`;
+  const res = await fetch(`${BASE_URL}/weather/forecast${query}`);
+  if (!res.ok) throw new Error(`Error getting forecast (${res.status})`);
   return res.json();
 }
 
-/** GET /api/weatherAPI?rainTomorrow=city */
-export async function willItRain(city) {
-  const res = await fetch(`${BASE}?rainTomorrow=${encodeURIComponent(city)}`);
-  if (!res.ok) throw new Error(`Error checking rain (${res.status})`);
-  return res.json();
-}
-
-/** GET /api/weatherAPI?forecastWeekend=city */
-export async function getForecastWeekend(city) {
-  const res = await fetch(`${BASE}?forecastWeekend=${encodeURIComponent(city)}`);
-  if (!res.ok) throw new Error(`Error getting weekend forecast (${res.status})`);
-  return res.json();
-}
-
-/** GET /api/weatherAPI?humidity=city */
-export async function getHumidity(city) {
-  const res = await fetch(`${BASE}?humidity=${encodeURIComponent(city)}`);
+// Get current humidity for a city
+export async function getHumidity(location = 'New York', units = 'imperial') {
+  const query = `?location=${encodeURIComponent(location)}&units=${encodeURIComponent(units)}`;
+  const res = await fetch(`${BASE_URL}/weather/humidity${query}`);
   if (!res.ok) throw new Error(`Error getting humidity (${res.status})`);
   return res.json();
 }
 
-/** GET /api/weatherAPI?historicalHigh=date&city=... */
-export async function getHistoricalHigh(date, city) {
-  const res = await fetch(
-    `${BASE}?historicalHigh=${encodeURIComponent(date)}&city=${encodeURIComponent(city)}`
-  );
+// Will it rain tomorrow in a city?
+export async function willItRain(location = 'New York') {
+  const query = `?location=${encodeURIComponent(location)}`;
+  const res = await fetch(`${BASE_URL}/weather/rain${query}`);
+  if (!res.ok) throw new Error(`Error checking rain (${res.status})`);
+  return res.json();
+}
+
+// Get historical high (requires paid OWM, demo returns a placeholder)
+export async function getHistoricalHigh(date, location = 'New York') {
+  const query = `?date=${encodeURIComponent(date)}&location=${encodeURIComponent(location)}`;
+  const res = await fetch(`${BASE_URL}/weather/historical${query}`);
   if (!res.ok) throw new Error(`Error getting historical high (${res.status})`);
   return res.json();
 }
 
-/** POST { action:"units", unit:"celsius"|"fahrenheit" } */
-export async function setWeatherUnits(unit) {
-  const res = await fetch(BASE, {
+// Set default weather units (per session)
+export async function setWeatherUnits(units) {
+  const res = await fetch(`${BASE_URL}/weather/units`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'units', unit }),
+    body: JSON.stringify({ units }),
   });
   if (!res.ok) throw new Error(`Error setting units (${res.status})`);
   return res.json();
 }
 
-/** GET /api/weatherAPI?uvIndex=city */
-export async function getUVIndex(city) {
-  const res = await fetch(`${BASE}?uvIndex=${encodeURIComponent(city)}`);
+// Get UV index for a city
+export async function getUVIndex(location = 'New York') {
+  const query = `?location=${encodeURIComponent(location)}`;
+  const res = await fetch(`${BASE_URL}/weather/uv${query}`);
   if (!res.ok) throw new Error(`Error getting UV index (${res.status})`);
   return res.json();
 }
 
-/** GET /api/weatherAPI?sunrise=city */
-export async function getSunrise(city) {
-  const res = await fetch(`${BASE}?sunrise=${encodeURIComponent(city)}`);
+// Get sunrise time for a city
+export async function getSunrise(location = 'New York') {
+  const query = `?location=${encodeURIComponent(location)}`;
+  const res = await fetch(`${BASE_URL}/weather/sunrise${query}`);
   if (!res.ok) throw new Error(`Error getting sunrise time (${res.status})`);
   return res.json();
 }
 
-/** GET /api/weatherAPI?sunset=city */
-export async function getSunset(city) {
-  const res = await fetch(`${BASE}?sunset=${encodeURIComponent(city)}`);
+// Get sunset time for a city
+export async function getSunset(location = 'New York') {
+  const query = `?location=${encodeURIComponent(location)}`;
+  const res = await fetch(`${BASE_URL}/weather/sunset${query}`);
   if (!res.ok) throw new Error(`Error getting sunset time (${res.status})`);
   return res.json();
 }
