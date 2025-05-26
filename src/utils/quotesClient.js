@@ -1,12 +1,9 @@
 // src/utils/quotesClient.js
-const BASE = '/api/quotesAPI';
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL + '/quote';
 
-/** GET /api/quotesAPI?topic=... */
-export async function getQuote(topic = '') {
-  const url = topic
-    ? `${BASE}?topic=${encodeURIComponent(topic)}`
-    : BASE;
-  const res = await fetch(url);
+export async function getQuote() {
+  const res = await fetch(BASE);
   if (!res.ok) throw new Error(`Error fetching quote (${res.status})`);
   return res.json();
 }
+
