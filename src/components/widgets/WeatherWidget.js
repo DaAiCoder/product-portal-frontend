@@ -1,6 +1,4 @@
-//Product-portal-frontend\src\components\widgets\WeatherWidget.js
-
-mport React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   getCurrentWeather,
   getForecast,
