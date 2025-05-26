@@ -1,45 +1,37 @@
-// src/utils/widgetLibrary.js
+// File: src/utils/widgetLibrary.js
 
 import {
   FaClock,
-  FaStopwatch,
   FaQuoteRight,
   FaCloudSun,
   FaRobot,
   FaComments,
   FaCalculator,
   FaStickyNote,
-  FaGlobe,
   FaRss,
   FaChartLine,
   FaBasketballBall,
 } from 'react-icons/fa';
 
-
-import quote from '../components/widgets/configs/quote';
+// Combined timer includes datetime, stopwatch, and world clock
 import timer from '../components/widgets/configs/timer';
+import quote from '../components/widgets/configs/quote';
 import weather from '../components/widgets/configs/weather';
 import aisummary from '../components/widgets/configs/aisummary';
 import chat from '../components/widgets/configs/chat';
 import calculator from '../components/widgets/configs/calculator';
 import notes from '../components/widgets/configs/notes';
 
+// New widgets
 import RssWidget from '../components/widgets/RssWidget';
 import StocksWidget from '../components/widgets/StocksWidget';
 import SportsScoresWidget from '../components/widgets/SportsScoresWidget';
 
 export const widgetLibrary = [
   {
-    ...datetime,
+    ...timer,
     icon: <FaClock size={40} />,
-    label: 'Date & Time',
-    w: 4,
-    h: 4,
-  },
-  {
-    ...stopwatch,
-    icon: <FaStopwatch size={40} />,
-    label: 'Stopwatch',
+    label: 'Timer',
     w: 4,
     h: 4,
   },
@@ -62,7 +54,7 @@ export const widgetLibrary = [
     icon: <FaRobot size={40} />,
     label: 'AI Summary',
     w: 4,
-    h: 4,
+    h: 5,
   },
   {
     ...chat,
@@ -75,13 +67,6 @@ export const widgetLibrary = [
     ...calculator,
     icon: <FaCalculator size={40} />,
     label: 'Calculator',
-    w: 4,
-    h: 4,
-  },
-  {
-    ...worldclock,
-    icon: <FaGlobe size={40} />,
-    label: 'World Clock',
     w: 4,
     h: 4,
   },
