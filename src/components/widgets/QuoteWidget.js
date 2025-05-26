@@ -1,4 +1,4 @@
-// File: src/components/widgets/QuoteWidget.js
+// File: src/components/widgets/Q uoteWidget.js
 
 import React, { useEffect, useState } from 'react';
 import { getQuote } from '../../utils/quotesClient';
