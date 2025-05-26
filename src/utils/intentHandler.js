@@ -1,6 +1,4 @@
-// File: src/utils   /intentHandler.js
-
-// 📧 Email
+//// 📧 Email
 import {
   getUnreadEmails,
   searchEmails,
@@ -39,12 +37,11 @@ import {
   getNextEvent,
 } from './calendarClient';
 
-// ☁️ Weather
+// ☁️ Weather (FIXED: Now points to new weatherClient.js)
 import {
-  getWeather,
-  getWeatherByCity,
+  getCurrentWeather,
+  getForecast,
   willItRain,
-  getForecastWeekend,
   getHumidity,
   getHistoricalHigh,
   setWeatherUnits,
@@ -52,6 +49,19 @@ import {
   getSunrise,
   getSunset,
 } from './weatherClient';
+
+// Compatibility shims for old code using getWeather/getWeatherByCity/getForecastWeekend
+export function getWeather(location = 'New York', units = 'imperial') {
+  return getCurrentWeather(location, units);
+}
+export function getWeatherByCity(city, units = 'imperial') {
+  return getCurrentWeather(city, units);
+}
+// getForecastWeekend was referenced in your original, but isn't in new weatherClient.
+// We'll route to getForecast for now.
+export function getForecastWeekend(city, units = 'imperial') {
+  return getForecast(city, units);
+}
 
 // 🕰 World Clock
 import {
