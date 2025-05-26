@@ -1,21 +1,23 @@
 // next.config.js
-const webpack = require('webpack');
+const path = require('path');
 
 /** @type {import('next').NextConfig} */
 module.exports = {
-  experimental: { esmExternals: false },
+  experimental: {
+    // makes Next.js prefer CommonJS externals
+    esmExternals: false,
+  },
   webpack(config) {
-    // Tell Webpack to prefer the "main" (CJS) field
+    // Force Webpack to pick the CJS "main" before the broken ESM "module"
     config.resolve.mainFields = ['main', 'module'];
 
-    // Replace any import of chrono-node/dist/esm/locales/... with the base chrono-node CJS
-    config.plugins.push(
-      new webpack.NormalModuleReplacementPlugin(
-        /chrono-node\/dist\/esm\/locales\/.*\.js$/,
-        'chrono-node'
-      )
-    );
+    // 1) Drop *all* of chrono-node's ESM files (including locales)
+    config.module.rules.unshift({
+      test: /chrono-node[\/\\]dist[\/\\]esm[\/\\].*\.js$/,
+      use: 'null-loader',
+    });
 
     return config;
   },
 };
+
