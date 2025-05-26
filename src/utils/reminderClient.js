@@ -1,5 +1,5 @@
 // src/utils/reminderClient.js
-const BASE = '/api/reminderAPI';
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL + '/reminder';
 
 /** POST { action:"create", text, date?, time?, hours? } */
 export async function createReminder(text, opts = {}) {
