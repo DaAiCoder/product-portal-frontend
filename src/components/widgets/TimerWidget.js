@@ -1,4 +1,4 @@
-// File: src/components/widgets/TimerWidget.js
+// File: src/components /widgets/TimerWidget.js
 
 import React, { useEffect, useState } from 'react';
 import {

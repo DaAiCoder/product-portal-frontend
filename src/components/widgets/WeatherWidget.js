@@ -1,6 +1,6 @@
 //Product-portal-frontend\src\components\widgets\WeatherWidget.js
 
-import React, { useEffect, useState } from 'react';
+mport React, { useEffect, useState } from 'react';
 import {
   getCurrentWeather,
   getForecast,
@@ -8,11 +8,11 @@ import {
 } from '../../pages/api/weatherAPI';
 import { FaCloudSun } from 'react-icons/fa';
 
-export default function WeatherWidget({ config }) {
+export default function WeatherWidget({ config = {} }) {
   const {
     location = '',
-    units = 'celsius', // use to display unit symbol
-    refreshInterval = 600000, // 10 minutes
+    units = 'celsius',
+    refreshInterval = 600000,
   } = config;
 
   const [weather, setWeather] = useState(null);
