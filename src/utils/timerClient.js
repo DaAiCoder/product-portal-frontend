@@ -1,5 +1,8 @@
 // src/utils/timerClient.js
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+// TIMER FUNCTIONS
 
 export async function startTimer(minutes = 1) {
   const res = await fetch(`${BASE_URL}/timer/start?minutes=${encodeURIComponent(minutes)}`, {
@@ -37,7 +40,8 @@ export async function getTimerRemaining() {
   return res.json();
 }
 
-// Clock endpoints
+// CLOCK FUNCTIONS
+
 export async function listClocks() {
   const res = await fetch(`${BASE_URL}/clocks`);
   if (!res.ok) throw new Error(`Error loading clocks (${res.status})`);
@@ -57,5 +61,31 @@ export async function removeClock(city) {
     method: 'POST'
   });
   if (!res.ok) throw new Error(`Error removing clock (${res.status})`);
+  return res.json();
+}
+
+// STOPWATCH FUNCTIONS
+
+export async function listStopwatches() {
+  const res = await fetch(`${BASE_URL}/stopwatch`);
+  if (!res.ok) throw new Error(`Error listing stopwatches (${res.status})`);
+  return res.json();
+}
+
+export async function startStopwatch() {
+  const res = await fetch(`${BASE_URL}/stopwatch/start`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Error starting stopwatch (${res.status})`);
+  return res.json();
+}
+
+export async function stopStopwatch() {
+  const res = await fetch(`${BASE_URL}/stopwatch/stop`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Error stopping stopwatch (${res.status})`);
+  return res.json();
+}
+
+export async function resetStopwatch() {
+  const res = await fetch(`${BASE_URL}/stopwatch/reset`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Error resetting stopwatch (${res.status})`);
   return res.json();
 }

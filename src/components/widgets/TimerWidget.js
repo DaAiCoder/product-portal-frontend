@@ -10,21 +10,31 @@ import {
   listTimers,
   clearTimers,
   getTimerRemaining,
-} from '../../utils/timerClient'; // <-- Updated import!
+  listStopwatches,
+  startStopwatch,
+  stopStopwatch,
+  resetStopwatch,
+} from '../../utils/timerClient';
 import { FaClock, FaHourglassStart, FaStopwatch, FaPlus, FaTrash } from 'react-icons/fa';
 
 export default function TimerWidget({ config = {} }) {
-  const { refreshInterval = 60000 } = config;
-  const [tab, setTab] = useState('clock'); // 'clock' | 'timer'
+  const { refreshInterval = 1000 } = config;
+  const [tab, setTab] = useState('clock'); // 'clock' | 'timer' | 'stopwatch'
+
   // Clocks
   const [clocks, setClocks] = useState([]);
   const [newCity, setNewCity] = useState('');
   const [newTZ, setNewTZ] = useState('');
+
   // Timers
   const [timers, setTimers] = useState([]);
-  const [timerDuration, setTimerDuration] = useState(1); // minutes
+  const [timerDuration, setTimerDuration] = useState(1);
 
-  // Load Clocks
+  // Stopwatch
+  const [stopwatch, setStopwatch] = useState(null);
+  const [swElapsed, setSwElapsed] = useState(0);
+
+  // Clocks
   const loadClocks = async () => {
     try {
       const res = await listClocks();
@@ -34,7 +44,7 @@ export default function TimerWidget({ config = {} }) {
     }
   };
 
-  // Load Timers
+  // Timers
   const loadTimers = async () => {
     try {
       const res = await listTimers();
@@ -44,19 +54,51 @@ export default function TimerWidget({ config = {} }) {
     }
   };
 
+  // Stopwatch
+  const loadStopwatch = async () => {
+    try {
+      const res = await listStopwatches();
+      // Pick the latest created stopwatch (or running one)
+      setStopwatch(res.stopwatches[0] || null);
+    } catch (err) {
+      console.error('Error loading stopwatch:', err);
+    }
+  };
+
+  // Refresh logic per tab
   useEffect(() => {
     if (tab === 'clock') loadClocks();
     if (tab === 'timer') loadTimers();
+    if (tab === 'stopwatch') loadStopwatch();
 
     const iv = setInterval(() => {
       if (tab === 'clock') loadClocks();
       if (tab === 'timer') loadTimers();
+      if (tab === 'stopwatch') loadStopwatch();
     }, refreshInterval);
 
     return () => clearInterval(iv);
   }, [tab, refreshInterval]);
 
-  // Renderers
+  // Stopwatch local elapsed counter (for smooth ticking)
+  useEffect(() => {
+    if (!stopwatch || !stopwatch.started_at || !stopwatch.running) {
+      setSwElapsed(0);
+      return;
+    }
+    const updateElapsed = () => {
+      const started = new Date(stopwatch.started_at);
+      const stopped = stopwatch.stopped_at ? new Date(stopwatch.stopped_at) : new Date();
+      setSwElapsed(Math.max(0, (stopped - started) / 1000));
+    };
+    updateElapsed();
+    const timer = setInterval(updateElapsed, 1000);
+    return () => clearInterval(timer);
+  }, [stopwatch]);
+
+  // -- RENDERERS --
+
+  // Clock tab
   const renderClock = () => (
     <div>
       <div className="flex mb-2">
@@ -105,6 +147,7 @@ export default function TimerWidget({ config = {} }) {
     </div>
   );
 
+  // Timer tab
   const renderTimer = () => (
     <div>
       <div className="flex space-x-1 mb-2">
@@ -154,6 +197,40 @@ export default function TimerWidget({ config = {} }) {
     </div>
   );
 
+  // Stopwatch tab
+  const renderStopwatch = () => {
+    const minutes = Math.floor(swElapsed / 60);
+    const seconds = Math.floor(swElapsed % 60);
+
+    return (
+      <div>
+        <div className="flex items-center mb-2">
+          <div className="text-2xl font-mono">{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</div>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={async () => { await startStopwatch(); loadStopwatch(); }}
+            className="p-1 border rounded"
+          >
+            Start
+          </button>
+          <button
+            onClick={async () => { await stopStopwatch(); loadStopwatch(); }}
+            className="p-1 border rounded"
+          >
+            Stop
+          </button>
+          <button
+            onClick={async () => { await resetStopwatch(); loadStopwatch(); }}
+            className="p-1 border rounded"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-2">
       <div className="flex space-x-4 mb-3">
@@ -169,10 +246,16 @@ export default function TimerWidget({ config = {} }) {
         >
           <FaHourglassStart /> Timer
         </button>
-        {/* Stopwatch removed since backend doesn't support it yet */}
+        <button
+          onClick={() => setTab('stopwatch')}
+          className={tab === 'stopwatch' ? 'font-bold' : 'text-gray-600'}
+        >
+          <FaStopwatch /> Stopwatch
+        </button>
       </div>
       {tab === 'clock' && renderClock()}
       {tab === 'timer' && renderTimer()}
+      {tab === 'stopwatch' && renderStopwatch()}
     </div>
   );
 }
