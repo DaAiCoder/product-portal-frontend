@@ -66,22 +66,46 @@ export default function CommandBar() {
 
   return (
     <div className="w-full max-w-2xl mx-auto my-6">
-      <form onSubmit={handleSubmit} className="flex items-center w-full shadow-sm">
-        <input
-          ref={inputRef}
-          name="command"
-          type="text"
-          autoComplete="off"
-          placeholder={prompts[idx]}
-          className="flex-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-blue-600 focus:shadow-md px-6 py-3 placeholder-gray-600 placeholder-opacity-75 transition-all duration-200 text-base"
-        />
-        <button
-          type="submit"
-          className="-ml-10 p-2 text-white bg-blue-600 hover:bg-blue-700 rounded-full focus:outline-none shadow"
-        >
-          <FaSearch />
-        </button>
-      </form>
+ <form
+  onSubmit={handleSubmit}
+  className="flex items-center w-full"
+  autoComplete="off"
+>
+  <div
+    className={`
+      flex items-center w-full bg-white dark:bg-gray-900 
+      border border-gray-200 dark:border-gray-700 rounded-2xl 
+      shadow-lg px-6 py-4
+      focus-within:ring-2 focus-within:ring-blue-400
+      transition-all duration-200
+      ${loading ? 'opacity-70' : ''}
+    `}
+    style={{
+      minHeight: 56,
+      boxShadow: "0 4px 24px 0 rgb(0 0 0 / 6%), 0 2px 8px rgb(0 0 0 / 4%)",
+      backdropFilter: "blur(2.5px)",
+    }}
+  >
+    <FaSearch className="text-xl text-gray-400 mr-3" />
+    <input
+      ref={inputRef}
+      name="command"
+      type="text"
+      autoComplete="off"
+      placeholder={prompts[idx]}
+      className="flex-1 bg-transparent text-lg md:text-xl outline-none border-0 placeholder-gray-600 dark:placeholder-gray-400"
+      style={{ letterSpacing: '0.01em' }}
+    />
+    <button
+      type="submit"
+      className="ml-2 px-4 py-2 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow focus:outline-none"
+      disabled={loading}
+    >
+      <FaSearch />
+    </button>
+  </div>
+</form>
+
       <div className="mt-2 min-h-[3rem]">
         {loading && (
           <div className="text-blue-600 font-semibold">Processing...</div>
