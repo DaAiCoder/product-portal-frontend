@@ -1,7 +1,8 @@
 // src/pages/feeds.js
 import React, { useEffect, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = 'https://product-portal-backend-xo2c.onrender.com';
+
 
 export default function FeedsPage() {
   const [topics, setTopics] = useState([]);
