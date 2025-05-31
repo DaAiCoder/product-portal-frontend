@@ -1,282 +1,160 @@
 // src/pages/feeds.js
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {
-  getFollowedTopics,
-  setFollowedTopics,
-  getRSSFeeds,
-  setRSSFeeds
-} from '../services/userPreferences';
 
-const suggestedTopics = [
-  'Technology',
-  'Business',
-  'Sports',
-  'Health',
-  'Science',
-  'Entertainment'
-];
-
-const NEWS_API_KEY = process.env.REACT_APP_NEWS_API_KEY;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function FeedsPage() {
-  // Followed topics & feeds
   const [topics, setTopics] = useState([]);
-  const [customTopic, setCustomTopic] = useState('');
-  const [feeds, setFeeds] = useState([]);
-  const [feedUrl, setFeedUrl] = useState('');
-
-  // Articles from NewsAPI
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const [articles, setArticles] = useState([]);
+  const [newTopic, setNewTopic] = useState('');
+  const [loadingTopics, setLoadingTopics] = useState(true);
+  const [loadingArticles, setLoadingArticles] = useState(false);
 
-  // RSS items from backend
-  const [rssItems, setRssItems] = useState([]);
+  const defaultCategories = ['Sports', 'Finance', 'Fitness', 'Crypto', 'Tech'];
 
-  // 1. Load saved topics & feeds on mount
   useEffect(() => {
-    (async () => {
-      try {
-        const savedTopics = await getFollowedTopics();
-        setTopics(savedTopics);
-        const savedFeeds = await getRSSFeeds();
-        setFeeds(savedFeeds);
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+    loadTopics();
   }, []);
 
-  // 2. Fetch NewsAPI articles whenever topics change
   useEffect(() => {
-    if (!NEWS_API_KEY || topics.length === 0) {
-      setArticles([]);
-      return;
+    if (selectedTopic) {
+      loadArticles(selectedTopic);
     }
-    (async () => {
-      try {
-        const q = topics.join(' OR ');
-        const resp = await fetch(
-          `https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&apiKey=${NEWS_API_KEY}`
-        );
-        const json = await resp.json();
-        setArticles((json.articles || []).slice(0, 12));
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-  }, [topics]);
+  }, [selectedTopic]);
 
-  // 3. Fetch RSS items from backend whenever feeds change
-  useEffect(() => {
-    if (feeds.length === 0) {
-      setRssItems([]);
-      return;
+  async function loadTopics() {
+    try {
+      const res = await axios.get(`${API_BASE}/feeds/topics`);
+      setTopics(res.data);
+    } catch (err) {
+      console.error('Error fetching topics:', err);
+    } finally {
+      setLoadingTopics(false);
     }
-    (async () => {
-      try {
-        let all = [];
-        for (const url of feeds) {
-          const resp = await axios.get('/rss', { params: { url } });
-          const { feed, items } = resp.data;
-          items.forEach(item =>
-            all.push({ ...item, feedTitle: feed.title })
-          );
-        }
-        setRssItems(all);
-      } catch (err) {
-        console.error('Error fetching RSS:', err);
-      }
-    })();
-  }, [feeds]);
+  }
 
-  // Handlers for topics
-  const toggleTopic = async (topic) => {
-    const updated = topics.includes(topic)
-      ? topics.filter(t => t !== topic)
-      : [...topics, topic];
-    setTopics(updated);
-    await setFollowedTopics(updated);
-  };
+  async function loadArticles(topic) {
+    setLoadingArticles(true);
+    try {
+      const res = await axios.get(`${API_BASE}/feeds/articles?topic=${encodeURIComponent(topic)}`);
+      setArticles(res.data);
+    } catch (err) {
+      console.error('Error loading articles:', err);
+    } finally {
+      setLoadingArticles(false);
+    }
+  }
 
-  const handleCustomTopic = async (e) => {
+  async function handleAddTopic(e) {
     e.preventDefault();
-    const t = customTopic.trim();
-    if (t && !topics.includes(t)) {
-      const updated = [...topics, t];
-      setTopics(updated);
-      await setFollowedTopics(updated);
-    }
-    setCustomTopic('');
-  };
+    if (!newTopic.trim()) return;
 
-  // Handlers for RSS feeds
-  const handleAddFeed = async (e) => {
-    e.preventDefault();
-    const url = feedUrl.trim();
-    if (url && !feeds.includes(url)) {
-      const updated = [...feeds, url];
-      setFeeds(updated);
-      await setRSSFeeds(updated);
+    try {
+      const res = await axios.post(`${API_BASE}/feeds/topics`, { topic: newTopic.trim() });
+      setTopics([...topics, res.data]);
+      setNewTopic('');
+    } catch (err) {
+      console.error('Error adding topic:', err);
     }
-    setFeedUrl('');
-  };
+  }
 
-  const removeFeed = async (url) => {
-    const updated = feeds.filter(f => f !== url);
-    setFeeds(updated);
-    await setRSSFeeds(updated);
-  };
+  async function handleRemoveTopic(topicId) {
+    try {
+      await axios.delete(`${API_BASE}/feeds/topics/${topicId}`);
+      setTopics(topics.filter(t => t.id !== topicId));
+      if (selectedTopic && selectedTopic.id === topicId) {
+        setSelectedTopic(null);
+        setArticles([]);
+      }
+    } catch (err) {
+      console.error('Error removing topic:', err);
+    }
+  }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto flex flex-col lg:flex-row lg:space-x-6">
-      {/* Left Pane: Topics & RSS Management */}
-      <aside className="lg:w-1/4 flex flex-col space-y-8">
-        {/* Follow Topics */}
-        <section className="bg-white rounded shadow p-4">
-          <h2 className="text-2xl font-semibold mb-4">Follow Topics</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {suggestedTopics.map(t => (
-              <button
-                key={t}
-                onClick={() => toggleTopic(t)}
-                className={`px-3 py-2 border rounded text-sm transition ${
-                  topics.includes(t)
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200'
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Your News Feed</h1>
+
+      <form onSubmit={handleAddTopic} className="mb-4 flex gap-2">
+        <input
+          type="text"
+          value={newTopic}
+          onChange={(e) => setNewTopic(e.target.value)}
+          className="border rounded px-3 py-1 w-full"
+          placeholder="Add a topic (e.g., AI, Liberia News)"
+        />
+        <button className="bg-blue-600 text-white px-4 py-1 rounded">Follow</button>
+      </form>
+
+      <div className="mb-4">
+        <h2 className="font-semibold mb-2">Predefined Categories</h2>
+        <div className="flex flex-wrap gap-2">
+          {defaultCategories.map((cat) => (
+            <span
+              key={cat}
+              className={`cursor-pointer px-3 py-1 rounded-full border ${
+                selectedTopic === cat ? 'bg-blue-600 text-white' : 'bg-gray-200'
+              }`}
+              onClick={() => setSelectedTopic(cat)}
+            >
+              {cat}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <h2 className="font-semibold mb-2">Your Topics</h2>
+        <div className="flex flex-wrap gap-2">
+          {loadingTopics ? (
+            <p>Loading topics...</p>
+          ) : (
+            topics.map((topic) => (
+              <span
+                key={topic.id}
+                className={`cursor-pointer px-3 py-1 rounded-full border flex items-center gap-2 ${
+                  selectedTopic === topic.name ? 'bg-green-600 text-white' : 'bg-gray-100'
                 }`}
+                onClick={() => setSelectedTopic(topic.name)}
               >
-                {t}
-              </button>
-            ))}
-          </div>
-          <form onSubmit={handleCustomTopic} className="flex space-x-2 mt-4">
-            <input
-              type="text"
-              placeholder="Add custom topic"
-              value={customTopic}
-              onChange={e => setCustomTopic(e.target.value)}
-              className="flex-1 px-3 py-2 border rounded text-sm"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-green-600 text-white rounded text-sm"
-            >
-              Add
-            </button>
-          </form>
-          {topics.length > 0 && (
-            <ul className="list-disc pl-5 mt-4 space-y-1 text-sm">
-              {topics.map((t, i) => (
-                <li key={i} className="flex justify-between items-center">
-                  <span>{t}</span>
-                  <button
-                    onClick={() => toggleTopic(t)}
-                    className="text-red-500 hover:text-red-700 ml-2"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* RSS Feeds Management */}
-        <section className="bg-white rounded shadow p-4">
-          <h2 className="text-2xl font-semibold mb-4">Your RSS Feeds</h2>
-          <form onSubmit={handleAddFeed} className="flex space-x-2 mb-4">
-            <input
-              type="url"
-              placeholder="https://example.com/rss"
-              value={feedUrl}
-              onChange={e => setFeedUrl(e.target.value)}
-              className="flex-1 px-3 py-2 border rounded text-sm"
-              required
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded text-sm"
-            >
-              Add
-            </button>
-          </form>
-          {feeds.length > 0 ? (
-            <ul className="list-disc pl-5 space-y-1 text-sm">
-              {feeds.map((f, i) => (
-                <li key={i} className="flex justify-between items-center">
-                  <span>{f}</span>
-                  <button
-                    onClick={() => removeFeed(f)}
-                    className="text-red-500 hover:text-red-700 ml-2"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500 text-sm">No RSS feeds added.</p>
-          )}
-        </section>
-      </aside>
-
-      {/* Main Content: News Articles & RSS Items */}
-      <main className="flex-1 space-y-8">
-        {/* News Articles */}
-        <section className="bg-white rounded shadow p-4">
-          <h2 className="text-2xl font-semibold mb-4">News Articles</h2>
-          {articles.length === 0 ? (
-            <p className="text-gray-600">Select topics to load articles.</p>
-          ) : (
-            <div className="space-y-4">
-              {articles.map((a, i) => (
-                <a
-                  key={i}
-                  href={a.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block p-4 border rounded hover:bg-gray-50 transition"
+                {topic.name}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveTopic(topic.id);
+                  }}
+                  className="text-xs text-red-600 ml-2"
                 >
-                  <h3 className="font-semibold text-lg">{a.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    {new Date(a.publishedAt).toLocaleDateString()}
-                  </p>
+                  ✕
+                </button>
+              </span>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-semibold mb-2">Articles</h2>
+        {loadingArticles ? (
+          <p>Loading articles...</p>
+        ) : articles.length > 0 ? (
+          <ul className="space-y-3">
+            {articles.map((a, idx) => (
+              <li key={idx} className="border p-3 rounded shadow">
+                <a href={a.link} target="_blank" rel="noopener noreferrer" className="text-lg font-bold">
+                  {a.title}
                 </a>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* RSS Items */}
-        {rssItems.length > 0 && (
-          <section className="bg-white rounded shadow p-4">
-            <h2 className="text-2xl font-semibold mb-4">RSS Items</h2>
-            <div className="space-y-6">
-              {rssItems.map(item => (
-                <div
-                  key={item.id}
-                  className="p-4 rounded border hover:shadow-lg transition"
-                >
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-medium text-blue-600 hover:underline"
-                  >
-                    {item.title}
-                  </a>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {item.feedTitle} | {item.published}
-                  </p>
-                  <p className="text-gray-700 mt-2 text-sm">
-                    {item.summary}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
+                <p className="text-sm text-gray-600">{a.description}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No articles found.</p>
         )}
-      </main>
+      </div>
     </div>
-);
+  );
 }
