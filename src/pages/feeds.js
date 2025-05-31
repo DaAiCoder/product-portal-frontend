@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 if (!API_BASE) {
   console.warn("⚠️ Missing NEXT_PUBLIC_API_BASE_URL env var.");
 }
@@ -12,12 +13,12 @@ const Feeds = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadTopics();
+    if (API_BASE) loadTopics();
   }, []);
 
   useEffect(() => {
-    if (topics.length > 0) {
-      loadArticles(topics[0]); // default: first topic
+    if (topics.length > 0 && API_BASE) {
+      loadArticles(topics[0]);
     }
   }, [topics]);
 
@@ -36,7 +37,7 @@ const Feeds = () => {
     try {
       const res = await fetch(`${API_BASE}/feeds/articles?topic=${encodeURIComponent(topic)}`);
       const data = await res.json();
-      setArticles(data);
+      setArticles(data || []);
     } catch (err) {
       console.error("Failed to load articles:", err);
     } finally {
@@ -57,7 +58,7 @@ const Feeds = () => {
 
       if (!res.ok) throw new Error("Topic add failed");
       setNewTopic("");
-      loadTopics(); // Refresh topics list
+      loadTopics();
     } catch (err) {
       console.error("Failed to add topic:", err);
     }
@@ -74,7 +75,7 @@ const Feeds = () => {
       });
 
       if (!res.ok) throw new Error("Topic delete failed");
-      loadTopics(); // Refresh list
+      loadTopics();
     } catch (err) {
       console.error("Failed to delete topic:", err);
     }
@@ -131,7 +132,9 @@ const Feeds = () => {
                 {article.title}
               </a>
               <p className="text-gray-700 text-sm">{article.summary}</p>
-              <p className="text-xs text-gray-500">{new Date(article.published).toLocaleString()}</p>
+              <p className="text-xs text-gray-500">
+                {new Date(article.published).toLocaleString()}
+              </p>
             </li>
           ))}
         </ul>
