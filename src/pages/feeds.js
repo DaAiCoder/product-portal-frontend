@@ -1,156 +1,143 @@
-// src/pages/feeds.js
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from "react";
 
-const API_BASE = 'https://product-portal-backend-xo2c.onrender.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+if (!API_BASE) {
+  console.warn("⚠️ Missing NEXT_PUBLIC_API_BASE_URL env var.");
+}
 
-
-export default function FeedsPage() {
+const Feeds = () => {
   const [topics, setTopics] = useState([]);
-  const [newTopic, setNewTopic] = useState('');
   const [articles, setArticles] = useState([]);
+  const [newTopic, setNewTopic] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : '';
-
   useEffect(() => {
-    fetchTopics();
+    loadTopics();
   }, []);
 
   useEffect(() => {
-    if (topics.length > 0) fetchArticles();
+    if (topics.length > 0) {
+      loadArticles(topics[0]); // default: first topic
+    }
   }, [topics]);
 
-  const fetchTopics = async () => {
+  const loadTopics = async () => {
     try {
-      const res = await fetch(`${API_BASE}/feeds/topic`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const json = await res.json();
-      setTopics(json.topics || []);
+      const res = await fetch(`${API_BASE}/feeds/topic`);
+      const data = await res.json();
+      setTopics(data.topics || []);
     } catch (err) {
-      console.error('Failed to load topics:', err);
+      console.error("Failed to load topics:", err);
     }
   };
 
-  const fetchArticles = async () => {
+  const loadArticles = async (topic) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch(`${API_BASE}/feeds/articles`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ topics })
-      });
+      const res = await fetch(`${API_BASE}/feeds/articles?topic=${encodeURIComponent(topic)}`);
       const data = await res.json();
-      setArticles(data.articles || []);
+      setArticles(data);
     } catch (err) {
-      console.error('Failed to fetch articles:', err);
+      console.error("Failed to load articles:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddTopic = async () => {
-    const topic = newTopic.trim();
-    if (!topic || topics.includes(topic)) return;
-
+    if (!newTopic.trim()) return;
     try {
       const res = await fetch(`${API_BASE}/feeds/topic`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ topic })
+        body: JSON.stringify({ topic: newTopic }),
       });
-      if (res.ok) {
-        setTopics([...topics, topic]);
-        setNewTopic('');
-      }
+
+      if (!res.ok) throw new Error("Topic add failed");
+      setNewTopic("");
+      loadTopics(); // Refresh topics list
     } catch (err) {
-      console.error('Error adding topic:', err);
+      console.error("Failed to add topic:", err);
     }
   };
 
-  const handleRemoveTopic = async (t) => {
+  const handleUnsubscribe = async (topic) => {
     try {
-      const res = await fetch(`${API_BASE}/feeds/topic/${encodeURIComponent(t)}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await fetch(`${API_BASE}/feeds/topic`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topic }),
       });
-      if (res.ok) {
-        setTopics(topics.filter((x) => x !== t));
-      }
+
+      if (!res.ok) throw new Error("Topic delete failed");
+      loadTopics(); // Refresh list
     } catch (err) {
-      console.error('Error removing topic:', err);
+      console.error("Failed to delete topic:", err);
     }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
-      <section className="bg-white rounded shadow p-4">
-        <h2 className="text-2xl font-semibold mb-4">Followed Topics</h2>
-        <div className="flex flex-wrap gap-2">
-          {topics.map((t, i) => (
-            <span
-              key={i}
-              className="flex items-center bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
-            >
-              {t}
-              <button
-                onClick={() => handleRemoveTopic(t)}
-                className="ml-2 text-red-600 font-bold"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className="mt-4 flex gap-2">
-          <input
-            type="text"
-            className="border px-3 py-2 rounded w-full"
-            placeholder="Add a topic like 'Crypto', 'Philadelphia Eagles'..."
-            value={newTopic}
-            onChange={(e) => setNewTopic(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddTopic()}
-          />
-          <button
-            onClick={handleAddTopic}
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Add
-          </button>
-        </div>
-      </section>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">📡 Your Feeds</h1>
 
-      <section className="bg-white rounded shadow p-4">
-        <h2 className="text-2xl font-semibold mb-4">Latest Articles</h2>
-        {loading ? (
-          <p>Loading...</p>
-        ) : articles.length === 0 ? (
-          <p className="text-gray-500">No articles available yet.</p>
-        ) : (
-          <ul className="space-y-4">
-            {articles.map((a, i) => (
-              <li key={i} className="p-4 border rounded hover:bg-gray-50">
-                <a
-                  href={a.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 font-semibold text-lg"
-                >
-                  {a.title}
-                </a>
-                <p className="text-sm text-gray-600">{a.summary}</p>
-                <p className="text-xs text-gray-400">{a.published}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="mb-4 flex gap-2">
+        <input
+          type="text"
+          value={newTopic}
+          onChange={(e) => setNewTopic(e.target.value)}
+          placeholder="Add a topic (e.g., Crypto, Fitness, Eagles)"
+          className="border px-3 py-2 rounded w-full"
+        />
+        <button
+          onClick={handleAddTopic}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Add
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        {topics.map((topic, idx) => (
+          <div
+            key={idx}
+            onClick={() => loadArticles(topic)}
+            className="bg-gray-200 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-300"
+          >
+            {topic}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUnsubscribe(topic);
+              }}
+              className="ml-2 text-red-500 hover:text-red-700"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {loading ? (
+        <p>Loading articles...</p>
+      ) : (
+        <ul className="space-y-4">
+          {articles.map((article, idx) => (
+            <li key={idx} className="border-b pb-2">
+              <a href={article.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold">
+                {article.title}
+              </a>
+              <p className="text-gray-700 text-sm">{article.summary}</p>
+              <p className="text-xs text-gray-500">{new Date(article.published).toLocaleString()}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
+};
+
+export default Feeds;
