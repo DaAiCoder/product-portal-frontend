@@ -1,6 +1,9 @@
+// src/components/widgets/RssWidget.js
+
 "use client";
 
 import React, { useState, useEffect } from "react";
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function RssWidget({ feedUrl = "https://hnrss.org/frontpage" }) {
   const [feed, setFeed] = useState({ title: "", items: [] });
@@ -11,12 +14,16 @@ export default function RssWidget({ feedUrl = "https://hnrss.org/frontpage" }) {
     async function fetchFeed() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/rss?url=${encodeURIComponent(url)}`);
+        const res = await fetch(`${BASE}/rss?url=${encodeURIComponent(url)}`);
+        const contentType = res.headers.get("content-type");
+        if (!res.ok || !contentType?.includes("application/json")) {
+          throw new Error("Invalid JSON response");
+        }
         const data = await res.json();
-        if (res.ok) setFeed(data);
-        else console.error(data.error);
+        setFeed(data);
       } catch (err) {
-        console.error(err);
+        console.error("RSSWidget error:", err);
+        setFeed({ title: "", items: [] });
       } finally {
         setLoading(false);
       }

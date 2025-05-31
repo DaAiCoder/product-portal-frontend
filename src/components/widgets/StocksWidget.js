@@ -1,6 +1,9 @@
+// src/components/widgets/StocksWidget.js
+
 "use client";
 
 import React, { useState, useEffect } from "react";
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function StocksWidget({
   symbols = ["AAPL", "GOOG"],
@@ -14,14 +17,16 @@ export default function StocksWidget({
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/finance?symbols=${symbols.join(
-            ","
-          )}&crypto=${crypto.join(",")}`
+          `${BASE}/finance?symbols=${symbols.join(",")}&crypto=${crypto.join(",")}`
         );
+        const contentType = res.headers.get("content-type");
+        if (!res.ok || !contentType?.includes("application/json")) {
+          throw new Error("Invalid JSON response");
+        }
         const json = await res.json();
         setData(json);
       } catch (err) {
-        console.error(err);
+        console.error("StocksWidget error:", err);
       } finally {
         setLoading(false);
       }
@@ -36,20 +41,18 @@ export default function StocksWidget({
         <p>Loading prices…</p>
       ) : (
         <div className="space-y-2">
-          {data.stockData.map((stock) => (
+          {data.stockData?.map((stock) => (
             <div key={stock.symbol} className="flex justify-between">
               <span>{stock.symbol}</span>
               <span>
-                {stock.price.toFixed(2)} USD ({stock.change.toFixed(2)}%)
+                {stock.price?.toFixed(2)} USD ({stock.change?.toFixed(2)}%)
               </span>
             </div>
           ))}
-          {data.cryptoData.map((coin) => (
+          {data.cryptoData?.map((coin) => (
             <div key={coin.id} className="flex justify-between">
-              <span>
-                {coin.id.charAt(0).toUpperCase() + coin.id.slice(1)}
-              </span>
-              <span>{coin.price.toFixed(2)} USD</span>
+              <span>{coin.id.charAt(0).toUpperCase() + coin.id.slice(1)}</span>
+              <span>{coin.price?.toFixed(2)} USD</span>
             </div>
           ))}
         </div>

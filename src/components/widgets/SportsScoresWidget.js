@@ -1,6 +1,9 @@
+// src/components/widgets/SportsScoresWidget.js
+
 "use client";
 
 import React, { useState, useEffect } from "react";
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function SportsScoresWidget() {
   const [games, setGames] = useState([]);
@@ -10,11 +13,15 @@ export default function SportsScoresWidget() {
     async function fetchGames() {
       setLoading(true);
       try {
-        const res = await fetch("/api/sports");
+        const res = await fetch(`${BASE}/sports/today`);
+        const contentType = res.headers.get("content-type");
+        if (!res.ok || !contentType?.includes("application/json")) {
+          throw new Error("Invalid JSON response");
+        }
         const json = await res.json();
         setGames(json.games || []);
       } catch (err) {
-        console.error(err);
+        console.error("SportsWidget error:", err);
       } finally {
         setLoading(false);
       }
@@ -31,13 +38,8 @@ export default function SportsScoresWidget() {
         <div className="space-y-2 max-h-48 overflow-auto">
           {games.map((g, i) => (
             <div key={i} className="flex justify-between">
-              <span>
-                {g.visitor_team.abbreviation} @{" "}
-                {g.home_team.abbreviation}
-              </span>
-              <span>
-                {g.visitor_team_score} – {g.home_team_score}
-              </span>
+              <span>{g.visitor_team?.abbreviation} @ {g.home_team?.abbreviation}</span>
+              <span>{g.visitor_team_score} – {g.home_team_score}</span>
             </div>
           ))}
         </div>
