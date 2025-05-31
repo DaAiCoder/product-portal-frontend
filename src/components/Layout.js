@@ -53,7 +53,7 @@ export default function Layout({ children }) {
       `}
     >
       {/* Top header */}
-      <header className={`bg-white dark:bg-gray-800 shadow`}>
+      <header className={`bg-white dark:bg-gray-400 shadow`}>
   <div className="max-w-7xl mx-auto flex flex-col items-stretch px-6 pt-8 pb-2">
     {/* Space above */}
     <div className="h-6 md:h-10"></div>
@@ -123,7 +123,7 @@ export default function Layout({ children }) {
       </div>
     </div>
     {/* Padding below command bar */}
-    <div className="h-8"></div>
+    <div className="h-4"></div>
   </div>
 </header>
 
