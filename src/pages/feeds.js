@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://product-portal-backend-xo2c.onrender.com";
 
-if (!API_BASE) {
-  console.warn("⚠️ Missing NEXT_PUBLIC_API_BASE_URL env var.");
+if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+  console.warn("⚠️ Missing NEXT_PUBLIC_API_BASE_URL env var. Using fallback:", API_BASE);
 }
 
 const Feeds = () => {
