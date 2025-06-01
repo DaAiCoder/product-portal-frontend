@@ -6,7 +6,7 @@ import WidgetWrapper from '../components/WidgetWrapper';
 import WidgetSettingsPanel from '../components/WidgetSettingsPanel';
 import { widgetLibrary } from '../utils/widgetLibrary';
 import { FaPlus } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -21,43 +21,59 @@ export default function Dashboard() {
     h: w.h,
   }));
 
-  // Load saved layout (if any) and merge with defaults
-  const savedRaw = localStorage.getItem('dashboardLayout');
-  let savedLayout = [];
-  try {
-    savedLayout = savedRaw ? JSON.parse(savedRaw) : [];
-  } catch {
-    savedLayout = [];
-  }
+  // State initializers (use defaults, then hydrate from localStorage)
+  const [layout, setLayout] = useState(defaultLayout);
+  const [titles, setTitles] = useState({});
+  const [favorites, setFavs] = useState({});
+  const [hidden, setHidden] = useState([]);
 
-  const mergedLayout = defaultLayout.map((def) => {
-    const match = savedLayout.find((s) => s.i === def.i);
-    return match || def;
-  });
-
-  const [layout, setLayout] = useState(mergedLayout);
-  const [titles, setTitles] = useState(() =>
-    JSON.parse(localStorage.getItem('widgetTitles') || '{}')
-  );
-  const [favorites, setFavs] = useState(() =>
-    JSON.parse(localStorage.getItem('widgetFavs') || '{}')
-  );
-  const [hidden, setHidden] = useState(() =>
-    JSON.parse(localStorage.getItem('widgetHidden') || '[]')
-  );
-
-  // Persist state
+  // Hydrate from localStorage (browser only)
   useEffect(() => {
-    localStorage.setItem('dashboardLayout', JSON.stringify(layout));
+    if (typeof window !== 'undefined') {
+      // Layout
+      let savedRaw = localStorage.getItem('dashboardLayout');
+      let savedLayout = [];
+      try {
+        savedLayout = savedRaw ? JSON.parse(savedRaw) : [];
+      } catch {
+        savedLayout = [];
+      }
+      const mergedLayout = defaultLayout.map((def) => {
+        const match = savedLayout.find((s) => s.i === def.i);
+        return match || def;
+      });
+      setLayout(mergedLayout);
+
+      // Titles
+      setTitles(JSON.parse(localStorage.getItem('widgetTitles') || '{}'));
+      // Favorites
+      setFavs(JSON.parse(localStorage.getItem('widgetFavs') || '{}'));
+      // Hidden
+      setHidden(JSON.parse(localStorage.getItem('widgetHidden') || '[]'));
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // Persist state (browser only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboardLayout', JSON.stringify(layout));
+    }
   }, [layout]);
   useEffect(() => {
-    localStorage.setItem('widgetTitles', JSON.stringify(titles));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('widgetTitles', JSON.stringify(titles));
+    }
   }, [titles]);
   useEffect(() => {
-    localStorage.setItem('widgetFavs', JSON.stringify(favorites));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('widgetFavs', JSON.stringify(favorites));
+    }
   }, [favorites]);
   useEffect(() => {
-    localStorage.setItem('widgetHidden', JSON.stringify(hidden));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('widgetHidden', JSON.stringify(hidden));
+    }
   }, [hidden]);
 
   // Handlers
@@ -134,10 +150,7 @@ export default function Dashboard() {
       />
 
       {/* Green "+" button at top-right */}
-      <Link
-        to="/widget-library"
-        className="fixed top-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50"
-      >
+      <Link href="/widget-library" className="fixed top-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg z-50">
         <FaPlus size={24} />
       </Link>
     </div>
