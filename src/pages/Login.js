@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const scenicImages = [
-  'https://source.unsplash.com/1600x900/?nature,water',
-  'https://source.unsplash.com/1600x900/?mountains',
-  'https://source.unsplash.com/1600x900/?forest',
-  'https://source.unsplash.com/1600x900/?sunset',
-  'https://source.unsplash.com/1600x900/?beach',
+  'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80',
 ];
 
 export default function Login() {
@@ -25,7 +24,6 @@ export default function Login() {
   const handleMagicLink = async (e) => {
     e.preventDefault();
     setMessage('Sending magic link...');
-
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/magic-link`, {
         email,
@@ -51,6 +49,7 @@ export default function Login() {
         backgroundImage: `url(${backgroundUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         height: '100vh',
         width: '100vw',
         display: 'flex',
@@ -65,7 +64,7 @@ export default function Login() {
           padding: '3rem',
           borderRadius: '12px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-          maxWidth: '450px',
+          maxWidth: '480px',
           width: '90%',
         }}
       >
@@ -130,4 +129,5 @@ export default function Login() {
     </div>
   );
 }
+
 
