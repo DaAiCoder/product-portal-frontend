@@ -1,27 +1,29 @@
 // File: src/pages/WidgetDirectory.jsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { widgetLibrary } from '../utils/widgetLibrary';
 
 export default function WidgetDirectory() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const addWidget = (widget) => {
-    const stored = JSON.parse(localStorage.getItem('dashboardLayout')) || [];
-    if (stored.some((w) => w.i === widget.id)) {
-      alert(widget.label + ' is already on your dashboard.');
-      return;
+    if (typeof window !== 'undefined') {
+      const stored = JSON.parse(localStorage.getItem('dashboardLayout')) || [];
+      if (stored.some((w) => w.i === widget.id)) {
+        alert(widget.label + ' is already on your dashboard.');
+        return;
+      }
+      const newItem = {
+        i: widget.id,
+        x: (stored.length * widget.w) % 12,
+        y: Infinity,
+        w: widget.w,
+        h: widget.h,
+      };
+      const newLayout = [...stored, newItem];
+      localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
+      router.push('/dashboard');
     }
-    const newItem = {
-      i: widget.id,
-      x: (stored.length * widget.w) % 12,
-      y: Infinity,
-      w: widget.w,
-      h: widget.h,
-    };
-    const newLayout = [...stored, newItem];
-    localStorage.setItem('dashboardLayout', JSON.stringify(newLayout));
-    navigate('/dashboard');
   };
 
   return (
