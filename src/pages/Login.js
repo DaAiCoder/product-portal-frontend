@@ -42,4 +42,74 @@ const Login = () => {
 
   // Dummy handlers for OAuth buttons
   const handleGoogleLogin = () => alert('Google login coming soon!');
-  const handleRedd
+  const handleRedditLogin = () => alert('Reddit login coming soon!');
+  const handleICloudLogin = () => alert('iCloud login coming soon!');
+
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left: Gime logo and tagline */}
+      <div className="hidden md:flex w-full md:w-1/2 bg-white flex-col justify-center items-center p-8">
+        <img src="/gime-logo.jpeg" alt="Gime Logo" className="w-48 mb-6" />
+        <h1 className="text-3xl text-gray-800 text-center font-bold">
+          Your digital world, all in one place
+        </h1>
+      </div>
+
+      {/* Right: Scenic image + login form overlay */}
+      <div
+        className="w-full md:w-1/2 bg-cover bg-center relative flex items-center justify-center transition-all duration-700"
+        style={{
+          backgroundImage: `url(${backgroundImages[bgIndex]})`,
+          minHeight: '100vh',
+        }}
+      >
+        <div className="bg-white bg-opacity-90 p-8 rounded-xl shadow-xl w-full max-w-md mx-4">
+          <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition font-semibold"
+            >
+              Login with Email
+            </button>
+          </form>
+          <p className="mt-4 text-center text-sm text-gray-600">{message}</p>
+
+          <div className="mt-6 border-t pt-4 text-sm text-gray-500 text-center">
+            Or continue with
+          </div>
+          <div className="flex justify-center mt-4 space-x-4">
+            <button
+              onClick={handleGoogleLogin}
+              className="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition font-semibold"
+            >
+              Google
+            </button>
+            <button
+              onClick={handleRedditLogin}
+              className="p-2 bg-gray-800 text-white rounded hover:bg-gray-900 transition font-semibold"
+            >
+              Reddit
+            </button>
+            <button
+              onClick={handleICloudLogin}
+              className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition font-semibold"
+            >
+              iCloud
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
