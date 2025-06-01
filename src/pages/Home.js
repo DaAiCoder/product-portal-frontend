@@ -1,14 +1,14 @@
 // File: src/pages/Home.js
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 export default function Home() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
-    // if you want non-authenticated users to see a landing page, guard this
-    navigate('/dashboard');
-  }, [navigate]);
+    // Redirect to /dashboard when this page loads
+    router.replace('/dashboard');
+  }, [router]);
 
-  return null; // or a loader/spinner while redirecting
+  return null; // Optionally, show a spinner or message here
 }
