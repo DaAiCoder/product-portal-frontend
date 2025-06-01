@@ -1,59 +1,68 @@
-// File: src/pages/Login.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
-export default function LoginPage() {
-  const [username, setUsername] = useState('');
+const Login = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const form = new URLSearchParams();
-    form.append('username', username);
-    form.append('password', password);
+    setError('');
 
-    const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || ''}/auth/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: form.toString(),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      return alert(err.detail || 'Login failed');
+    try {
+      const form = new URLSearchParams();
+      form.append('username', email);
+      form.append('password', password);
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://product-portal-backend-xo2c.onrender.com'}/auth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: form.toString(),
+      });
+
+      if (!res.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await res.json();
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('email', email);
+      router.push('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError('Invalid credentials');
     }
-    const { access_token } = await res.json();
-    // ← **Store the token so subsequent calls can use it**
-    localStorage.setItem('authToken', access_token);
-    // Redirect to feeds (or dashboard)
-    navigate('/feeds');
   };
 
   return (
-    <form onSubmit={handleLogin} className="max-w-sm mx-auto p-4 space-y-4">
-      <div>
-        <label>Username</label>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form onSubmit={onSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+        <h2 className="text-2xl mb-4 font-semibold text-center">Login</h2>
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         <input
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          className="w-full px-3 py-2 border rounded"
+          type="email"
+          placeholder="Email"
+          className="w-full mb-3 p-2 border rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
         />
-      </div>
-      <div>
-        <label>Password</label>
         <input
           type="password"
+          placeholder="Password"
+          className="w-full mb-4 p-2 border rounded"
           value={password}
-          onChange={e => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border rounded"
+          onChange={(e) => setPassword(e.target.value)}
+          required
         />
-      </div>
-      <button
-        type="submit"
-        className="w-full py-2 bg-blue-600 text-white rounded"
-      >
-        Login
-      </button>
-    </form>
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+          Sign In
+        </button>
+      </form>
+    </div>
   );
-}
+};
+
+export default Login;
