@@ -1,6 +1,8 @@
 // src/utils/timerClient.js
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+console.log("API Base URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+
 
 // TIMER FUNCTIONS
 
