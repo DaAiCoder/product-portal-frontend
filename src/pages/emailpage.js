@@ -9,7 +9,6 @@ import {
   FaRobot
 } from 'react-icons/fa';
 import AiPromptModal from '../components/AiPromptModal';
-import '../styles/globals.css';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ||
   'https://product-portal-backend-xo2c.onrender.com';
