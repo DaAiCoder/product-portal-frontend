@@ -42,8 +42,4 @@ const Login = () => {
 
   // Dummy handlers for OAuth buttons
   const handleGoogleLogin = () => alert('Google login coming soon!');
-  const handleRedditLogin = () => alert('Reddit login coming soon!');
-  const handleICloudLogin = () => alert('iCloud login coming soon!');
-
-  return (
-    <div classNam
+  const handleRedd
