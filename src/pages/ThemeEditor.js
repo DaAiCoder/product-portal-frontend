@@ -1,10 +1,20 @@
-//ThemeEditor.js
+// ThemeEditor.js
 
 import React, { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 export default function ThemeEditor() {
   const { tokens, setToken } = useContext(ThemeContext);
+
+  // Defensive: If tokens is not defined, show a loading or fallback.
+  if (!tokens || typeof tokens !== 'object') {
+    return (
+      <div className="p-6 max-w-xl mx-auto">
+        <h1 className="text-2xl font-bold">Theme Editor</h1>
+        <p>Loading theme settings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
