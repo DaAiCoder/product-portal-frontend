@@ -68,7 +68,7 @@ export default function Login() {
           width: '90%',
         }}
       >
-        <h2 style={{ marginBottom: '1rem' }}>Login/Register</h2>
+        <h1 style={{ marginBottom: '1rem' }}>Login/Register</h1>
         <form onSubmit={handleMagicLink}>
           <input
             type="email"
@@ -78,7 +78,7 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             style={{
               width: '100%',
-              padding: '0.75rem',
+              padding: '1.25rem',
               marginBottom: '1rem',
               borderRadius: '6px',
               border: '1px solid #ccc',
@@ -98,7 +98,7 @@ export default function Login() {
               cursor: 'pointer',
             }}
           >
-            Send Magic Link
+            Login with Email 
           </button>
         </form>
         <p style={{ marginTop: '1rem', textAlign: 'center' }}>{message}</p>
