@@ -1,4 +1,4 @@
-// src/pages/_app.js
+// src/pages/ _app.js
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
