@@ -16,8 +16,8 @@
     "ical.js": "^2.1.0",
     "ics": "^3.8.1",
     "moment-timezone": "^0.5.48",
-    "next": "^15.3.2",
     "openai": "^4.103.0",
+    "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-color": "^2.19.3",
@@ -30,9 +30,9 @@
     "react-quill": "^2.0.0",
     "react-resizable": "^3.0.5",
     "react-router-dom": "^6.11.2",
-    "react-scripts": "5.0.1",
     "rrule": "^2.8.1",
     "rss-parser": "^3.13.0",
+    "stream-browserify": "^3.0.0",
     "sugar-date": "^2.0.6",
     "uuid": "^11.1.0"
   },
@@ -43,10 +43,9 @@
     "tailwindcss": "^3.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "node node_modules/react-scripts/scripts/build.js",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "browserslist": [
     ">0.2%",
