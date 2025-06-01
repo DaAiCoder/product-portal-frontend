@@ -1,4 +1,4 @@
-// src/pages/feeds.js
+// src/pages/ feeds.js
 
 import React, { useEffect, useState } from "react";
 
