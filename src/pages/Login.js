@@ -55,7 +55,7 @@ export default function Login() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        transition: 'background-image 1s ease-in-out',
+        transition: 'background-image 5s ease-in-out',
       }}
     >
       <div
@@ -68,7 +68,7 @@ export default function Login() {
           width: '90%',
         }}
       >
-        <h2 style={{ marginBottom: '1rem' }}>Welcome Back</h2>
+        <h2 style={{ marginBottom: '1rem' }}>Login/Register</h2>
         <form onSubmit={handleMagicLink}>
           <input
             type="email"
@@ -107,19 +107,19 @@ export default function Login() {
           <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '0.5rem' }}>
             <button
               onClick={() => handleOAuth('google')}
-              style={{ backgroundColor: '#db4437', color: 'white', padding: '0.5rem 1rem', border: 'none', borderRadius: '6px' }}
+              style={{ backgroundColor: '#db4437', color: 'white', padding: '1rem 1.5rem', border: 'none', borderRadius: '6px' }}
             >
               Google
             </button>
             <button
               onClick={() => handleOAuth('reddit')}
-              style={{ backgroundColor: '#ff5700', color: 'white', padding: '0.5rem 1rem', border: 'none', borderRadius: '6px' }}
+              style={{ backgroundColor: '#ff5700', color: 'white', padding: '1rem 1.5rem', border: 'none', borderRadius: '6px' }}
             >
               Reddit
             </button>
             <button
               onClick={() => handleOAuth('icloud')}
-              style={{ backgroundColor: '#333', color: 'white', padding: '0.5rem 1rem', border: 'none', borderRadius: '6px' }}
+              style={{ backgroundColor: '#333', color: 'white', padding: '1rem 1.5rem', border: 'none', borderRadius: '6px' }}
             >
               iCloud
             </button>
