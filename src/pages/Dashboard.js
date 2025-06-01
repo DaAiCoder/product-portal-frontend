@@ -12,7 +12,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 export default function Dashboard() {
-  // Build the default layout from widgetLibrary
+  // Default layout
   const defaultLayout = widgetLibrary.map((w, i) => ({
     i: w.id,
     x: (i * w.w) % 12,
@@ -21,23 +21,21 @@ export default function Dashboard() {
     h: w.h,
   }));
 
-  // State initializers (use defaults, then hydrate from localStorage)
+  // Safe initial values
   const [layout, setLayout] = useState(defaultLayout);
   const [titles, setTitles] = useState({});
   const [favorites, setFavs] = useState({});
   const [hidden, setHidden] = useState([]);
 
-  // Hydrate from localStorage (browser only)
+  // Hydrate from localStorage on mount (client only)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Layout
-      let savedRaw = localStorage.getItem('dashboardLayout');
       let savedLayout = [];
       try {
+        const savedRaw = localStorage.getItem('dashboardLayout');
         savedLayout = savedRaw ? JSON.parse(savedRaw) : [];
-      } catch {
-        savedLayout = [];
-      }
+      } catch {}
       const mergedLayout = defaultLayout.map((def) => {
         const match = savedLayout.find((s) => s.i === def.i);
         return match || def;
@@ -45,16 +43,22 @@ export default function Dashboard() {
       setLayout(mergedLayout);
 
       // Titles
-      setTitles(JSON.parse(localStorage.getItem('widgetTitles') || '{}'));
+      try {
+        setTitles(JSON.parse(localStorage.getItem('widgetTitles') || '{}'));
+      } catch {}
       // Favorites
-      setFavs(JSON.parse(localStorage.getItem('widgetFavs') || '{}'));
+      try {
+        setFavs(JSON.parse(localStorage.getItem('widgetFavs') || '{}'));
+      } catch {}
       // Hidden
-      setHidden(JSON.parse(localStorage.getItem('widgetHidden') || '[]'));
+      try {
+        setHidden(JSON.parse(localStorage.getItem('widgetHidden') || '[]'));
+      } catch {}
     }
     // eslint-disable-next-line
   }, []);
 
-  // Persist state (browser only)
+  // Persist state
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('dashboardLayout', JSON.stringify(layout));
@@ -76,14 +80,14 @@ export default function Dashboard() {
     }
   }, [hidden]);
 
-  // Handlers
+  // Handlers and render logic unchanged...
+
   const onLayoutChange = (newLayout) => setLayout(newLayout);
   const handleRename = (id, newTitle) =>
     setTitles((t) => ({ ...t, [id]: newTitle }));
   const handleFav = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
   const handleHide = (id) => setHidden((h) => Array.from(new Set([...h, id])));
 
-  // Settings panel
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsWidgetId, setSettingsWidgetId] = useState(null);
   const handleOpenSettings = (id) => {
@@ -91,12 +95,10 @@ export default function Dashboard() {
     setSettingsOpen(true);
   };
 
-  // Filter out hidden widgets
   const visibleWidgets = widgetLibrary.filter((w) => !hidden.includes(w.id));
   const pinnedWidgets = visibleWidgets.filter((w) => favorites[w.id]);
   const otherWidgets = visibleWidgets.filter((w) => !favorites[w.id]);
 
-  // Render helper
   const renderWidgets = (list) =>
     list.map(({ id, label, component: Component, defaultSettings = {} }) => {
       const cfg = layout.find((l) => l.i === id);
