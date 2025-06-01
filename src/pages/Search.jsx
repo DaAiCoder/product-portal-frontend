@@ -1,17 +1,18 @@
 // src/pages/Search.jsx
 
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function SearchPage() {
-  const { search } = useLocation();
-  const params = new URLSearchParams(search);
-  const query  = params.get('query') || '';
+  const router = useRouter();
+  const { query: urlQuery } = router.query;
+  const query = urlQuery || '';
 
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState('');
-  const [source,  setSource]  = useState(null);
-  const [error,   setError]   = useState('');
+  const [source, setSource] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!query) return;
@@ -34,8 +35,8 @@ export default function SearchPage() {
           );
           const propsJson = await propsRes.json();
           const pages = propsJson.query?.pages;
-          const page  = pages && Object.values(pages)[0];
-          const qid   = page?.pageprops?.wikibase_item;
+          const page = pages && Object.values(pages)[0];
+          const qid = page?.pageprops?.wikibase_item;
           if (!qid) throw new Error('No Wikidata item');
 
           const sparql = `
@@ -74,8 +75,8 @@ export default function SearchPage() {
           );
           const propsJson = await propsRes.json();
           const pages = propsJson.query?.pages;
-          const page  = pages && Object.values(pages)[0];
-          const qid   = page?.pageprops?.wikibase_item;
+          const page = pages && Object.values(pages)[0];
+          const qid = page?.pageprops?.wikibase_item;
           if (!qid) throw new Error('No Wikidata item');
 
           const claimsRes = await fetch(
@@ -116,8 +117,8 @@ export default function SearchPage() {
           );
           const propsJson = await propsRes.json();
           const pages = propsJson.query?.pages;
-          const page  = pages && Object.values(pages)[0];
-          const qid   = page?.pageprops?.wikibase_item;
+          const page = pages && Object.values(pages)[0];
+          const qid = page?.pageprops?.wikibase_item;
           if (!qid) throw new Error('No Wikidata item');
 
           const claimsRes = await fetch(
@@ -181,11 +182,11 @@ export default function SearchPage() {
         );
         const ddgJson = await ddgRes.json();
         let text = ddgJson.AbstractText;
-        let url  = ddgJson.AbstractURL;
+        let url = ddgJson.AbstractURL;
         if ((!text || !url) && Array.isArray(ddgJson.RelatedTopics) && ddgJson.RelatedTopics.length) {
           const first = ddgJson.RelatedTopics[0];
           text = first.Text;
-          url  = first.FirstURL;
+          url = first.FirstURL;
         }
         if (text) {
           setSummary(text);
@@ -225,7 +226,9 @@ export default function SearchPage() {
     return (
       <div className="p-6">
         <p>Please enter a search query.</p>
-        <Link to="/" className="text-blue-600 hover:underline">Go back</Link>
+        <Link href="/" className="text-blue-600 hover:underline">
+          Go back
+        </Link>
       </div>
     );
   }
@@ -233,7 +236,6 @@ export default function SearchPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Results for “{query}”</h1>
-
       {loading ? (
         <p>Loading…</p>
       ) : error ? (
