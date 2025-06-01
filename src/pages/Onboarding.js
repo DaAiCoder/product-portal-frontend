@@ -1,6 +1,6 @@
 // File: src/pages/Onboarding.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 const suggestedTopics = [
   'Technology',
@@ -12,7 +12,7 @@ const suggestedTopics = [
 ];
 
 export default function Onboarding() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [selected, setSelected] = useState([]);
   const [custom, setCustom] = useState('');
 
@@ -35,7 +35,7 @@ export default function Onboarding() {
   const handleSubmit = () => {
     // Stub: save to localStorage for now
     localStorage.setItem('followTopics', JSON.stringify(selected));
-    navigate('/');
+    router.push('/');
   };
 
   return (
