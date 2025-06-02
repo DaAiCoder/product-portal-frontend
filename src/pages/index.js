@@ -1,4 +1,4 @@
-// src/pages/index.js
+// src/pages/index .js
 import Login from './Login';
 
 export default function Home(props) {
