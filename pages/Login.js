@@ -1,24 +1,22 @@
-// /pages/Login.js
-
 import React, { useState, useEffect } from "react";
 
-const backgrounds = [
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80"
+const scenicImages = [
+  "/backgrounds/bg1.jpeg",
+  "/backgrounds/bg2.jpeg",
+  "/backgrounds/bg3.jpeg",
+  "/backgrounds/bg4.jpeg",
 ];
 
 export default function Login() {
-  const [bg, setBg] = useState(backgrounds[0]);
-  const [email, setEmail] = useState("");
-  const [msg, setMsg] = useState("");
+  const [backgroundUrl, setBackgroundUrl] = useState(scenicImages[0]);
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBg(b => {
-        const i = backgrounds.indexOf(b);
-        return backgrounds[(i + 1) % backgrounds.length];
+      setBackgroundUrl(prev => {
+        const nextIdx = (scenicImages.indexOf(prev) + 1) % scenicImages.length;
+        return scenicImages[nextIdx];
       });
     }, 8000);
     return () => clearInterval(interval);
@@ -26,10 +24,13 @@ export default function Login() {
 
   const handleMagicLink = e => {
     e.preventDefault();
-    setMsg("Magic link sent! (demo)");
+    setMessage("Magic link sent! (demo)");
   };
 
-  // Prevent stacking on mobile: force horizontal scroll
+  const handleOAuth = provider => {
+    setMessage(`${provider} login coming soon!`);
+  };
+
   return (
     <div
       style={{
@@ -111,7 +112,7 @@ export default function Login() {
           </div>
           <button
             type="button"
-            onClick={() => setMsg("Google login coming soon!")}
+            onClick={() => handleOAuth("Google")}
             style={{
               width: "100%",
               background: "#fff",
@@ -129,7 +130,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            onClick={() => setMsg("iCloud login coming soon!")}
+            onClick={() => handleOAuth("iCloud")}
             style={{
               width: "100%",
               background: "#111",
@@ -147,7 +148,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            onClick={() => setMsg("Reddit login coming soon!")}
+            onClick={() => handleOAuth("Reddit")}
             style={{
               width: "100%",
               background: "#ff5700",
@@ -166,7 +167,7 @@ export default function Login() {
           <div style={{ margin: "18px 0 0 0", fontSize: 13, color: "#888" }}>
             By signing in, you agree to Gime’s Terms of Service & Privacy Policy.
             <div style={{ margin: "7px 0 0 0", color: "#1976f7", fontSize: 14 }}>
-              {msg}
+              {message}
             </div>
           </div>
         </div>
@@ -177,7 +178,7 @@ export default function Login() {
           width: "50vw",
           minWidth: 320,
           height: "100vh",
-          backgroundImage: `url(${bg})`,
+          backgroundImage: `url(${backgroundUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           transition: "background-image 1s",
