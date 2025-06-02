@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const scenicImages = [
   "/backgrounds/bg1.jpeg",
@@ -22,13 +23,38 @@ export default function Login() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleMagicLink = e => {
+  const handleMagicLink = async (e) => {
     e.preventDefault();
-    setMessage("Magic link sent! (demo)");
+    setMessage("Sending magic link...");
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/send-magic-link`,
+        { email }
+      );
+      if (res.data && res.data.success) {
+        if (res.data.link) {
+          setMessage(
+            <>
+              Check your email for the login link!
+              <br />
+              <span style={{ fontSize: 13, color: "#1976f7" }}>
+                (Dev: <a href={res.data.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "underline" }}>Test Magic Link</a>)
+              </span>
+            </>
+          );
+        } else {
+          setMessage("Check your email for the login link!");
+        }
+      } else {
+        setMessage("Could not send magic link. Try again.");
+      }
+    } catch (err) {
+      setMessage("Error sending magic link.");
+    }
   };
 
-  const handleOAuth = provider => {
-    setMessage(`${provider} login coming soon!`);
+  const handleOAuth = (provider) => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/${provider}/login`;
   };
 
   return (
@@ -115,7 +141,7 @@ export default function Login() {
           </div>
           <button
             type="button"
-            onClick={() => handleOAuth("Google")}
+            onClick={() => handleOAuth("google")}
             style={{
               width: "100%",
               background: "#fff",
@@ -133,7 +159,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            onClick={() => handleOAuth("iCloud")}
+            onClick={() => handleOAuth("icloud")}
             style={{
               width: "100%",
               background: "#111",
@@ -151,7 +177,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            onClick={() => handleOAuth("Reddit")}
+            onClick={() => handleOAuth("reddit")}
             style={{
               width: "100%",
               background: "#ff5700",
@@ -170,7 +196,7 @@ export default function Login() {
           <div style={{ margin: "18px 0 0 0", fontSize: 13, color: "#888" }}>
             By signing in, you agree to Gime’s Terms of Service & Privacy Policy.
             <div style={{ margin: "7px 0 0 0", color: "#1976f7", fontSize: 14 }}>
-              {message}
+              {typeof message === "string" ? message : message}
             </div>
           </div>
         </div>
