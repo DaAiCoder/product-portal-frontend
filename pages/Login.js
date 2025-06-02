@@ -59,9 +59,12 @@ export default function Login() {
           style={{ width: "100%", maxWidth: 330, margin: "0 auto" }}
           onSubmit={handleMagicLink}
         >
-          <h2 style={{ fontWeight: 700, fontSize: 30, marginBottom: 32, color: "#1976f7" }}>
+          <h2 style={{ fontWeight: 700, fontSize: 30, marginBottom: 12, color: "#1976f7" }}>
             Sign in to Gime
           </h2>
+          <div style={{ color: "#64748b", fontSize: 16, marginBottom: 26, fontWeight: 400 }}>
+            Your digital world, all in one place
+          </div>
           <input
             type="email"
             placeholder="Email"
