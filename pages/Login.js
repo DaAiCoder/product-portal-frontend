@@ -24,7 +24,6 @@ export default function Login() {
     return () => clearInterval(interval);
   }, []);
 
-  // Magic Link (connects to backend)
   const handleMagicLink = async (e) => {
     e.preventDefault();
     setMessage('Sending magic link...');
@@ -37,61 +36,66 @@ export default function Login() {
       }
     } catch (err) {
       setMessage('Error sending link.');
-      console.error(err);
     }
   };
 
-  // Social OAuth
   const handleOAuth = (provider) => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/${provider}/login`;
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left: White, logo, form */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 w-full bg-white py-20 px-8 min-h-[50vh]">
-        <img
-          src="/gime-logo.jpeg"
-          alt="Gime Logo"
-          className="w-32 mb-6"
-          draggable={false}
-          style={{ userSelect: "none" }}
-        />
-        <h1 className="text-4xl font-extrabold mb-2 text-[#1976f7] tracking-tight">Gime</h1>
-        <div className="text-lg text-gray-700 mb-8 text-center">Your digital world, all in one place</div>
+    <div
+      className="w-screen h-screen flex flex-row"
+      style={{ minHeight: "100vh", minWidth: "100vw", overflow: "hidden" }}
+    >
+      {/* Left: Login form (white) */}
+      <div
+        className="w-1/2 h-full flex flex-col justify-center items-center bg-white"
+        style={{
+          minWidth: "50vw",
+          maxWidth: "50vw",
+          minHeight: "100vh",
+        }}
+      >
         <div className="w-full max-w-xs">
-          <h2 className="text-2xl font-bold mb-8 text-gray-900">Sign in to Gime</h2>
-          <form onSubmit={handleMagicLink} className="flex flex-col gap-6 w-full" autoComplete="off">
+          <h2 className="text-3xl font-bold mb-10 text-gray-900 text-left w-full">
+            Sign in to Gime
+          </h2>
+          <form className="w-full flex flex-col gap-6" onSubmit={handleMagicLink} autoComplete="off">
             <input
               type="email"
               placeholder="Email"
-              className="text-base bg-white border-b border-gray-300 focus:border-[#1976f7] outline-none px-0 py-3 mb-2"
+              className="text-lg bg-white border-b border-gray-300 focus:border-[#1976f7] outline-none px-0 py-3 mb-2"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
+              style={{ boxShadow: "none" }}
             />
             <button
               type="submit"
-              className="bg-[#1976f7] hover:bg-[#155ec0] transition-colors text-white text-base rounded-full font-semibold py-3"
+              className="text-lg font-semibold text-white bg-[#1976f7] hover:bg-[#155ec0] transition-colors rounded-full py-3 mt-2"
+              style={{ boxShadow: "none" }}
             >
               Sign in with Email
             </button>
           </form>
-          <div className="my-8 flex items-center">
-            <div className="flex-1 border-t border-gray-200"></div>
+          <div className="my-8 flex items-center w-full">
+            <div className="flex-1 border-t border-gray-300"></div>
             <span className="mx-3 text-gray-400 text-sm">OR</span>
-            <div className="flex-1 border-t border-gray-200"></div>
+            <div className="flex-1 border-t border-gray-300"></div>
           </div>
           <button
-            className="w-full text-base flex items-center gap-2 justify-center text-black font-semibold py-3 hover:bg-gray-100 transition rounded-full mb-3 bg-white"
+            className="w-full text-lg flex items-center gap-2 justify-center text-black font-semibold py-3 hover:bg-gray-200 transition rounded-full mb-3 bg-white"
+            style={{ boxShadow: "none", border: "none" }}
             type="button"
             onClick={() => handleOAuth("google")}
           >
             <img src="/google-icon.svg" alt="" className="w-6 h-6" /> Sign in with Google
           </button>
           <button
-            className="w-full text-base flex items-center gap-2 justify-center bg-black text-white font-semibold py-3 hover:bg-gray-900 transition rounded-full mb-3"
+            className="w-full text-lg flex items-center gap-2 justify-center bg-black text-white font-semibold py-3 hover:bg-gray-900 transition rounded-full mb-3"
+            style={{ boxShadow: "none", border: "none" }}
             type="button"
             onClick={() => handleOAuth("icloud")}
           >
@@ -101,13 +105,14 @@ export default function Login() {
             Sign in with iCloud
           </button>
           <button
-            className="w-full text-base flex items-center gap-2 justify-center bg-orange-500 text-white font-semibold py-3 hover:bg-orange-600 transition rounded-full"
+            className="w-full text-lg flex items-center gap-2 justify-center bg-orange-500 text-white font-semibold py-3 hover:bg-orange-600 transition rounded-full"
+            style={{ boxShadow: "none", border: "none" }}
             type="button"
             onClick={() => handleOAuth("reddit")}
           >
             <img src="/reddit-icon.svg" alt="" className="w-6 h-6" /> Sign in with Reddit
           </button>
-          <div className="mt-8 text-xs text-gray-400 text-center">
+          <div className="mt-8 text-xs text-gray-400 text-center w-full">
             By signing in, you agree to Gime’s Terms of Service & Privacy Policy.
             <br />
             {message && <div className="mt-2 text-blue-600">{message}</div>}
@@ -116,12 +121,14 @@ export default function Login() {
       </div>
       {/* Right: Scenic rotating background */}
       <div
-        className="md:w-1/2 w-full min-h-[50vh] bg-cover bg-center transition-all duration-700"
+        className="w-1/2 h-full bg-cover bg-center transition-all duration-700"
         style={{
           backgroundImage: `url(${backgroundUrl})`,
+          minWidth: "50vw",
+          maxWidth: "50vw",
           minHeight: "100vh",
         }}
-      ></div>
+      />
     </div>
   );
 }
