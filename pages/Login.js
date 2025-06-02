@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const scenicImages = [
   'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80',
@@ -16,8 +16,10 @@ export default function Login() {
   // Rotate background every 8 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      const random = Math.floor(Math.random() * scenicImages.length);
-      setBackgroundUrl(scenicImages[random]);
+      setBackgroundUrl((prev) => {
+        const nextIdx = (scenicImages.indexOf(prev) + 1) % scenicImages.length;
+        return scenicImages[nextIdx];
+      });
     }, 8000);
     return () => clearInterval(interval);
   }, []);
@@ -45,125 +47,81 @@ export default function Login() {
   };
 
   return (
-    <div
-      style={{
-        backgroundImage: `url(${backgroundUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
-        minWidth: '100vw',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        transition: 'background-image 1s ease-in-out',
-      }}
-    >
-      <main
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left: White, logo, form */}
+      <div className="flex flex-col justify-center items-center md:w-1/2 w-full bg-white py-20 px-8 min-h-[50vh]">
+        <img
+          src="/gime-logo.jpeg"
+          alt="Gime Logo"
+          className="w-32 mb-6"
+          draggable={false}
+          style={{ userSelect: "none" }}
+        />
+        <h1 className="text-4xl font-extrabold mb-2 text-[#1976f7] tracking-tight">Gime</h1>
+        <div className="text-lg text-gray-700 mb-8 text-center">Your digital world, all in one place</div>
+        <div className="w-full max-w-xs">
+          <h2 className="text-2xl font-bold mb-8 text-gray-900">Sign in to Gime</h2>
+          <form onSubmit={handleMagicLink} className="flex flex-col gap-6 w-full" autoComplete="off">
+            <input
+              type="email"
+              placeholder="Email"
+              className="text-base bg-white border-b border-gray-300 focus:border-[#1976f7] outline-none px-0 py-3 mb-2"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="bg-[#1976f7] hover:bg-[#155ec0] transition-colors text-white text-base rounded-full font-semibold py-3"
+            >
+              Sign in with Email
+            </button>
+          </form>
+          <div className="my-8 flex items-center">
+            <div className="flex-1 border-t border-gray-200"></div>
+            <span className="mx-3 text-gray-400 text-sm">OR</span>
+            <div className="flex-1 border-t border-gray-200"></div>
+          </div>
+          <button
+            className="w-full text-base flex items-center gap-2 justify-center text-black font-semibold py-3 hover:bg-gray-100 transition rounded-full mb-3 bg-white"
+            type="button"
+            onClick={() => handleOAuth("google")}
+          >
+            <img src="/google-icon.svg" alt="" className="w-6 h-6" /> Sign in with Google
+          </button>
+          <button
+            className="w-full text-base flex items-center gap-2 justify-center bg-black text-white font-semibold py-3 hover:bg-gray-900 transition rounded-full mb-3"
+            type="button"
+            onClick={() => handleOAuth("icloud")}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path d="M18.95 12.31a5.25 5.25 0 00-5.13-4.31 4.54 4.54 0 00-4.53 4.53v.17A3.43 3.43 0 003 16.11a3.44 3.44 0 003.31 3.43h10.48a3.44 3.44 0 003.31-3.43 3.41 3.41 0 00-2.15-3.23zm-3.94-7.27a2.1 2.1 0 11-2.1-2.09 2.09 2.09 0 012.1 2.09z"></path>
+            </svg>
+            Sign in with iCloud
+          </button>
+          <button
+            className="w-full text-base flex items-center gap-2 justify-center bg-orange-500 text-white font-semibold py-3 hover:bg-orange-600 transition rounded-full"
+            type="button"
+            onClick={() => handleOAuth("reddit")}
+          >
+            <img src="/reddit-icon.svg" alt="" className="w-6 h-6" /> Sign in with Reddit
+          </button>
+          <div className="mt-8 text-xs text-gray-400 text-center">
+            By signing in, you agree to Gime’s Terms of Service & Privacy Policy.
+            <br />
+            {message && <div className="mt-2 text-blue-600">{message}</div>}
+          </div>
+        </div>
+      </div>
+      {/* Right: Scenic rotating background */}
+      <div
+        className="md:w-1/2 w-full min-h-[50vh] bg-cover bg-center transition-all duration-700"
         style={{
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          padding: '2.5rem 2rem',
-          borderRadius: '18px',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.16)',
-          width: '100%',
-          maxWidth: '410px',
-          margin: '32px',
-          display: 'flex',
-          flexDirection: 'column',
+          backgroundImage: `url(${backgroundUrl})`,
+          minHeight: "100vh",
         }}
-        tabIndex={-1}
-      >
-        <h1 style={{ marginBottom: '1.25rem', fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.02em' }}>Sign in to Gime</h1>
-        <form onSubmit={handleMagicLink} style={{ width: '100%' }}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '1.1rem',
-              marginBottom: '1.2rem',
-              borderRadius: '7px',
-              border: '1px solid #d1d5db',
-              fontSize: '1.05rem',
-              background: '#fafbfc',
-            }}
-          />
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: '#1976f7',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '1.12rem',
-              border: 'none',
-              borderRadius: '7px',
-              cursor: 'pointer',
-              marginBottom: '8px',
-            }}
-          >
-            Login with Email
-          </button>
-        </form>
-        <p style={{ marginTop: '1rem', textAlign: 'center', minHeight: 20, color: '#1976f7' }}>{message}</p>
-        <div style={{ margin: '2rem 0 0.2rem 0', textAlign: 'center', color: '#555', fontSize: 14 }}>
-          Or sign in with
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', gap: '0.5rem' }}>
-          <button
-            onClick={() => handleOAuth('google')}
-            style={{
-              backgroundColor: '#db4437',
-              color: 'white',
-              flex: 1,
-              padding: '0.85rem 0',
-              border: 'none',
-              borderRadius: '7px',
-              fontWeight: 600,
-              fontSize: '1.04rem',
-            }}
-          >
-            Google
-          </button>
-          <button
-            onClick={() => handleOAuth('reddit')}
-            style={{
-              backgroundColor: '#ff5700',
-              color: 'white',
-              flex: 1,
-              padding: '0.85rem 0',
-              border: 'none',
-              borderRadius: '7px',
-              fontWeight: 600,
-              fontSize: '1.04rem',
-            }}
-          >
-            Reddit
-          </button>
-          <button
-            onClick={() => handleOAuth('icloud')}
-            style={{
-              backgroundColor: '#333',
-              color: 'white',
-              flex: 1,
-              padding: '0.85rem 0',
-              border: 'none',
-              borderRadius: '7px',
-              fontWeight: 600,
-              fontSize: '1.04rem',
-            }}
-          >
-            iCloud
-          </button>
-        </div>
-        <div style={{ marginTop: '2.2rem', fontSize: 12, textAlign: 'center', color: '#888' }}>
-          By signing in, you agree to Gime’s Terms of Service & Privacy Policy.
-        </div>
-      </main>
+      ></div>
     </div>
   );
 }
